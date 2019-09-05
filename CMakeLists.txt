@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.4)
+cmake_minimum_required(VERSION 3.14.5)
 project("takoyaki" C CXX)
 
 message("-- CONFIGURATION TYPES: ${CMAKE_CONFIGURATION_TYPES}")
