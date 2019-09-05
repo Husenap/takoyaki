@@ -7,6 +7,7 @@ include("cmake/compiler_features.cmake")
 include("cmake/compiler_warnings.cmake")
 include("cmake/glfw.cmake")
 include("cmake/imgui.cmake")
+add_subdirectory("glad")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "predefined")

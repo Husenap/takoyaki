@@ -5,7 +5,7 @@ set(src_files
 
 add_executable(${target_name} ${src_files})
 
-target_link_libraries(${target_name} PUBLIC glfw)
+target_link_libraries(${target_name} PUBLIC glfw glad)
 
 FetchContent_GetProperties(imgui SOURCE_DIR imgui_src_location)
 target_include_directories(${target_name} PUBLIC ${imgui_src_location})
