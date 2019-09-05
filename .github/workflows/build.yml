@@ -17,5 +17,5 @@ jobs:
     - name: Generate
       run: cmake . -B_build
     - name: Compile
-			run: cmake --build _build
+      run: cmake --build _build
 
