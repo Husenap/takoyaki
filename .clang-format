@@ -1,0 +1,13 @@
+AllowShortFunctionsOnASingleLine: false
+BasedOnStyle: Google
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ColumnLimit: 110
+AccessModifierOffset: '-4'
+IndentWidth: '4'
+Language: Cpp
+TabWidth: '4'
+UseTab: Always
+IndentPPDirectives: AfterHash
