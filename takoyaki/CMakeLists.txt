@@ -5,7 +5,7 @@ set(src_files
 
 add_executable(${target_name} ${src_files})
 
-target_link_libraries(${target_name} PUBLIC glfw glad imgui)
+target_link_libraries(${target_name} PUBLIC glfw glad nuklear)
 
 set_target_properties(${target_name} PROPERTIES FOLDER "takoyaki")
 set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
