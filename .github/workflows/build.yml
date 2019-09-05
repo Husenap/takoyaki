@@ -1,0 +1,21 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Generate
+      run: cmake . -B_build -Ax64
+		- name: Compile
+			run: cmake --build _build
+
