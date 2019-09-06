@@ -119,8 +119,9 @@ static const char* fragmentShaderText = R"(
 
 in vec2 uv;
 
+uniform float iTime;
 uniform vec2 iResolution;
-uniform vec4 iColor;
+uniform vec4 iCameraPosition;
 
 
 #define SMOOTHNESS (0.002 / (myResolution.y/1080.))
@@ -190,7 +191,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
 
 	vec3 col = vec3(0.0);
 
-	col = taegeukgi(uv*iColor.zw+iColor.xy);
+	col = taegeukgi(uv + cos(vec2(iTime)));
 
 	fragColor = vec4(col, 1.0);
 }
@@ -225,8 +226,9 @@ int main() {
 	GLuint fragmentShader;
 	GLuint program;
 	GLint vPosLocation;
+	GLint iTimeLocation;
 	GLint iResolutionLocation;
-	GLint iColorLocation;
+	GLint iCameraPositionLocation;
 	int success;
 
 	glGenBuffers(1, &vertexArrayName);
@@ -273,8 +275,9 @@ int main() {
 	}
 
 	vPosLocation = glGetAttribLocation(program, "vPos");
+	iTimeLocation = glGetUniformLocation(program, "iTime");
 	iResolutionLocation = glGetUniformLocation(program, "iResolution");
-	iColorLocation = glGetUniformLocation(program, "iColor");
+	iCameraPositionLocation = glGetUniformLocation(program, "iCameraPosition");
 
 
 	IMGUI_CHECKVERSION();
@@ -285,10 +288,11 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
 
-	bool showDemoWindow  = true;
+	bool showDemoWindow  = false;
 	bool showColorWindow = true;
 
-	ImVec4 clearColor{0.18f, 0.18f, 0.18f, 1.0f};
+	ImVec4 cameraPosition{0.18f, 0.18f, 0.18f, 1.0f};
+	ImVec4 cameraRotation{0.0f, 0.0f, 0.0f, 0.0f};
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -302,33 +306,32 @@ int main() {
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
 
 		if (showColorWindow) {
-			ImGui::Begin("Clear color", &showColorWindow);
+			ImGui::Begin("Uniforms", &showColorWindow);
 			// ImGui::PushItemWidth(ImGui::GetFontSize() * -12);           // Use fixed width for labels (by
 			// passing a negative value), the rest goes to widgets. We choose a width proportional to our font
 			// size.
 
-			ImGui::ColorEdit4("##clearColor",
-			                  (float*)&clearColor,
-			                  ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreviewHalf);
-			ImGui::SameLine();
-			ImGui::TextUnformatted("Clear Color");
+			ImGui::DragFloat3("Camera Position", (float*)&cameraPosition);
+			ImGui::DragFloat3("Camera Rotation", (float*)&cameraRotation);
 			ImGui::End();
 		}
 
 		ImGui::Render();
 
 		int width, height;
+		double time = glfwGetTime();
 		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
-		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+		glClearColor(0.18f, 0.18f, 0.18f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(program);
 		glBindVertexArray(vertexArrayName);
 		glVertexAttribPointer(vPosLocation, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), nullptr);
 		glEnableVertexAttribArray(vPosLocation);
+		glUniform1f(iTimeLocation, (float)time);
 		glUniform2f(iResolutionLocation, (float)width, (float)height);
-		glUniform4fv(iColorLocation, 1, (GLfloat*)&clearColor);
+		glUniform4fv(iCameraPositionLocation, 1, (GLfloat*)&cameraPosition);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
