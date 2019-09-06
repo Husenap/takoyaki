@@ -9,14 +9,10 @@
 #include <GLFW/glfw3.h>
 
 void Style() {
-	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 18.0f);
+	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImVec4* colors    = style.Colors;
-
-	/// 0 = FLAT APPEARENCE
-	/// 1 = MORE "3D" LOOK
-	int is3D = 0;
 
 	colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled]          = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
@@ -61,34 +57,33 @@ void Style() {
 	colors[ImGuiCol_NavHighlight]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
 	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+	colors[ImGuiCol_Tab]                   = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_TabHovered]            = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+	colors[ImGuiCol_TabActive]             = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
+	colors[ImGuiCol_TabUnfocused]          = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_TabUnfocusedActive]    = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
 
-	style.PopupRounding = 3;
+	style.PopupRounding = 3.f;
 
-	style.WindowPadding = ImVec2(4, 4);
-	style.FramePadding  = ImVec2(6, 4);
-	style.ItemSpacing   = ImVec2(6, 2);
+	style.WindowPadding = ImVec2(4.f, 4.f);
+	style.FramePadding  = ImVec2(6.f, 4.f);
+	style.ItemSpacing   = ImVec2(6.f, 2.f);
 
-	style.ScrollbarSize = 18;
+	style.ScrollbarSize = 18.f;
 
-	style.WindowBorderSize = 1;
-	style.ChildBorderSize  = 1;
-	style.PopupBorderSize  = 1;
-	style.FrameBorderSize  = is3D;
+	style.WindowBorderSize = 1.f;
+	style.ChildBorderSize  = 1.f;
+	style.PopupBorderSize  = 1.f;
+	style.FrameBorderSize  = 0.f;
 
-	style.WindowRounding    = 3;
-	style.ChildRounding     = 3;
-	style.FrameRounding     = 3;
-	style.ScrollbarRounding = 2;
-	style.GrabRounding      = 3;
+	style.WindowRounding    = 3.f;
+	style.ChildRounding     = 3.f;
+	style.FrameRounding     = 3.f;
+	style.ScrollbarRounding = 2.f;
+	style.GrabRounding      = 3.f;
 
-	style.TabBorderSize = is3D;
-	style.TabRounding   = 3;
-
-	colors[ImGuiCol_Tab]                = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	colors[ImGuiCol_TabHovered]         = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
-	colors[ImGuiCol_TabActive]          = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
-	colors[ImGuiCol_TabUnfocused]       = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
+	style.TabBorderSize = 0.f;
+	style.TabRounding   = 3.f;
 }
 
 static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -97,7 +92,117 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, i
 	}
 }
 
+static void ErrorCallback(int error, const char* description) {
+	fprintf(stderr, "Error: %s\n", description);
+}
+
+ImVec2 vertices[3] = {
+    {-1.0f, 3.0f},
+    {3.0f, -1.0f},
+    {-1.0f, -1.0f},
+};
+
+static const char* vertexShaderText = R"(
+#version 450
+
+in vec2 vPos;
+out vec2 uv;
+
+void main(){
+	gl_Position = vec4(vPos, 1.0, 1.0);
+	uv = vPos*0.5+0.5;
+}
+)";
+
+static const char* fragmentShaderText = R"(
+#version 450
+
+in vec2 uv;
+
+uniform vec2 iResolution;
+uniform vec4 iColor;
+
+
+#define SMOOTHNESS (0.002 / (myResolution.y/1080.))
+vec2 myResolution;
+
+const vec3 BLACK	= (vec3(0.)/255.0);
+const vec3 WHITE	= (vec3(255.)/255.0);
+const vec3 RED		= (vec3(205., 46., 58.)/255.0);
+const vec3 BLUE		= (vec3(0., 71., 160.)/255.0);
+
+const vec2 NW		= normalize(vec2(-3.0, 2.0));
+
+float cross2(vec2 u, vec2 v){
+    return smoothstep(SMOOTHNESS, -SMOOTHNESS, u.x*v.y-u.y*v.x);
+}
+
+float dCircle(vec2 p, float r){
+    return smoothstep(SMOOTHNESS, -SMOOTHNESS, length(p) - r*0.5);
+}
+float dBox(vec2 p, vec2 s){
+    return smoothstep(SMOOTHNESS, -SMOOTHNESS, max(abs(p.x)-s.x*0.5, abs(p.y)-s.y*0.5));
+}
+float dStripe(vec2 p, float i, float a, float g){
+    float c = cos(a);
+    float s = sin(a);
+    mat2 m2 = mat2(c, -s, s, c);
+    vec2 q = p * m2;
+    
+    q.y -= 0.75+1./24.;
+    q.y -= (3./24.)*i;
+    
+    return dBox(q, vec2(1./2., 1./12.)) - dBox(q, vec2(1./24., 1./12.)) * g;
+}
+
+vec3 taegeukgi(vec2 p){
+    vec3 col = WHITE;
+    
+    col = mix(col, mix(BLUE, RED, vec3(cross2(NW, p))), dCircle(p, 1.0));
+    
+    col = mix(col, RED, dCircle(p-NW*0.25, 0.5));
+    col = mix(col, BLUE, dCircle(p+NW*0.25, 0.5));
+    
+    col = mix(col, BLACK, dStripe(p, 0., atan(NW.x, NW.y), 0.));
+    col = mix(col, BLACK, dStripe(p, 1., atan(NW.x, NW.y), 0.));
+    col = mix(col, BLACK, dStripe(p, 2., atan(NW.x, NW.y), 0.));
+    
+    col = mix(col, BLACK, dStripe(p, 0., atan(NW.x, -NW.y), 0.));
+    col = mix(col, BLACK, dStripe(p, 1., atan(NW.x, -NW.y), 1.));
+    col = mix(col, BLACK, dStripe(p, 2., atan(NW.x, -NW.y), 0.));
+    
+    col = mix(col, BLACK, dStripe(p, 0., atan(-NW.x, NW.y), 1.));
+    col = mix(col, BLACK, dStripe(p, 1., atan(-NW.x, NW.y), 0.));
+    col = mix(col, BLACK, dStripe(p, 2., atan(-NW.x, NW.y), 1.));
+    
+    col = mix(col, BLACK, dStripe(p, 0., atan(-NW.x, -NW.y), 1.));
+    col = mix(col, BLACK, dStripe(p, 1., atan(-NW.x, -NW.y), 1.));
+    col = mix(col, BLACK, dStripe(p, 2., atan(-NW.x, -NW.y), 1.));
+    
+    return col;
+}
+
+
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord){
+	myResolution = iResolution;
+	vec2 uv = (fragCoord*2.f - iResolution.xy) / iResolution.y;
+
+	vec3 col = vec3(0.0);
+
+	col = taegeukgi(uv*iColor.zw+iColor.xy);
+
+	fragColor = vec4(col, 1.0);
+}
+
+void main(){
+	mainImage(gl_FragColor.rgba, gl_FragCoord.xy);
+}
+)";
+
 int main() {
+	glfwSetErrorCallback(ErrorCallback);
+
 	if (!glfwInit()) {
 		return 1;
 	}
@@ -115,6 +220,63 @@ int main() {
 	gladLoadGL();
 	glfwSwapInterval(1);
 
+	GLuint vertexArrayName;
+	GLuint vertexShader;
+	GLuint fragmentShader;
+	GLuint program;
+	GLint vPosLocation;
+	GLint iResolutionLocation;
+	GLint iColorLocation;
+	int success;
+
+	glGenBuffers(1, &vertexArrayName);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayName);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &vertexArrayName);
+
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderText, NULL);
+	glCompileShader(vertexShader);
+
+	success = -1;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success){
+		char buffer[512];
+		glGetShaderInfoLog(vertexShader, GL_COMPILE_STATUS, nullptr, buffer);
+		throw std::runtime_error(buffer);
+	}
+
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderText, NULL);
+	glCompileShader(fragmentShader);
+
+	success = -1;
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success){
+		char buffer[512];
+		glGetShaderInfoLog(fragmentShader, GL_COMPILE_STATUS, nullptr, buffer);
+		throw std::runtime_error(buffer);
+	}
+
+	program = glCreateProgram();
+	glAttachShader(program, vertexShader);
+	glAttachShader(program, fragmentShader);
+	glLinkProgram(program);
+
+	success = -1;
+	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (!success) {
+		char buffer[512];
+		glGetProgramInfoLog(program, 512, NULL, buffer);
+		throw std::runtime_error(buffer);
+	}
+
+	vPosLocation = glGetAttribLocation(program, "vPos");
+	iResolutionLocation = glGetUniformLocation(program, "iResolution");
+	iColorLocation = glGetUniformLocation(program, "iColor");
+
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
@@ -123,10 +285,15 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
 
-	bool showDemoWindow = true;
+	bool showDemoWindow  = true;
+	bool showColorWindow = true;
+
+	ImVec4 clearColor{0.18f, 0.18f, 0.18f, 1.0f};
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+
+		glfwMakeContextCurrent(window);
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -134,13 +301,35 @@ int main() {
 
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
 
+		if (showColorWindow) {
+			ImGui::Begin("Clear color", &showColorWindow);
+			// ImGui::PushItemWidth(ImGui::GetFontSize() * -12);           // Use fixed width for labels (by
+			// passing a negative value), the rest goes to widgets. We choose a width proportional to our font
+			// size.
+
+			ImGui::ColorEdit4("##clearColor",
+			                  (float*)&clearColor,
+			                  ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreviewHalf);
+			ImGui::SameLine();
+			ImGui::TextUnformatted("Clear Color");
+			ImGui::End();
+		}
+
 		ImGui::Render();
 
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
-		glClearColor(0.18f, 0.18f, 0.18f, 1.0f);
+		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUseProgram(program);
+		glBindVertexArray(vertexArrayName);
+		glVertexAttribPointer(vPosLocation, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), nullptr);
+		glEnableVertexAttribArray(vPosLocation);
+		glUniform2f(iResolutionLocation, (float)width, (float)height);
+		glUniform4fv(iColorLocation, 1, (GLfloat*)&clearColor);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
