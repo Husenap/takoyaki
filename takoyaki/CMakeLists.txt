@@ -1,6 +1,10 @@
 set(target_name "takoyaki")
 
 set(graphics_files
+    "src/graphics/Renderer.h"
+    "src/graphics/Renderer.cpp"
+    "src/graphics/Window.h"
+    "src/graphics/Window.cpp"
     "src/graphics/Commands.h"
     "src/graphics/Shader.h"
     "src/graphics/ShaderProgram.h")
