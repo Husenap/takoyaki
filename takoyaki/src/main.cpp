@@ -233,21 +233,22 @@ int main() {
 		int width, height;
 		glfwGetFramebufferSize(window.GetHandle(), &width, &height);
 
-		renderer.Commands().Clear();
+		auto& cmds = renderer.Commands();
+		cmds.Clear();
 
-		renderer.Commands().Push<ty::Commands::Viewport>(0, 0, width, height);
-		renderer.Commands().Push<ty::Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
-		renderer.Commands().Push<ty::Commands::Clear>(GL_COLOR_BUFFER_BIT);
+		cmds.Push<ty::Commands::Viewport>(0, 0, width, height);
+		cmds.Push<ty::Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
+		cmds.Push<ty::Commands::Clear>(GL_COLOR_BUFFER_BIT);
 
-		renderer.Commands().Push<ty::Commands::UseProgram>(program.mProgram);
+		cmds.Push<ty::Commands::UseProgram>(program.mProgram);
 		glUniform1f(iTimeLocation, (float)time);
 		glUniform2f(iResolutionLocation, (float)width, (float)height);
 
-		renderer.Commands().Push<ty::Commands::BindVertexArray>(vertexArrayName);
-		renderer.Commands().Push<ty::Commands::VertexAttribPointer>(
+		cmds.Push<ty::Commands::BindVertexArray>(vertexArrayName);
+		cmds.Push<ty::Commands::VertexAttribPointer>(
 		    vPosLocation, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
-		renderer.Commands().Push<ty::Commands::EnableVertexAttribArray>(vPosLocation);
-		renderer.Commands().Push<ty::Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+		cmds.Push<ty::Commands::EnableVertexAttribArray>(vPosLocation);
+		cmds.Push<ty::Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
 
 		renderer.ProcessCommands();
 

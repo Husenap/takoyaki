@@ -20,7 +20,7 @@ public:
 	}
 
 	GLint GetAttributeLocation(std::string_view name) {
-		return glGetAttributeLocation(mProgram, name.data());
+		return glGetAttribLocation(mProgram, name.data());
 	}
 	GLint GetUniformLocation(std::string_view name) {
 		return glGetUniformLocation(mProgram, name.data());
