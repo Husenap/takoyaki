@@ -5,6 +5,8 @@
 #include <variant>
 #include <iostream>
 #include <vector>
+#include <string>
+#include <string_view>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>

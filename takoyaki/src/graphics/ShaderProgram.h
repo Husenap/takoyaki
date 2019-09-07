@@ -1,13 +1,11 @@
 #pragma once
 
-#include <type_traits>
-
 namespace ty {
 
 class ShaderProgram {
 public:
 	template <typename... Shaders>
-	ShaderProgram(Shaders... shaders) {
+	ShaderProgram(Shaders&&... shaders) {
 		mProgram = glCreateProgram();
 		(AttachShader(shaders), ...);
 		glLinkProgram(mProgram);
@@ -19,6 +17,13 @@ public:
 			glGetProgramInfoLog(mProgram, 512, NULL, buffer);
 			throw std::runtime_error(buffer);
 		}
+	}
+
+	GLint GetAttributeLocation(std::string_view name) {
+		return glGetAttributeLocation(mProgram, name.data());
+	}
+	GLint GetUniformLocation(std::string_view name) {
+		return glGetUniformLocation(mProgram, name.data());
 	}
 
 	GLuint mProgram;

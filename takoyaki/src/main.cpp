@@ -1,8 +1,11 @@
+#include "graphics/Renderer.h"
+#include "graphics/Window.h"
+
+#include "graphics/Commands.h"
 #include "graphics/Shader.h"
 #include "graphics/ShaderProgram.h"
-#include "graphics/Commands.h"
 
-void Style() {
+void SetupImGuiStyle() {
 	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
 
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -80,12 +83,6 @@ void Style() {
 	style.TabRounding   = 3.f;
 }
 
-static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-}
-
 static void ErrorCallback(int error, const char* description) {
 	fprintf(stderr, "Error: %s\n", description);
 }
@@ -98,25 +95,17 @@ ImVec2 vertices[3] = {
 
 static const char* vertexShaderCode = R"(
 #version 450
-
 in vec2 vPos;
-out vec2 uv;
-
 void main(){
 	gl_Position = vec4(vPos, 1.0, 1.0);
-	uv = vPos*0.5+0.5;
 }
 )";
 
 static const char* fragmentShaderCode = R"(
 #version 450
 
-in vec2 uv;
-
 uniform float iTime;
 uniform vec2 iResolution;
-uniform vec4 iCameraPosition;
-
 
 #define SMOOTHNESS (0.002 / (myResolution.y/1080.))
 vec2 myResolution;
@@ -202,24 +191,13 @@ int main() {
 		return 1;
 	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "TakoYaki", NULL, NULL);
-	if (!window) {
-		return 1;
-	}
-
-	glfwSetKeyCallback(window, KeyCallback);
-
-	glfwMakeContextCurrent(window);
-	gladLoadGL();
-	glfwSwapInterval(1);
+	ty::Renderer renderer;
+	ty::Window window(1024, 768, "TakoYaki");
 
 	GLuint vertexArrayName;
 	GLint vPosLocation;
 	GLint iTimeLocation;
 	GLint iResolutionLocation;
-	GLint iCameraPositionLocation;
 
 	glGenBuffers(1, &vertexArrayName);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayName);
@@ -231,75 +209,55 @@ int main() {
 	ty::FragmentShader fShader(fragmentShaderCode);
 	ty::ShaderProgram program(vShader, fShader);
 
-	vPosLocation            = glGetAttribLocation(program.mProgram, "vPos");
-	iTimeLocation           = glGetUniformLocation(program.mProgram, "iTime");
-	iResolutionLocation     = glGetUniformLocation(program.mProgram, "iResolution");
-	iCameraPositionLocation = glGetUniformLocation(program.mProgram, "iCameraPosition");
+	vPosLocation        = program.GetAttributeLocation("vPos");
+	iTimeLocation       = program.GetUniformLocation("iTime");
+	iResolutionLocation = program.GetUniformLocation("iResolution");
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	SetupImGuiStyle();
 
-	Style();
+	bool showDemoWindow = false;
 
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 450");
+	while (!window.ShouldClose()) {
+		window.PollEvents();
 
-	bool showDemoWindow  = false;
-	bool showColorWindow = true;
-
-	ImVec4 cameraPosition{0.18f, 0.18f, 0.18f, 1.0f};
-	ImVec4 cameraRotation{0.0f, 0.0f, 0.0f, 0.0f};
-
-	while (!glfwWindowShouldClose(window)) {
 		double time = glfwGetTime();
 
-		glfwPollEvents();
+		renderer.NewFrame();
 
-		glfwMakeContextCurrent(window);
-
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		glfwMakeContextCurrent(window.GetHandle());
 
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
-
-		if (showColorWindow) {
-			ImGui::Begin("Uniforms", &showColorWindow);
-			ImGui::PushItemWidth(ImGui::GetFontSize() * -8);
-
-			ImGui::DragFloat3("Camera Position", (float*)&cameraPosition);
-			ImGui::DragFloat3("Camera Rotation", (float*)&cameraRotation);
-
-			ImGui::End();
-		}
 
 		ImGui::Render();
 
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
-		glClearColor(0.18f, 0.18f, 0.18f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glfwGetFramebufferSize(window.GetHandle(), &width, &height);
 
-		glUseProgram(program.mProgram);
-		glBindVertexArray(vertexArrayName);
-		glVertexAttribPointer(vPosLocation, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), nullptr);
-		glEnableVertexAttribArray(vPosLocation);
+		renderer.Commands().Clear();
+
+		renderer.Commands().Push<ty::Commands::Viewport>(0, 0, width, height);
+		renderer.Commands().Push<ty::Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
+		renderer.Commands().Push<ty::Commands::Clear>(GL_COLOR_BUFFER_BIT);
+
+		renderer.Commands().Push<ty::Commands::UseProgram>(program.mProgram);
 		glUniform1f(iTimeLocation, (float)time);
 		glUniform2f(iResolutionLocation, (float)width, (float)height);
-		glUniform4fv(iCameraPositionLocation, 1, (GLfloat*)&cameraPosition);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		renderer.Commands().Push<ty::Commands::BindVertexArray>(vertexArrayName);
+		renderer.Commands().Push<ty::Commands::VertexAttribPointer>(
+		    vPosLocation, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
+		renderer.Commands().Push<ty::Commands::EnableVertexAttribArray>(vPosLocation);
+		renderer.Commands().Push<ty::Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
 
-		glfwSwapBuffers(window);
+		renderer.ProcessCommands();
+
+		window.SwapBuffers();
 	}
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	glfwDestroyWindow(window);
 	glfwTerminate();
 
 	return 0;
