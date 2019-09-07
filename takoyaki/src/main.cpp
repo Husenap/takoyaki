@@ -1,12 +1,6 @@
-#include <iostream>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-#include <glad/glad.h>
-
-#include <GLFW/glfw3.h>
+#include "graphics/Shader.h"
+#include "graphics/ShaderProgram.h"
+#include "graphics/Commands.h"
 
 void Style() {
 	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
@@ -102,7 +96,7 @@ ImVec2 vertices[3] = {
     {-1.0f, -1.0f},
 };
 
-static const char* vertexShaderText = R"(
+static const char* vertexShaderCode = R"(
 #version 450
 
 in vec2 vPos;
@@ -114,7 +108,7 @@ void main(){
 }
 )";
 
-static const char* fragmentShaderText = R"(
+static const char* fragmentShaderCode = R"(
 #version 450
 
 in vec2 uv;
@@ -222,14 +216,10 @@ int main() {
 	glfwSwapInterval(1);
 
 	GLuint vertexArrayName;
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint program;
 	GLint vPosLocation;
 	GLint iTimeLocation;
 	GLint iResolutionLocation;
 	GLint iCameraPositionLocation;
-	int success;
 
 	glGenBuffers(1, &vertexArrayName);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayName);
@@ -237,48 +227,14 @@ int main() {
 
 	glGenVertexArrays(1, &vertexArrayName);
 
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderText, NULL);
-	glCompileShader(vertexShader);
+	ty::VertexShader vShader(vertexShaderCode);
+	ty::FragmentShader fShader(fragmentShaderCode);
+	ty::ShaderProgram program(vShader, fShader);
 
-	success = -1;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success){
-		char buffer[512];
-		glGetShaderInfoLog(vertexShader, GL_COMPILE_STATUS, nullptr, buffer);
-		throw std::runtime_error(buffer);
-	}
-
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderText, NULL);
-	glCompileShader(fragmentShader);
-
-	success = -1;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success){
-		char buffer[512];
-		glGetShaderInfoLog(fragmentShader, GL_COMPILE_STATUS, nullptr, buffer);
-		throw std::runtime_error(buffer);
-	}
-
-	program = glCreateProgram();
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
-	glLinkProgram(program);
-
-	success = -1;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
-	if (!success) {
-		char buffer[512];
-		glGetProgramInfoLog(program, 512, NULL, buffer);
-		throw std::runtime_error(buffer);
-	}
-
-	vPosLocation = glGetAttribLocation(program, "vPos");
-	iTimeLocation = glGetUniformLocation(program, "iTime");
-	iResolutionLocation = glGetUniformLocation(program, "iResolution");
-	iCameraPositionLocation = glGetUniformLocation(program, "iCameraPosition");
-
+	vPosLocation            = glGetAttribLocation(program.mProgram, "vPos");
+	iTimeLocation           = glGetUniformLocation(program.mProgram, "iTime");
+	iResolutionLocation     = glGetUniformLocation(program.mProgram, "iResolution");
+	iCameraPositionLocation = glGetUniformLocation(program.mProgram, "iCameraPosition");
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -295,6 +251,8 @@ int main() {
 	ImVec4 cameraRotation{0.0f, 0.0f, 0.0f, 0.0f};
 
 	while (!glfwWindowShouldClose(window)) {
+		double time = glfwGetTime();
+
 		glfwPollEvents();
 
 		glfwMakeContextCurrent(window);
@@ -307,25 +265,23 @@ int main() {
 
 		if (showColorWindow) {
 			ImGui::Begin("Uniforms", &showColorWindow);
-			// ImGui::PushItemWidth(ImGui::GetFontSize() * -12);           // Use fixed width for labels (by
-			// passing a negative value), the rest goes to widgets. We choose a width proportional to our font
-			// size.
+			ImGui::PushItemWidth(ImGui::GetFontSize() * -8);
 
 			ImGui::DragFloat3("Camera Position", (float*)&cameraPosition);
 			ImGui::DragFloat3("Camera Rotation", (float*)&cameraRotation);
+
 			ImGui::End();
 		}
 
 		ImGui::Render();
 
 		int width, height;
-		double time = glfwGetTime();
 		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
 		glClearColor(0.18f, 0.18f, 0.18f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(program);
+		glUseProgram(program.mProgram);
 		glBindVertexArray(vertexArrayName);
 		glVertexAttribPointer(vPosLocation, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), nullptr);
 		glEnableVertexAttribArray(vPosLocation);

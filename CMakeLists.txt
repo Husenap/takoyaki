@@ -5,6 +5,7 @@ message("-- CONFIGURATION TYPES: ${CMAKE_CONFIGURATION_TYPES}")
 
 include("cmake/compiler_features.cmake")
 include("cmake/compiler_warnings.cmake")
+include("cmake/cotire.cmake")
 include("cmake/glfw.cmake")
 include("cmake/thirdparty.cmake")
 
