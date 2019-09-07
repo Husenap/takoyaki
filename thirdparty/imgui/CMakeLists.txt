@@ -9,3 +9,4 @@ add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_include_directories(imgui PUBLIC ${imgui_include_dir})
 
 target_link_libraries(imgui glfw glad)
+set_target_properties(imgui PROPERTIES FOLDER "thirdparty")

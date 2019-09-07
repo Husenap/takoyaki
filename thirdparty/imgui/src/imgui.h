@@ -1,3 +1,4 @@
+#pragma warning(push, 0)
 // dear imgui, v1.72b
 // (headers)
 
@@ -2219,3 +2220,6 @@ struct ImFont
 #ifdef IMGUI_INCLUDE_IMGUI_USER_H
 #include "imgui_user.h"
 #endif
+
+
+#pragma warning(pop)
