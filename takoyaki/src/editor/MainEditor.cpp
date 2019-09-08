@@ -27,9 +27,18 @@ void MainEditor::Update() {
 }
 
 void MainEditor::DrawWorkspace() {
-	if (ImGui::Begin("Workspace", &mShowWorkspace, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus)) {
+	ImGuiWindowFlags workspaceFlags(ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+	                                ImGuiWindowFlags_NoBringToFrontOnFocus);
+	if (ImGui::Begin("Workspace", &mShowWorkspace, workspaceFlags)) {
 		ImGui::SetWindowPos({0.f, mMenuBarSize.y}, ImGuiCond_Always);
 		ImGui::SetWindowSize({mMenuBarSize.x, mFramebufferSize.y - mMenuBarSize.y}, ImGuiCond_Always);
+
+		for (int i = 0; i < 5; ++i) {
+			std::string str = "Vec3##" + std::to_string(i);
+			if (ImGui::Begin(str.c_str())) {
+			}
+			ImGui::End();
+		}
 	}
 	ImGui::End();
 }
