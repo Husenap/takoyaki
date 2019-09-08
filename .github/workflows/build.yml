@@ -14,10 +14,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+
+    - name: Install RandR (Ubuntu only)
+      if: matrix.os == "ubuntu-latest"
+      run: sudo apt-get install xorg-dev libglu1-mesa-dev
+
     - name: Update submodules
       run: git submodule update --init --recursive
+
     - name: Generate
       run: cmake . -B_build
+
     - name: Compile
       run: cmake --build _build
+
 
