@@ -58,20 +58,20 @@ void SetupImGuiStyle() {
 
 	style.PopupRounding = 3.f;
 
-	style.WindowPadding = ImVec2(4.f, 4.f);
-	style.FramePadding  = ImVec2(6.f, 4.f);
-	style.ItemSpacing   = ImVec2(6.f, 2.f);
+	style.WindowPadding = glm::vec2(4.f, 4.f);
+	style.FramePadding  = glm::vec2(6.f, 4.f);
+	style.ItemSpacing   = glm::vec2(6.f, 2.f);
 
 	style.ScrollbarSize = 18.f;
 
-	style.WindowBorderSize = 1.f;
-	style.ChildBorderSize  = 1.f;
+	style.WindowBorderSize = 0.f;
+	style.ChildBorderSize  = 0.f;
 	style.PopupBorderSize  = 1.f;
 	style.FrameBorderSize  = 0.f;
 
-	style.WindowRounding    = 3.f;
-	style.ChildRounding     = 3.f;
-	style.FrameRounding     = 3.f;
+	style.WindowRounding    = 2.f;
+	style.ChildRounding     = 2.f;
+	style.FrameRounding     = 2.f;
 	style.ScrollbarRounding = 2.f;
 	style.GrabRounding      = 3.f;
 
@@ -95,26 +95,16 @@ MainWindow::MainWindow(int width, int height, const char* title) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	mWindow = glfwCreateWindow(800, 600, "TakoYaki", NULL, NULL);
+	mWindow = glfwCreateWindow(width, height, "TakoYaki", NULL, NULL);
 	if (!mWindow) {
 		throw std::runtime_error("Failed to create a GLFW window!");
 	}
 
-	glfwSetWindowUserPointer(mWindow, this);
+	glfwGetFramebufferSize(mWindow, &mFramebufferSize.x, &mFramebufferSize.y);
 
-	glfwSetKeyCallback(mWindow, WindowInputCallback);
-	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
-
-	glfwMakeContextCurrent(mWindow);
-	gladLoadGL();
-	glfwSwapInterval(1);
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
-	ImGui_ImplOpenGL3_Init("#version 450");
-
-	::SetupImGuiStyle();
+	InitCallbacks();
+	InitGL();
+	InitImGui();
 }
 
 MainWindow::~MainWindow() {
@@ -124,6 +114,28 @@ MainWindow::~MainWindow() {
 
 	glfwDestroyWindow(mWindow);
 	glfwTerminate();
+}
+
+void MainWindow::InitCallbacks() {
+	glfwSetWindowUserPointer(mWindow, this);
+
+	glfwSetKeyCallback(mWindow, WindowInputCallback);
+	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
+}
+
+void MainWindow::InitGL() {
+	glfwMakeContextCurrent(mWindow);
+	gladLoadGL();
+	glfwSwapInterval(1);
+}
+
+void MainWindow::InitImGui() {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+	ImGui_ImplOpenGL3_Init("#version 450");
+
+	::SetupImGuiStyle();
 }
 
 bool MainWindow::ShouldClose() const {
@@ -142,14 +154,18 @@ void MainWindow::PollEvents() {
 	glfwPollEvents();
 }
 
+const glm::ivec2& MainWindow::GetFramebufferSize() const {
+	return mFramebufferSize;
+}
+
 void MainWindow::OnInput(int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		RequestClose();
 	}
 }
 
-void MainWindow::OnFramebufferSize(int width, int height) {
-	std::cout << "Screen resized to: " << width << ", " << height << std::endl;
+void MainWindow::OnFramebufferSize(glm::ivec2 size) {
+	mFramebufferSize = size;
 }
 
 }  // namespace ty

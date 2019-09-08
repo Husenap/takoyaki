@@ -40,11 +40,7 @@ uniform int iFrame;
 // Video capture: https://www.youtube.com/watch?v=s_UOFo2IULQ
 
 
-#if HW_PERFORMANCE==0
 #define AA 1
-#else
-#define AA 2  // Set AA to 1 if your machine is too slow
-#endif
 
 
 //------------------------------------------------------------------
@@ -554,46 +550,30 @@ Takoyaki::Takoyaki()
 	iTimeLocation       = program.GetUniformLocation("iTime");
 	iResolutionLocation = program.GetUniformLocation("iResolution");
 
-	bool showDemoWindow = false;
 	int frame           = 0;
 
 	while (!mWindow.ShouldClose()) {
 		++frame;
 		mWindow.PollEvents();
+		mRenderer.NewFrame();
 
 		double time = glfwGetTime();
 
-		mRenderer.NewFrame();
+		mEditor.Update();
 
-		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
-
-		if (ImGui::BeginMainMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-				if (ImGui::MenuItem("Open")) {
-					tinyfd_openFileDialog("Open TakoYaki file", "", 0, nullptr, nullptr, 0);
-				}
-				if (ImGui::MenuItem("Save As..")) {
-					tinyfd_saveFileDialog("Save TakoYaki file", "", 0, nullptr, nullptr);
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-
-		int width, height;
-		glfwGetFramebufferSize(mWindow.GetHandle(), &width, &height);
+		glm::ivec2 size = mWindow.GetFramebufferSize();
 
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
 
-		cmds.Push<ty::Commands::Viewport>(0, 0, width, height);
+		cmds.Push<ty::Commands::Viewport>(0, 0, size.x, size.y);
 		cmds.Push<ty::Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
 		cmds.Push<ty::Commands::Clear>(GL_COLOR_BUFFER_BIT);
 
 		cmds.Push<ty::Commands::UseProgram>(program.mProgram);
 		cmds.Push<ty::Commands::Uniform>(iFrameLocation, frame);
 		cmds.Push<ty::Commands::Uniform>(iTimeLocation, (GLfloat)time);
-		cmds.Push<ty::Commands::Uniform>(iResolutionLocation, glm::vec2(width, height));
+		cmds.Push<ty::Commands::Uniform>(iResolutionLocation, glm::vec2(size.x, size.y));
 
 		cmds.Push<ty::Commands::BindVertexArray>(vertexArrayName);
 		cmds.Push<ty::Commands::VertexAttribPointer>(

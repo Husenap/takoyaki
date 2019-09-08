@@ -14,10 +14,13 @@ set(graphics_files
     "src/graphics/ShaderProgram.h")
 
 set(editor_files
+    "src/editor/MainEditor.h"
+    "src/editor/MainEditor.cpp"
     "src/editor/Takoyaki.h"
     "src/editor/Takoyaki.cpp")
 
 set(util_files
+    "src/util/glmvecToImVec.h"
     "src/util/VariantPolyfill.h")
 
 set(precompiled_files

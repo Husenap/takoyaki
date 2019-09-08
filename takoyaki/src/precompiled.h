@@ -6,6 +6,12 @@
 #include <variant>
 #include <vector>
 #include <fstream>
+#include <functional>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "util/glmvecToImVec.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -14,9 +20,6 @@
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <tinyfiledialogs.h>
 
