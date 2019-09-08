@@ -174,7 +174,7 @@ public:
 
 	void Apply() {
 		glVertexAttribPointer(
-		    std::visit(Locations::GetLocation(), mLocation), mSize, mType, mNormalized, mStride, mPointer);
+		    std::visit(Locations::GetLocation{}, mLocation), mSize, mType, mNormalized, mStride, mPointer);
 	}
 };
 
@@ -192,7 +192,7 @@ public:
 	}
 
 	void Apply() {
-		glEnableVertexAttribArray(std::visit(Locations::GetLocation(), mLocation));
+		glEnableVertexAttribArray(std::visit(Locations::GetLocation{}, mLocation));
 	}
 };
 
@@ -213,65 +213,50 @@ public:
 	}
 };
 
-// glEnableVertexAttribArray(vPosLocation);
-// glUniform1f(iTimeLocation, (float)time);
-// glUniform2f(iResolutionLocation, (float)width, (float)height);
-// glDrawArrays(GL_TRIANGLES, 0, 3);
+class Uniform {
+	using LocationHolder = std::variant<Locations::FixedLocation, Locations::UniformLocation>;
+	using Data = std::variant<GLint,
+	                          glm::ivec2,
+	                          glm::ivec3,
+	                          glm::ivec4,
+	                          GLfloat,
+	                          glm::vec2,
+	                          glm::vec3,
+	                          glm::vec4,
+	                          glm::mat2,
+	                          glm::mat3,
+	                          glm::mat4>;
+	LocationHolder mLocation;
+	Data mData;
+
+public:
+	Uniform(GLint location, Data&& data)
+	    : mLocation(Locations::FixedLocation(location))
+	    , mData(data) {
+	}
+	Uniform(GLint program, std::string_view name, Data&& data)
+	    : mLocation(Locations::UniformLocation(program, name))
+	    , mData(data) {
+	}
+
+	void Apply() {
+		GLint location = std::visit(Locations::GetLocation{}, mLocation);
+
+		std::visit(make_overloaded{
+		               [location](GLint data) { glUniform1i(location, data); },
+		               [location](glm::ivec2 data) { glUniform2iv(location, 1, glm::value_ptr(data)); },
+		               [location](glm::ivec3 data) { glUniform3iv(location, 1, glm::value_ptr(data)); },
+		               [location](glm::ivec4 data) { glUniform4iv(location, 1, glm::value_ptr(data)); },
+		               [location](GLfloat data) { glUniform1f(location, data); },
+		               [location](glm::vec2 data) { glUniform2fv(location, 1, glm::value_ptr(data)); },
+		               [location](glm::vec3 data) { glUniform3fv(location, 1, glm::value_ptr(data)); },
+		               [location](glm::vec4 data) { glUniform4fv(location, 1, glm::value_ptr(data)); },
+		               [location](glm::mat2 data) { glUniformMatrix2fv(location, 1, GL_FALSE, glm::value_ptr(data)); },
+		               [location](glm::mat3 data) { glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(data)); },
+		               [location](glm::mat4 data) { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(data)); },
+		           },
+		           mData);
+	}
+};
 
 }  // namespace ty::Commands
-
-namespace ty {
-
-using Command = std::variant<std::monostate,
-                             Commands::Viewport,
-                             Commands::ClearColor,
-                             Commands::Clear,
-                             Commands::UseProgram,
-                             Commands::BindVertexArray,
-                             Commands::VertexAttribPointer,
-                             Commands::EnableVertexAttribArray,
-                             Commands::DrawArrays>;
-
-template <typename Command>
-struct ImmediateCommand {
-	template <typename... Args>
-	ImmediateCommand(Args&&... args) {
-		Command cmd(std::forward<Args>(args)...);
-		cmd.Apply();
-	}
-};
-
-struct CommandRunner {
-	template <typename T>
-	void operator()(T& command) const {
-		command.Apply();
-	}
-
-	void operator()(std::monostate&) const {
-		throw std::runtime_error("Should there be a monostate in the commandlist?");
-	}
-};
-
-template <typename T>
-class CommandList {
-public:
-	template <typename CommandType, typename... Args>
-	void Push(Args&&... args) {
-		mCommandList.emplace_back(std::in_place_type_t<CommandType>{}, std::forward<Args>(args)...);
-	}
-
-	void Clear() {
-		mCommandList.clear();
-	}
-
-	template <typename Visitor>
-	void Visit(Visitor&& visitor) {
-		for (auto& command : mCommandList) {
-			std::visit(visitor, command);
-		}
-	}
-
-private:
-	std::vector<T> mCommandList;
-};
-}  // namespace ty

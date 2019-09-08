@@ -1,10 +1,10 @@
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
 BasedOnStyle: Google
 BinPackArguments: false
 BinPackParameters: false
 BreakConstructorInitializers: BeforeComma
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
-ColumnLimit: 110
+ColumnLimit: 120
 AccessModifierOffset: '-4'
 IndentWidth: '4'
 Language: Cpp

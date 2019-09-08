@@ -9,12 +9,13 @@ void Renderer::NewFrame() {
 }
 
 void Renderer::ProcessCommands() {
-	mCommandList.Visit(CommandRunner());
+	mCommandList.Visit(RenderCommandExecutor());
 
+	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-ty::CommandList<ty::Command>& Renderer::Commands() {
+ty::RenderCommandList<ty::RenderCommand>& Renderer::Commands() {
 	return mCommandList;
 }
 

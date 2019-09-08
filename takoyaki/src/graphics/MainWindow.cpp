@@ -1,15 +1,6 @@
-#include "Window.h"
+#include "MainWindow.h"
 
 namespace {
-void WindowInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	auto userWindow = static_cast<ty::Window*>(glfwGetWindowUserPointer(window));
-	if (userWindow) {
-		userWindow->InputCallback(key, scancode, action, mods);
-	} else {
-		throw std::runtime_error("Failed to process window input");
-	}
-}
-
 void SetupImGuiStyle() {
 	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
 
@@ -19,7 +10,7 @@ void SetupImGuiStyle() {
 	colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled]          = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
 	colors[ImGuiCol_ChildBg]               = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	colors[ImGuiCol_WindowBg]              = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_WindowBg]              = ImVec4(0.25f, 0.25f, 0.25f, 0.75f);
 	colors[ImGuiCol_PopupBg]               = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
 	colors[ImGuiCol_Border]                = ImVec4(0.12f, 0.12f, 0.12f, 0.71f);
 	colors[ImGuiCol_BorderShadow]          = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
@@ -29,7 +20,7 @@ void SetupImGuiStyle() {
 	colors[ImGuiCol_TitleBg]               = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
 	colors[ImGuiCol_TitleBgActive]         = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 	colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.17f, 0.17f, 0.17f, 0.90f);
-	colors[ImGuiCol_MenuBarBg]             = ImVec4(0.335f, 0.335f, 0.335f, 1.000f);
+	colors[ImGuiCol_MenuBarBg]             = ImVec4(0.33f, 0.33f, 0.33f, 0.75f);
 	colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.24f, 0.24f, 0.24f, 0.53f);
 	colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
 	colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
@@ -89,14 +80,14 @@ void SetupImGuiStyle() {
 }
 
 static void ErrorCallback(int error, const char* description) {
-	fprintf(stderr, "Error: %s\n", description);
+	std::cout << "Error[" << error << "]: " << description << std::endl;
 }
 
 }  // namespace
 
 namespace ty {
 
-Window::Window(int width, int height, const char* title) {
+MainWindow::MainWindow(int width, int height, const char* title) {
 	glfwSetErrorCallback(::ErrorCallback);
 	if (!glfwInit()) {
 		throw std::runtime_error("Failed to initialize GLFW!");
@@ -111,7 +102,8 @@ Window::Window(int width, int height, const char* title) {
 
 	glfwSetWindowUserPointer(mWindow, this);
 
-	glfwSetKeyCallback(mWindow, ::WindowInputCallback);
+	glfwSetKeyCallback(mWindow, WindowInputCallback);
+	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
 
 	glfwMakeContextCurrent(mWindow);
 	gladLoadGL();
@@ -125,7 +117,7 @@ Window::Window(int width, int height, const char* title) {
 	::SetupImGuiStyle();
 }
 
-Window::~Window() {
+MainWindow::~MainWindow() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -134,26 +126,30 @@ Window::~Window() {
 	glfwTerminate();
 }
 
-bool Window::ShouldClose() const {
+bool MainWindow::ShouldClose() const {
 	return glfwWindowShouldClose(mWindow);
 }
 
-void Window::RequestClose() {
+void MainWindow::RequestClose() {
 	glfwSetWindowShouldClose(mWindow, GLFW_TRUE);
 }
 
-void Window::InputCallback(int key, int scancode, int action, int mods) {
+void MainWindow::SwapBuffers() {
+	glfwSwapBuffers(mWindow);
+}
+
+void MainWindow::PollEvents() {
+	glfwPollEvents();
+}
+
+void MainWindow::OnInput(int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		RequestClose();
 	}
 }
 
-void Window::SwapBuffers() {
-	glfwSwapBuffers(mWindow);
-}
-
-void Window::PollEvents() {
-	glfwPollEvents();
+void MainWindow::OnFramebufferSize(int width, int height) {
+	std::cout << "Screen resized to: " << width << ", " << height << std::endl;
 }
 
 }  // namespace ty
