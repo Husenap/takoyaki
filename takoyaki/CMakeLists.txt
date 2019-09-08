@@ -13,12 +13,21 @@ set(graphics_files
     "src/graphics/Shader.h"
     "src/graphics/ShaderProgram.h")
 
+set(editor_files
+    "src/editor/Takoyaki.h"
+    "src/editor/Takoyaki.cpp")
+
+set(util_files
+    "src/util/VariantPolyfill.h")
+
 set(precompiled_files
     "src/precompiled.h")
 
 set(src_files
     ${graphics_gl_files}
     ${graphics_files}
+    ${editor_files}
+    ${util_files}
     ${precompiled_files}
     "src/main.cpp")
 
@@ -28,8 +37,10 @@ target_link_libraries(${target_name} PUBLIC glfw glad glm_static imgui tinyfd)
 
 source_group("src" FILES "src/main.cpp")
 source_group("src\\precompiled" FILES ${precompiled_files})
+source_group("src\\editor" FILES ${editor_files})
 source_group("src\\graphics" FILES ${graphics_files})
-source_group("src\\graphics\\" FILES ${graphics_gl_files})
+source_group("src\\graphics\\gl" FILES ${graphics_gl_files})
+source_group("src\\util" FILES ${util_files})
 
 
 set_target_properties(${target_name} PROPERTIES FOLDER "takoyaki")
