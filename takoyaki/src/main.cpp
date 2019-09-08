@@ -1,11 +1,9 @@
-#include "graphics/MainWindow.h"
+﻿#include "graphics/MainWindow.h"
 #include "graphics/Renderer.h"
 
 #include "graphics/Shader.h"
 #include "graphics/ShaderProgram.h"
 #include "graphics/gl/RenderCommand.h"
-
-#include <tinyfiledialogs.h>
 
 namespace {
 ImVec2 vertices[3] = {
@@ -13,7 +11,6 @@ ImVec2 vertices[3] = {
     {3.0f, -1.0f},
     {-1.0f, -1.0f},
 };
-
 
 static const char* vertexShaderCode   = R"(
 #version 450
@@ -535,11 +532,6 @@ void main(){
 }  // namespace
 
 int main() {
-	const char* fileToOpen = tinyfd_openFileDialog("Open Shader File", "", 0, nullptr, nullptr, 0);
-	if (fileToOpen) {
-		tinyfd_messageBox("File to Open", fileToOpen, "ok", "info", 1);
-	}
-
 	ty::Renderer renderer;
 	ty::MainWindow window(1024, 768, "TakoYaki");
 
@@ -562,7 +554,7 @@ int main() {
 	iTimeLocation       = program.GetUniformLocation("iTime");
 	iResolutionLocation = program.GetUniformLocation("iResolution");
 
-	bool showDemoWindow = true;
+	bool showDemoWindow = false;
 	int frame           = 0;
 
 	while (!window.ShouldClose()) {
@@ -575,7 +567,18 @@ int main() {
 
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
 
-		ImGui::Render();
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Open")) {
+					tinyfd_openFileDialog("Open TakoYaki file", "", 0, nullptr, nullptr, 0);
+				}
+				if (ImGui::MenuItem("Save As..")) {
+					tinyfd_saveFileDialog("Save TakoYaki file", "", 0, nullptr, nullptr);
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
 
 		int width, height;
 		glfwGetFramebufferSize(window.GetHandle(), &width, &height);
