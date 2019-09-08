@@ -23,4 +23,5 @@
 
 #include <tinyfiledialogs.h>
 
+#include "util/KeyInput.h"
 #include "util/VariantPolyfill.h"

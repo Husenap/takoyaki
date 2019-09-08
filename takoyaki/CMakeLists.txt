@@ -20,6 +20,7 @@ set(editor_files
     "src/editor/Takoyaki.cpp")
 
 set(util_files
+    "src/util/KeyInput.h"
     "src/util/glmvecToImVec.h"
     "src/util/VariantPolyfill.h")
 

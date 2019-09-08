@@ -8,6 +8,7 @@ void MainEditor::Update() {
 	}
 
 	if (ImGui::BeginMainMenuBar()) {
+		mMenuBarSize = ImGui::GetWindowSize();
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("Open")) {
 				tinyfd_openFileDialog("Open TakoYaki file", "", 0, nullptr, nullptr, 0);
@@ -26,9 +27,21 @@ void MainEditor::Update() {
 }
 
 void MainEditor::DrawWorkspace() {
-	if (ImGui::Begin("Workspace", &mShowWorkspace, ImGuiWindowFlags_NoDecoration)) {
+	if (ImGui::Begin("Workspace", &mShowWorkspace, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus)) {
+		ImGui::SetWindowPos({0.f, mMenuBarSize.y}, ImGuiCond_Always);
+		ImGui::SetWindowSize({mMenuBarSize.x, mFramebufferSize.y - mMenuBarSize.y}, ImGuiCond_Always);
 	}
 	ImGui::End();
+}
+
+void MainEditor::OnInput(const KeyInput& input) {
+	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {
+		mShowWorkspace = !mShowWorkspace;
+	}
+}
+
+void MainEditor::OnFramebufferSize(const glm::ivec2& size) {
+	mFramebufferSize = size;
 }
 
 }  // namespace ty

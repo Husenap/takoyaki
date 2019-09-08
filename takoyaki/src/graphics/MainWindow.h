@@ -18,15 +18,13 @@ public:
 
 	const glm::ivec2& GetFramebufferSize() const;
 
-	virtual void OnInput(int key, int scancode, int action, int mods) override;
-	virtual void OnFramebufferSize(glm::ivec2 size) override;
+	virtual void OnInput(const KeyInput& input) override;
+	virtual void OnFramebufferSize(const glm::ivec2& size) override;
 
 private:
 	void InitCallbacks();
 	void InitGL();
 	void InitImGui();
-
-	glm::ivec2 mFramebufferSize;
 };
 
 }  // namespace ty

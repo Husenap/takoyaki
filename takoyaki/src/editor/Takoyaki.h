@@ -12,6 +12,9 @@ public:
 	~Takoyaki();
 
 private:
+	void OnInput(const KeyInput& input);
+	void OnFramebufferSize(const glm::ivec2& size);
+
 	Renderer mRenderer;
 	MainWindow mWindow;
 	MainEditor mEditor;

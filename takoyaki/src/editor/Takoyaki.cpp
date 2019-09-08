@@ -530,6 +530,8 @@ namespace ty {
 
 Takoyaki::Takoyaki()
     : mWindow(1024, 768, "Takoyaki") {
+	mWindow.AddInputListener([this](const KeyInput& input) { OnInput(input); });
+	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
 
 	GLuint vertexArrayName;
 	GLint vPosLocation;
@@ -550,18 +552,17 @@ Takoyaki::Takoyaki()
 	iTimeLocation       = program.GetUniformLocation("iTime");
 	iResolutionLocation = program.GetUniformLocation("iResolution");
 
-	int frame           = 0;
+	int frame = 0;
 
 	while (!mWindow.ShouldClose()) {
 		++frame;
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
 
-		double time = glfwGetTime();
+		float time      = (float)glfwGetTime();
+		glm::ivec2 size = mWindow.GetFramebufferSize();
 
 		mEditor.Update();
-
-		glm::ivec2 size = mWindow.GetFramebufferSize();
 
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
@@ -572,7 +573,7 @@ Takoyaki::Takoyaki()
 
 		cmds.Push<ty::Commands::UseProgram>(program.mProgram);
 		cmds.Push<ty::Commands::Uniform>(iFrameLocation, frame);
-		cmds.Push<ty::Commands::Uniform>(iTimeLocation, (GLfloat)time);
+		cmds.Push<ty::Commands::Uniform>(iTimeLocation, time);
 		cmds.Push<ty::Commands::Uniform>(iResolutionLocation, glm::vec2(size.x, size.y));
 
 		cmds.Push<ty::Commands::BindVertexArray>(vertexArrayName);
@@ -588,5 +589,13 @@ Takoyaki::Takoyaki()
 }
 
 Takoyaki::~Takoyaki() {}
+
+void Takoyaki::OnInput(const KeyInput& input) {
+	mEditor.OnInput(input);
+}
+
+void Takoyaki::OnFramebufferSize(const glm::ivec2& size) {
+	mEditor.OnFramebufferSize(size);
+}
 
 }  // namespace ty
