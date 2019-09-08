@@ -7,6 +7,7 @@ include("cmake/compiler_features.cmake")
 include("cmake/compiler_warnings.cmake")
 include("cmake/cotire.cmake")
 include("cmake/glfw.cmake")
+include("cmake/glm.cmake")
 include("cmake/thirdparty.cmake")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

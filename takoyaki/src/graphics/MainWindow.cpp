@@ -1,15 +1,6 @@
-#include "Window.h"
+#include "MainWindow.h"
 
 namespace {
-void WindowInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	auto userWindow = static_cast<ty::Window*>(glfwGetWindowUserPointer(window));
-	if (userWindow) {
-		userWindow->InputCallback(key, scancode, action, mods);
-	} else {
-		throw std::runtime_error("Failed to process window input");
-	}
-}
-
 void SetupImGuiStyle() {
 	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
 
@@ -89,14 +80,14 @@ void SetupImGuiStyle() {
 }
 
 static void ErrorCallback(int error, const char* description) {
-	fprintf(stderr, "Error: %s\n", description);
+	std::cout << "Error[" << error << "]: " << description << std::endl;
 }
 
 }  // namespace
 
 namespace ty {
 
-Window::Window(int width, int height, const char* title) {
+MainWindow::MainWindow(int width, int height, const char* title) {
 	glfwSetErrorCallback(::ErrorCallback);
 	if (!glfwInit()) {
 		throw std::runtime_error("Failed to initialize GLFW!");
@@ -111,7 +102,8 @@ Window::Window(int width, int height, const char* title) {
 
 	glfwSetWindowUserPointer(mWindow, this);
 
-	glfwSetKeyCallback(mWindow, ::WindowInputCallback);
+	glfwSetKeyCallback(mWindow, WindowInputCallback);
+	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
 
 	glfwMakeContextCurrent(mWindow);
 	gladLoadGL();
@@ -125,7 +117,7 @@ Window::Window(int width, int height, const char* title) {
 	::SetupImGuiStyle();
 }
 
-Window::~Window() {
+MainWindow::~MainWindow() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -134,26 +126,30 @@ Window::~Window() {
 	glfwTerminate();
 }
 
-bool Window::ShouldClose() const {
+bool MainWindow::ShouldClose() const {
 	return glfwWindowShouldClose(mWindow);
 }
 
-void Window::RequestClose() {
+void MainWindow::RequestClose() {
 	glfwSetWindowShouldClose(mWindow, GLFW_TRUE);
 }
 
-void Window::InputCallback(int key, int scancode, int action, int mods) {
+void MainWindow::SwapBuffers() {
+	glfwSwapBuffers(mWindow);
+}
+
+void MainWindow::PollEvents() {
+	glfwPollEvents();
+}
+
+void MainWindow::OnInput(int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		RequestClose();
 	}
 }
 
-void Window::SwapBuffers() {
-	glfwSwapBuffers(mWindow);
-}
-
-void Window::PollEvents() {
-	glfwPollEvents();
+void MainWindow::OnFramebufferSize(int width, int height) {
+	std::cout << "Screen resized to: " << width << ", " << height << std::endl;
 }
 
 }  // namespace ty

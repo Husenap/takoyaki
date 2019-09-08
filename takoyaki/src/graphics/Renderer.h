@@ -1,6 +1,6 @@
 #pragma once
 
-#include "commands.h"
+#include "gl/RenderCommand.h"
 
 namespace ty {
 
@@ -8,10 +8,10 @@ class Renderer {
 public:
 	void NewFrame();
 	void ProcessCommands();
-	CommandList<Command>& Commands();
+	RenderCommandList<RenderCommand>& Commands();
 
 private:
-	CommandList<Command> mCommandList;
+	RenderCommandList<RenderCommand> mCommandList;
 };
 
 }  // namespace ty
