@@ -535,8 +535,7 @@ void main(){
 }  // namespace
 
 int main() {
-	std::string cwd = std::experimental::filesystem::current_path().string() + "/";
-	const char* fileToOpen = tinyfd_openFileDialog("Open Shader File", cwd.c_str(), 0, nullptr, nullptr, 0);
+	const char* fileToOpen = tinyfd_openFileDialog("Open Shader File", "", 0, nullptr, nullptr, 0);
 	if (fileToOpen) {
 		tinyfd_messageBox("File to Open", fileToOpen, "ok", "info", 1);
 	}
