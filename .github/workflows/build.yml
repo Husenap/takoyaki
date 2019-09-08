@@ -30,12 +30,12 @@ jobs:
   build-ubuntu:
     name: Build-Ubuntu
     runs-on: ubuntu-latest
-    env:
-      CXX: /usr/bin/g++-8
-      CC: /usr/bin/gcc-8
 
     steps:
     - uses: actions/checkout@v1
+      env:
+        CXX: /usr/bin/g++-8
+        CC: /usr/bin/gcc-8
     - name: Install Packages
       run: sudo apt-get install xorg-dev libglu1-mesa-dev g++-8
     - name: Update submodules
