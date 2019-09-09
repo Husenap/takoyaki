@@ -1,8 +1,8 @@
 #include "MainWindow.h"
 
 namespace {
-void SetupImGuiStyle() {
-	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
+void SetupImGuiStyle(float scaling) {
+	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f * scaling);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImVec4* colors    = style.Colors;
@@ -77,6 +77,8 @@ void SetupImGuiStyle() {
 
 	style.TabBorderSize = 0.f;
 	style.TabRounding   = 3.f;
+
+	style.ScaleAllSizes(scaling);
 }
 
 static void ErrorCallback(int error, const char* description) {
@@ -135,7 +137,9 @@ void MainWindow::InitImGui() {
 	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
 
-	::SetupImGuiStyle();
+	float xS, yS;
+	glfwGetWindowContentScale(mWindow, &xS, &yS);
+	::SetupImGuiStyle(xS);
 }
 
 bool MainWindow::ShouldClose() const {
