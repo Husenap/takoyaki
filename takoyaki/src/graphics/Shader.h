@@ -15,14 +15,19 @@ public:
 		if (!success) {
 			char buffer[512];
 			glGetShaderInfoLog(mShader, GL_COMPILE_STATUS, nullptr, buffer);
-			throw std::runtime_error(buffer);
+			try {
+				throw std::runtime_error(buffer);
+			} catch (const std::runtime_error& e) {
+				std::cout << e.what() << std::endl;
+			}
 		}
 	}
+	~Shader() { glDeleteShader(mShader); }
 
 	GLuint mShader;
 };
 
-using VertexShader = Shader<GL_VERTEX_SHADER>;
+using VertexShader   = Shader<GL_VERTEX_SHADER>;
 using FragmentShader = Shader<GL_FRAGMENT_SHADER>;
 
 }  // namespace ty

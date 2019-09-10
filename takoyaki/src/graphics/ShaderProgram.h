@@ -15,21 +15,22 @@ public:
 		if (!success) {
 			char buffer[512];
 			glGetProgramInfoLog(mProgram, 512, NULL, buffer);
-			throw std::runtime_error(buffer);
+			try {
+				throw std::runtime_error(buffer);
+			} catch (const std::runtime_error& e) {
+				std::cout << e.what() << std::endl;
+			}
 		}
 	}
+	~ShaderProgram() { glDeleteProgram(mProgram); }
 
-	GLint GetAttributeLocation(std::string_view name) {
-		return glGetAttribLocation(mProgram, name.data());
-	}
-	GLint GetUniformLocation(std::string_view name) {
-		return glGetUniformLocation(mProgram, name.data());
-	}
+	GLint GetAttributeLocation(std::string_view name) { return glGetAttribLocation(mProgram, name.data()); }
+	GLint GetUniformLocation(std::string_view name) { return glGetUniformLocation(mProgram, name.data()); }
 
 	GLuint mProgram;
 
 private:
-	template<typename T>
+	template <typename T>
 	void AttachShader(T&& shader) {
 		glAttachShader(mProgram, shader.mShader);
 	}
