@@ -7,6 +7,7 @@
 #include <vector>
 #include <fstream>
 #include <functional>
+#include <memory>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
