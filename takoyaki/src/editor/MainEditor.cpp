@@ -22,23 +22,45 @@ void MainEditor::Update() {
 	}
 
 	if (mShowWorkspace) {
-		DrawWorkspace();
+		DrawUniformList();
 	}
 }
 
-void MainEditor::DrawWorkspace() {
-	ImGuiWindowFlags workspaceFlags(ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
-	                                ImGuiWindowFlags_NoBringToFrontOnFocus);
-	if (ImGui::Begin("Workspace", &mShowWorkspace, workspaceFlags)) {
-		ImGui::SetWindowPos({0.f, mMenuBarSize.y}, ImGuiCond_Always);
-		ImGui::SetWindowSize({mMenuBarSize.x, mFramebufferSize.y - mMenuBarSize.y}, ImGuiCond_Always);
+void MainEditor::DrawUniformList() {
+	static int item = 0;
+	static char nameBuffer[64];
 
-		for (int i = 0; i < 5; ++i) {
-			std::string str = "Vec3##" + std::to_string(i);
-			if (ImGui::Begin(str.c_str())) {
+	if (ImGui::Begin("Uniforms", &mShowWorkspace)) {
+		if (ImGui::Button("Add Uniform")) {
+			if (!ImGui::IsPopupOpen("Add New Uniform")) {
+				memset(nameBuffer, 0, 64);
+				item = 0;
+				ImGui::OpenPopup("Add New Uniform");
 			}
-			ImGui::End();
 		}
+		for (const auto& uniform : mUniforms) {
+			ImGui::Text(uniform.c_str());
+		}
+	}
+	if (ImGui::BeginPopupModal("Add New Uniform", nullptr, ImGuiWindowFlags_NoResize)) {
+		ImGui::SetWindowSize({0.f, 0.f});
+		ImGui::Combo("Type", &item, "float\0vec2\0vec3\0vec4\0\0");
+		ImGui::InputText("Variable Name", nameBuffer, 64);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.f, 0.f));
+		ImGui::Columns(2, nullptr, false);
+		if (ImGui::Button("Create", {-FLT_EPSILON, 0.0})) {
+			mUniforms.push_back(nameBuffer);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::NextColumn();
+		if (ImGui::Button("Cancel", {-FLT_EPSILON, 0.0})) {
+			ImGui::CloseCurrentPopup();
+		}
+        ImGui::Columns(1);
+		ImGui::PopStyleVar();
+
+		ImGui::EndPopup();
 	}
 	ImGui::End();
 }
@@ -52,5 +74,7 @@ void MainEditor::OnInput(const KeyInput& input) {
 void MainEditor::OnFramebufferSize(const glm::ivec2& size) {
 	mFramebufferSize = size;
 }
+
+void MainEditor::OnContentScale(const glm::vec2& scale) {}
 
 }  // namespace ty

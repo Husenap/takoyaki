@@ -20,11 +20,20 @@ public:
 
 	virtual void OnInput(const KeyInput& input) override;
 	virtual void OnFramebufferSize(const glm::ivec2& size) override;
+	virtual void OnContentScale(const glm::vec2& size) override;
 
 private:
 	void InitCallbacks();
 	void InitGL();
 	void InitImGui();
+	void SetupImGuiStyle();
+
+	struct FontData {
+		float mScale;
+		ImFont* mFont;
+	};
+	std::vector<FontData> mFonts;
+	void UpdateScales();
 };
 
 }  // namespace ty

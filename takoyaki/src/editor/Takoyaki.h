@@ -14,6 +14,7 @@ public:
 private:
 	void OnInput(const KeyInput& input);
 	void OnFramebufferSize(const glm::ivec2& size);
+	void OnContentScale(const glm::vec2& scale);
 
 	Renderer mRenderer;
 	MainWindow mWindow;
