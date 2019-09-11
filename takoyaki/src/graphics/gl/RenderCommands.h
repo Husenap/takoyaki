@@ -139,7 +139,7 @@ class VertexAttribPointer {
 	const LocationHolder mLocation;
 	const GLint mSize;
 	const GLenum mType;
-	const GLboolean mNormalized;
+	const int mNormalized;
 	const GLsizei mStride;
 	const GLvoid* mPointer;
 
@@ -147,7 +147,7 @@ public:
 	VertexAttribPointer(GLint location,
 	                    GLint size,
 	                    GLenum type,
-	                    GLboolean normalized,
+	                    int normalized,
 	                    GLsizei stride,
 	                    const GLvoid* pointer = nullptr)
 	    : mLocation(Locations::FixedLocation(location))
@@ -161,7 +161,7 @@ public:
 	                    std::string_view name,
 	                    GLint size,
 	                    GLenum type,
-	                    GLboolean normalized,
+	                    int normalized,
 	                    GLsizei stride,
 	                    const GLvoid* pointer = nullptr)
 	    : mLocation(Locations::AttributeLocation(program, name))
@@ -174,7 +174,7 @@ public:
 
 	void Apply() {
 		glVertexAttribPointer(
-		    std::visit(Locations::GetLocation{}, mLocation), mSize, mType, mNormalized, mStride, mPointer);
+		    std::visit(Locations::GetLocation{}, mLocation), mSize, mType, (unsigned char)mNormalized, mStride, mPointer);
 	}
 };
 

@@ -23,7 +23,10 @@ if (MSVC)
         /w14826					# Conversion from 'type1' to 'type_2' is sign-extended. This may cause unexpected runtime behavior.
         /w14905					# wide string literal cast to 'LPSTR'
         /w14906					# string literal cast to 'LPWSTR'
-        /w14928)                # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
+        /w14928
+        
+    	/wd4201					# nonstandard extension used : nameless struct/union
+        )
 else()
     target_compile_options(compiler-warnings INTERFACE 
         -Wall                   # reasonable and standard

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "components/UniformsMenu.h"
+
 namespace ty {
 
 class MainEditor {
@@ -9,19 +11,25 @@ public:
 
 	void Update();
 
-	void DrawUniformList();
-
 	void OnInput(const KeyInput& input);
 	void OnFramebufferSize(const glm::ivec2& size);
 	void OnContentScale(const glm::vec2& scale);
 
+	void ReportError(const std::string& message);
+
+void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+
 private:
-	bool mShowDemoWindow = true;
-	bool mShowWorkspace = true;
+	void DisplayErrors();
+
+	bool mShowDemoWindow = false;
 
 	ImVec2 mMenuBarSize;
 	glm::ivec2 mFramebufferSize;
-	std::vector<std::string> mUniforms;
+	glm::vec2 mContentScale;
+	std::vector<std::string> mErrors;
+
+	UniformsMenu mUniformsMenu;
 };
 
 }  // namespace ty

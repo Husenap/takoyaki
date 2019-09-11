@@ -10,6 +10,9 @@ public:
 	using ContentScaleCallbackType    = std::function<void(const glm::vec2&)>;
 
 public:
+	BaseWindow() {}
+	virtual ~BaseWindow() {}
+
 	static void WindowInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 		auto userWindow = reinterpret_cast<DERIVED_TYPE*>(glfwGetWindowUserPointer(window));
 		if (userWindow) {
@@ -60,7 +63,7 @@ public:
 	void AddContentScaleListener(ContentScaleCallbackType callback) {
 		if (callback) {
 			mContentScaleListeners.emplace_back(callback);
-			callback(mFramebufferSize);
+			callback(mContentScale);
 		}
 	}
 

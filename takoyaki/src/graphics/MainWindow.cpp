@@ -17,7 +17,7 @@ MainWindow::MainWindow(int width, int height, const char* title) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	mWindow = glfwCreateWindow(width, height, "TakoYaki", NULL, NULL);
+	mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (!mWindow) {
 		throw std::runtime_error("Failed to create a GLFW window!");
 	}
@@ -67,12 +67,12 @@ void MainWindow::SetupImGuiStyle() {
 	for (float f = 1.0f; f <= 3.f; ++f) {
 		FontData data;
 		data.mScale = f;
-		data.mFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f * f);
+		data.mFont  = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f * f);
 		mFonts.emplace_back(data);
 	}
 
-	ImGuiStyle& style = ImGui::GetStyle();
-	ImVec4* colors    = style.Colors;
+	ImGuiStyle& style                      = ImGui::GetStyle();
+	ImVec4* colors                         = style.Colors;
 	colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled]          = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
 	colors[ImGuiCol_ChildBg]               = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
@@ -124,9 +124,10 @@ void MainWindow::SetupImGuiStyle() {
 
 	style.PopupRounding = 3.f;
 
-	style.WindowPadding = glm::vec2(4.f, 4.f);
-	style.FramePadding  = glm::vec2(6.f, 4.f);
-	style.ItemSpacing   = glm::vec2(6.f, 2.f);
+	style.WindowPadding    = glm::vec2(4.f, 4.f);
+	style.FramePadding     = glm::vec2(6.f, 4.f);
+	style.ItemSpacing      = glm::vec2(3.f, 3.f);
+	style.ItemInnerSpacing = glm::vec2(3.f, 3.f);
 
 	style.ScrollbarSize = 18.f;
 
@@ -144,7 +145,6 @@ void MainWindow::SetupImGuiStyle() {
 	style.TabBorderSize = 0.f;
 	style.TabRounding   = 3.f;
 }
-
 
 bool MainWindow::ShouldClose() const {
 	return glfwWindowShouldClose(mWindow);
@@ -177,7 +177,7 @@ void MainWindow::OnFramebufferSize(const glm::ivec2& size) {
 }
 
 void MainWindow::OnContentScale(const glm::vec2& size) {
-	ImGui::GetStyle().ScaleAllSizes(1.f/mContentScale.x);
+	ImGui::GetStyle().ScaleAllSizes(1.f / mContentScale.x);
 
 	mContentScale = size;
 
@@ -188,10 +188,10 @@ void MainWindow::UpdateScales() {
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(mContentScale.x);
 
-	ImGui::GetIO().FontDefault = nullptr;
+	ImGui::GetIO().FontDefault     = nullptr;
 	ImGui::GetIO().FontGlobalScale = 1.f;
 	for (const auto& font : mFonts) {
-		ImGui::GetIO().FontDefault = font.mFont;
+		ImGui::GetIO().FontDefault     = font.mFont;
 		ImGui::GetIO().FontGlobalScale = mContentScale.x / font.mScale;
 
 		if (font.mScale >= mContentScale.x) {

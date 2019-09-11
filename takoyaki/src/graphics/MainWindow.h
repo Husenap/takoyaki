@@ -7,7 +7,7 @@ namespace ty {
 class MainWindow : public BaseWindow<MainWindow> {
 public:
 	MainWindow(int width, int height, const char* title);
-	~MainWindow();
+	virtual ~MainWindow();
 
 	bool ShouldClose() const;
 	void RequestClose();

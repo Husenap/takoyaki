@@ -2,7 +2,6 @@
 
 #include "../graphics/MainWindow.h"
 #include "../graphics/Renderer.h"
-#include "../graphics/ShaderProgram.h"
 #include "MainEditor.h"
 
 namespace ty {

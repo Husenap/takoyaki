@@ -40,6 +40,7 @@ Takoyaki::Takoyaki()
     , mShaderFileToLoad("assets/shaders/main_shader.glsl") {
 	mWindow.AddInputListener([this](const KeyInput& input) { OnInput(input); });
 	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
+	mWindow.AddContentScaleListener([this](const glm::vec2& scale) { OnContentScale(scale); });
 
 	GLuint vertexArrayName;
 
@@ -48,19 +49,7 @@ Takoyaki::Takoyaki()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glGenVertexArrays(1, &vertexArrayName);
 
-	std::ifstream shaderFile("assets/shaders/main_shader.glsl");
-	std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
-	std::string shaderCode = fragmentShaderCodeBegin;
-	shaderCode += shaderFileCode;
-	shaderCode += fragmentShaderCodeEnd;
-	ty::VertexShader vShader(vertexShaderCode);
-	ty::FragmentShader fShader(shaderCode.c_str());
-	mProgram = std::make_unique<ShaderProgram>(vShader, fShader);
-
-	vPosLocation        = mProgram->GetAttributeLocation("vPos");
-	iFrameLocation      = mProgram->GetUniformLocation("iTime");
-	iTimeLocation       = mProgram->GetUniformLocation("iTime");
-	iResolutionLocation = mProgram->GetUniformLocation("iResolution");
+	ReloadShader();
 
 	int frame = 0;
 
@@ -77,20 +66,21 @@ Takoyaki::Takoyaki()
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
 
-		cmds.Push<ty::Commands::Viewport>(0, 0, size.x, size.y);
-		cmds.Push<ty::Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
-		cmds.Push<ty::Commands::Clear>(GL_COLOR_BUFFER_BIT);
+		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
+		cmds.Push<Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
+		cmds.Push<Commands::Clear>(GL_COLOR_BUFFER_BIT);
 
-		cmds.Push<ty::Commands::UseProgram>(mProgram->mProgram);
-		cmds.Push<ty::Commands::Uniform>(iFrameLocation, frame);
-		cmds.Push<ty::Commands::Uniform>(iTimeLocation, time);
-		cmds.Push<ty::Commands::Uniform>(iResolutionLocation, glm::vec2(size.x, size.y));
+		cmds.Push<Commands::UseProgram>(mProgram->mProgram);
+		cmds.Push<Commands::Uniform>(iFrameLocation, frame);
+		cmds.Push<Commands::Uniform>(iTimeLocation, time);
+		cmds.Push<Commands::Uniform>(iResolutionLocation, glm::vec2(size.x, size.y));
+		mEditor.RegisterCommands(cmds, mProgram);
 
-		cmds.Push<ty::Commands::BindVertexArray>(vertexArrayName);
-		cmds.Push<ty::Commands::VertexAttribPointer>(
+		cmds.Push<Commands::BindVertexArray>(vertexArrayName);
+		cmds.Push<Commands::VertexAttribPointer>(
 		    vPosLocation, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
-		cmds.Push<ty::Commands::EnableVertexAttribArray>(vPosLocation);
-		cmds.Push<ty::Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+		cmds.Push<Commands::EnableVertexAttribArray>(vPosLocation);
+		cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
 
 		mRenderer.ProcessCommands();
 
@@ -124,25 +114,29 @@ void Takoyaki::OnContentScale(const glm::vec2& scale) {
 }
 
 void Takoyaki::ReloadShader() {
-	try {
-		mProgram = nullptr;
+	mProgram = nullptr;
 
-		std::ifstream shaderFile(mShaderFileToLoad);
-		std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
-		shaderFile.close();
-		std::string shaderCode = fragmentShaderCodeBegin;
-		shaderCode += shaderFileCode;
-		shaderCode += fragmentShaderCodeEnd;
-		ty::VertexShader vShader(vertexShaderCode);
-		ty::FragmentShader fShader(shaderCode.c_str());
-		mProgram = std::make_unique<ShaderProgram>(vShader, fShader);
+	std::ifstream shaderFile(mShaderFileToLoad);
+	std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
+	shaderFile.close();
+	std::string shaderCode = fragmentShaderCodeBegin;
+	shaderCode += shaderFileCode;
+	shaderCode += fragmentShaderCodeEnd;
 
-		vPosLocation        = mProgram->GetAttributeLocation("vPos");
-		iFrameLocation      = mProgram->GetUniformLocation("iTime");
-		iTimeLocation       = mProgram->GetUniformLocation("iTime");
-		iResolutionLocation = mProgram->GetUniformLocation("iResolution");
-	} catch (...) {
+	VertexShader vShader(vertexShaderCode);
+	FragmentShader fShader(shaderCode.c_str());
+
+	mProgram = std::make_unique<ShaderProgram>(vShader, fShader);
+
+	auto error = mProgram->GetError();
+	if (error.has_value()) {
+		mEditor.ReportError(error.value());
 	}
+
+	vPosLocation        = mProgram->GetAttributeLocation("vPos");
+	iFrameLocation      = mProgram->GetUniformLocation("iTime");
+	iTimeLocation       = mProgram->GetUniformLocation("iTime");
+	iResolutionLocation = mProgram->GetUniformLocation("iResolution");
 }
 
 }  // namespace ty

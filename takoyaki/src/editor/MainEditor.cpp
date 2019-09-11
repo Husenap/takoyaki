@@ -2,6 +2,8 @@
 
 namespace ty {
 
+const char* ErrorPopupName         = "Error##Popup";
+
 void MainEditor::Update() {
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
@@ -21,53 +23,19 @@ void MainEditor::Update() {
 		ImGui::EndMainMenuBar();
 	}
 
-	if (mShowWorkspace) {
-		DrawUniformList();
+	mUniformsMenu.Update();
+
+	if (!mErrors.empty()) {
+		DisplayErrors();
 	}
-}
-
-void MainEditor::DrawUniformList() {
-	static int item = 0;
-	static char nameBuffer[64];
-
-	if (ImGui::Begin("Uniforms", &mShowWorkspace)) {
-		if (ImGui::Button("Add Uniform")) {
-			if (!ImGui::IsPopupOpen("Add New Uniform")) {
-				memset(nameBuffer, 0, 64);
-				item = 0;
-				ImGui::OpenPopup("Add New Uniform");
-			}
-		}
-		for (const auto& uniform : mUniforms) {
-			ImGui::Text(uniform.c_str());
-		}
-	}
-	if (ImGui::BeginPopupModal("Add New Uniform", nullptr, ImGuiWindowFlags_NoResize)) {
-		ImGui::SetWindowSize({0.f, 0.f});
-		ImGui::Combo("Type", &item, "float\0vec2\0vec3\0vec4\0\0");
-		ImGui::InputText("Variable Name", nameBuffer, 64);
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.f, 0.f));
-		ImGui::Columns(2, nullptr, false);
-		if (ImGui::Button("Create", {-FLT_EPSILON, 0.0})) {
-			mUniforms.push_back(nameBuffer);
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::NextColumn();
-		if (ImGui::Button("Cancel", {-FLT_EPSILON, 0.0})) {
-			ImGui::CloseCurrentPopup();
-		}
-        ImGui::Columns(1);
-		ImGui::PopStyleVar();
-
-		ImGui::EndPopup();
-	}
-	ImGui::End();
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
 	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {
-		mShowWorkspace = !mShowWorkspace;
+		mUniformsMenu.ToggleVisibility();
+	}
+	if (input.key == GLFW_KEY_F4 && input.action == GLFW_PRESS) {
+		mShowDemoWindow = !mShowDemoWindow;
 	}
 }
 
@@ -75,6 +43,32 @@ void MainEditor::OnFramebufferSize(const glm::ivec2& size) {
 	mFramebufferSize = size;
 }
 
-void MainEditor::OnContentScale(const glm::vec2& scale) {}
+void MainEditor::OnContentScale(const glm::vec2& scale) {
+	mContentScale = scale;
+}
+
+void MainEditor::ReportError(const std::string& message) {
+	mErrors.emplace_back(message);
+}
+
+void MainEditor::DisplayErrors() {
+	if (!ImGui::IsPopupOpen(ErrorPopupName)) {
+		ImGui::OpenPopup(ErrorPopupName);
+	}
+	if (ImGui::BeginPopupModal(ErrorPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
+		ImGui::SetWindowSize({300.f*mContentScale.x, 0.f});
+		ImGui::TextWrapped(mErrors.front().c_str());
+		if (ImGui::Button("Ok", {-FLT_EPSILON, 0.0})) {
+			mErrors.erase(mErrors.begin());
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+}
+
+void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
+	mUniformsMenu.RegisterCommands(cmds, program);
+}
 
 }  // namespace ty
