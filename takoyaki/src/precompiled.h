@@ -10,6 +10,7 @@
 #include <functional>
 #include <optional>
 #include <algorithm>
+#include <memory>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
