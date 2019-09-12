@@ -36,7 +36,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 
     vec3 col = vec3(0.0);
     
-    col += voronoi(uv*5.+hejsan+halloj);
+    col += voronoi(uv*5.);
 
     fragColor = vec4(col, 1.0);
 }

@@ -1,6 +1,10 @@
 set(target_name "takoyaki")
 
 set(graphics_gl_files
+    "src/graphics/gl/RenderTarget.h"
+    "src/graphics/gl/RenderTarget.cpp"
+    "src/graphics/gl/Shader.h"
+    "src/graphics/gl/ShaderProgram.h"
     "src/graphics/gl/RenderCommands.h"
     "src/graphics/gl/RenderCommand.h")
 
@@ -9,9 +13,7 @@ set(graphics_files
     "src/graphics/Renderer.cpp"
     "src/graphics/BaseWindow.h"
     "src/graphics/MainWindow.h"
-    "src/graphics/MainWindow.cpp"
-    "src/graphics/Shader.h"
-    "src/graphics/ShaderProgram.h")
+    "src/graphics/MainWindow.cpp")
 
 set(editor_files
     "src/editor/MainEditor.h"
@@ -25,6 +27,8 @@ set(editor_components_files
     "src/editor/components/UniformItem.h")
 
 set(util_files
+    "src/util/FileWatcher.h"
+    "src/util/FileWatcher.cpp"
     "src/util/KeyInput.h"
     "src/util/glmvecToImVec.h"
     "src/util/VariantPolyfill.h")

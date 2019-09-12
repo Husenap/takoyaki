@@ -11,6 +11,10 @@
 #include <optional>
 #include <algorithm>
 #include <memory>
+#include <filesystem>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -30,6 +34,6 @@
 #include "util/KeyInput.h"
 #include "util/VariantPolyfill.h"
 
-#include "graphics/Shader.h"
-#include "graphics/ShaderProgram.h"
+#include "graphics/gl/Shader.h"
+#include "graphics/gl/ShaderProgram.h"
 #include "graphics/gl/RenderCommand.h"

@@ -1,0 +1,51 @@
+#include "FileWatcher.h"
+
+namespace ty {
+void FileWatcher::StartThread() {
+	mThread = std::thread([&]() { Job(); });
+}
+void FileWatcher::StopThread() {
+	mIsRunning = false;
+	if (mThread.joinable()) {
+		mThread.join();
+	}
+}
+void FileWatcher::Job() {
+	mIsRunning = true;
+
+	while (mIsRunning) {
+		for (auto& [file, data] : mFiles) {
+			auto writeTime = std::filesystem::last_write_time(file);
+			if (data.mLastWriteTime != writeTime) {
+				data.mLastWriteTime = writeTime;
+				std::lock_guard<std::mutex> lock(mMutex);
+				mMarkedFiles.push_back(file);
+			}
+		}
+		std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(100));
+	}
+}
+void FileWatcher::Flush() {
+	if (mMarkedFiles.empty()) return;
+
+	std::lock_guard<std::mutex> lock(mMutex);
+
+	for (const auto& file : mMarkedFiles) {
+		auto data = mFiles.find(file);
+		if (data != mFiles.end()) {
+			data->second.mCallback(file);
+		}
+	}
+	mMarkedFiles.clear();
+}
+void FileWatcher::Watch(const std::string& file, FileChangeCallback callback) {
+	FileData data;
+	data.mFilePath      = file;
+	data.mCallback      = callback;
+	data.mLastWriteTime = std::filesystem::last_write_time(file);
+	mFiles[file]        = data;
+}
+void FileWatcher::Clear() {
+	mFiles.clear();
+}
+}  // namespace ty
