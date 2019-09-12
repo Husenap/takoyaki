@@ -1,12 +1,78 @@
 #include "MainWindow.h"
 
 namespace {
-void SetupImGuiStyle() {
-	ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
+static void ErrorCallback(int error, const char* description) {
+	std::cout << "Error[" << error << "]: " << description << std::endl;
+}
 
-	ImGuiStyle& style = ImGui::GetStyle();
-	ImVec4* colors    = style.Colors;
+}  // namespace
 
+namespace ty {
+
+MainWindow::MainWindow(int width, int height, const char* title) {
+	glfwSetErrorCallback(::ErrorCallback);
+	if (!glfwInit()) {
+		throw std::runtime_error("Failed to initialize GLFW!");
+	}
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
+	if (!mWindow) {
+		throw std::runtime_error("Failed to create a GLFW window!");
+	}
+
+	glfwGetFramebufferSize(mWindow, &mFramebufferSize.x, &mFramebufferSize.y);
+	glfwGetWindowContentScale(mWindow, &mContentScale.x, &mContentScale.y);
+
+	InitCallbacks();
+	InitGL();
+	InitImGui();
+}
+
+MainWindow::~MainWindow() {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(mWindow);
+	glfwTerminate();
+}
+
+void MainWindow::InitCallbacks() {
+	glfwSetWindowUserPointer(mWindow, this);
+
+	glfwSetKeyCallback(mWindow, WindowInputCallback);
+	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
+	glfwSetWindowContentScaleCallback(mWindow, WindowContentScaleCallback);
+}
+
+void MainWindow::InitGL() {
+	glfwMakeContextCurrent(mWindow);
+	gladLoadGL();
+	glfwSwapInterval(1);
+}
+
+void MainWindow::InitImGui() {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+	ImGui_ImplOpenGL3_Init("#version 450");
+
+	SetupImGuiStyle();
+	UpdateScales();
+}
+
+void MainWindow::SetupImGuiStyle() {
+	for (float f = 1.0f; f <= 3.f; ++f) {
+		FontData data;
+		data.mScale = f;
+		data.mFont  = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f * f);
+		mFonts.emplace_back(data);
+	}
+
+	ImGuiStyle& style                      = ImGui::GetStyle();
+	ImVec4* colors                         = style.Colors;
 	colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled]          = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
 	colors[ImGuiCol_ChildBg]               = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
@@ -58,72 +124,26 @@ void SetupImGuiStyle() {
 
 	style.PopupRounding = 3.f;
 
-	style.WindowPadding = ImVec2(4.f, 4.f);
-	style.FramePadding  = ImVec2(6.f, 4.f);
-	style.ItemSpacing   = ImVec2(6.f, 2.f);
+	style.WindowPadding    = glm::vec2(4.f, 4.f);
+	style.FramePadding     = glm::vec2(6.f, 4.f);
+	style.ItemSpacing      = glm::vec2(3.f, 3.f);
+	style.ItemInnerSpacing = glm::vec2(3.f, 3.f);
 
 	style.ScrollbarSize = 18.f;
 
-	style.WindowBorderSize = 1.f;
-	style.ChildBorderSize  = 1.f;
+	style.WindowBorderSize = 0.f;
+	style.ChildBorderSize  = 0.f;
 	style.PopupBorderSize  = 1.f;
 	style.FrameBorderSize  = 0.f;
 
-	style.WindowRounding    = 3.f;
-	style.ChildRounding     = 3.f;
-	style.FrameRounding     = 3.f;
+	style.WindowRounding    = 2.f;
+	style.ChildRounding     = 2.f;
+	style.FrameRounding     = 2.f;
 	style.ScrollbarRounding = 2.f;
 	style.GrabRounding      = 3.f;
 
 	style.TabBorderSize = 0.f;
 	style.TabRounding   = 3.f;
-}
-
-static void ErrorCallback(int error, const char* description) {
-	std::cout << "Error[" << error << "]: " << description << std::endl;
-}
-
-}  // namespace
-
-namespace ty {
-
-MainWindow::MainWindow(int width, int height, const char* title) {
-	glfwSetErrorCallback(::ErrorCallback);
-	if (!glfwInit()) {
-		throw std::runtime_error("Failed to initialize GLFW!");
-	}
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	mWindow = glfwCreateWindow(800, 600, "TakoYaki", NULL, NULL);
-	if (!mWindow) {
-		throw std::runtime_error("Failed to create a GLFW window!");
-	}
-
-	glfwSetWindowUserPointer(mWindow, this);
-
-	glfwSetKeyCallback(mWindow, WindowInputCallback);
-	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
-
-	glfwMakeContextCurrent(mWindow);
-	gladLoadGL();
-	glfwSwapInterval(1);
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
-	ImGui_ImplOpenGL3_Init("#version 450");
-
-	::SetupImGuiStyle();
-}
-
-MainWindow::~MainWindow() {
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
-	glfwDestroyWindow(mWindow);
-	glfwTerminate();
 }
 
 bool MainWindow::ShouldClose() const {
@@ -142,14 +162,42 @@ void MainWindow::PollEvents() {
 	glfwPollEvents();
 }
 
-void MainWindow::OnInput(int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+const glm::ivec2& MainWindow::GetFramebufferSize() const {
+	return mFramebufferSize;
+}
+
+void MainWindow::OnInput(const KeyInput& input) {
+	if (input.key == GLFW_KEY_ESCAPE && input.action == GLFW_PRESS) {
 		RequestClose();
 	}
 }
 
-void MainWindow::OnFramebufferSize(int width, int height) {
-	std::cout << "Screen resized to: " << width << ", " << height << std::endl;
+void MainWindow::OnFramebufferSize(const glm::ivec2& size) {
+	mFramebufferSize = size;
+}
+
+void MainWindow::OnContentScale(const glm::vec2& size) {
+	ImGui::GetStyle().ScaleAllSizes(1.f / mContentScale.x);
+
+	mContentScale = size;
+
+	UpdateScales();
+}
+
+void MainWindow::UpdateScales() {
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.ScaleAllSizes(mContentScale.x);
+
+	ImGui::GetIO().FontDefault     = nullptr;
+	ImGui::GetIO().FontGlobalScale = 1.f;
+	for (const auto& font : mFonts) {
+		ImGui::GetIO().FontDefault     = font.mFont;
+		ImGui::GetIO().FontGlobalScale = mContentScale.x / font.mScale;
+
+		if (font.mScale >= mContentScale.x) {
+			break;
+		}
+	}
 }
 
 }  // namespace ty

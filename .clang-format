@@ -12,3 +12,4 @@ TabWidth: '4'
 UseTab: ForIndentation
 IndentPPDirectives: AfterHash
 AlignConsecutiveAssignments: true
+IndentCaseLabels: false
