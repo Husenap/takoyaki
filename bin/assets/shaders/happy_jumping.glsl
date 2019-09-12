@@ -17,9 +17,6 @@
 
 //------------------------------------------------------------------
 
-uniform vec3 iSunDirection;
-
-
 // http://iquilezles.org/www/articles/smin/smin.htm
 float smin( float a, float b, float k )
 {

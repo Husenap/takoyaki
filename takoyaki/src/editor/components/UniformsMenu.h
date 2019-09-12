@@ -14,8 +14,9 @@ public:
 	void HandleNewUniform();
 
 	void ToggleVisibility();
+	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
 
-void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+	std::string GetUniformDeclarations();
 
 private:
 	enum class UniformType : int { Float, Vec2, Vec3, Vec4 };

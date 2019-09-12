@@ -1,5 +1,3 @@
-uniform float hallo;
-
 vec2 N22(in vec2 p){
     vec3 a = fract(p.xyx*vec3(123.34, 234.34, 345.65));
     a += dot(a, a+34.45);
@@ -38,7 +36,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 
     vec3 col = vec3(0.0);
     
-    col += voronoi(uv*5.+hallo);
+    col += voronoi(uv*5.+hejsan+halloj);
 
     fragColor = vec4(col, 1.0);
 }

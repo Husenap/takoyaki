@@ -116,10 +116,12 @@ void Takoyaki::OnContentScale(const glm::vec2& scale) {
 void Takoyaki::ReloadShader() {
 	mProgram = nullptr;
 
+
 	std::ifstream shaderFile(mShaderFileToLoad);
 	std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
 	shaderFile.close();
 	std::string shaderCode = fragmentShaderCodeBegin;
+	shaderCode += mEditor.GetUniformsMenu().GetUniformDeclarations();
 	shaderCode += shaderFileCode;
 	shaderCode += fragmentShaderCodeEnd;
 
@@ -134,7 +136,7 @@ void Takoyaki::ReloadShader() {
 	}
 
 	vPosLocation        = mProgram->GetAttributeLocation("vPos");
-	iFrameLocation      = mProgram->GetUniformLocation("iTime");
+	iFrameLocation      = mProgram->GetUniformLocation("iFrame");
 	iTimeLocation       = mProgram->GetUniformLocation("iTime");
 	iResolutionLocation = mProgram->GetUniformLocation("iResolution");
 }

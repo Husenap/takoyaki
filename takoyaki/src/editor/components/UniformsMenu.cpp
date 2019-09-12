@@ -112,4 +112,18 @@ void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std:
 	}
 }
 
+std::string UniformsMenu::GetUniformDeclarations() {
+	std::string output = "";
+
+	for (const auto& uniform : mUniforms) {
+		output += "uniform ";
+		output += std::visit(GetUniformType{}, uniform.mItem);
+		output += " ";
+		output += uniform.mName;
+		output += ";\n";
+	}
+
+	return output;
+}
+
 }  // namespace ty

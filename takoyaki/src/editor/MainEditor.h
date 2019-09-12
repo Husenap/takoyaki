@@ -6,7 +6,7 @@ namespace ty {
 
 class MainEditor {
 public:
-	MainEditor() = default;
+	MainEditor()  = default;
 	~MainEditor() = default;
 
 	void Update();
@@ -17,7 +17,9 @@ public:
 
 	void ReportError(const std::string& message);
 
-void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+
+	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
 
 private:
 	void DisplayErrors();

@@ -25,4 +25,11 @@ struct UniformItemVec4 {
 
 using UniformItem = std::variant<UniformItemFloat, UniformItemVec2, UniformItemVec3, UniformItemVec4>;
 
+struct GetUniformType {
+	template <typename T>
+	std::string operator()(T& uniform) {
+		return uniform.type;
+	}
+};
+
 }  // namespace ty
