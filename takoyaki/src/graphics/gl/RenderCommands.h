@@ -197,9 +197,9 @@ public:
 };
 
 class DrawArrays {
-	GLenum mMode;
-	GLint mFirst;
-	GLsizei mCount;
+	const GLenum mMode;
+	const GLint mFirst;
+	const GLsizei mCount;
 
 public:
 	DrawArrays(GLenum mode, GLint first, GLsizei count)
@@ -226,8 +226,8 @@ class Uniform {
 	                          glm::mat2,
 	                          glm::mat3,
 	                          glm::mat4>;
-	LocationHolder mLocation;
-	Data mData;
+	const LocationHolder mLocation;
+	const Data mData;
 
 public:
 	Uniform(GLint location, Data&& data)
@@ -257,6 +257,16 @@ public:
 		           },
 		           mData);
 	}
+};
+
+class BindFramebuffer {
+	const GLuint mFramebufferName;
+
+public:
+	BindFramebuffer(GLuint framebufferName)
+	    : mFramebufferName(framebufferName) {}
+
+	void Apply() { glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferName); }
 };
 
 }  // namespace ty::Commands

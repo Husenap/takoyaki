@@ -2,7 +2,6 @@
 
 #include "../graphics/MainWindow.h"
 #include "../graphics/Renderer.h"
-#include "../util/FileWatcher.h"
 #include "MainEditor.h"
 
 namespace ty {
@@ -29,12 +28,16 @@ private:
 
 	GLuint mVertexArray;
 	std::unique_ptr<ShaderProgram> mProgram;
+	std::unique_ptr<ShaderProgram> mCopyProgram;
 	GLint mPosLoc;
 	GLint mFrameLoc;
 	GLint mTimeLoc;
 	GLint mResolutionLoc;
 
+	std::unique_ptr<RenderTarget> mRenderTarget;
+
 	std::string mShaderFileToLoad;
+	void CreateCopyProgram();
 };
 
 }  // namespace ty

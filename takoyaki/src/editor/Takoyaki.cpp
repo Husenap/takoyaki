@@ -40,6 +40,7 @@ Takoyaki::Takoyaki()
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
+	CreateCopyProgram();
 
 	mFileWatcher.Watch(mShaderFileToLoad, [this](auto&) { LoadShader(); });
 	LoadShader();
@@ -61,20 +62,30 @@ Takoyaki::Takoyaki()
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
 
+		cmds.Push<Commands::BindFramebuffer>(0);
 		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
+
 		cmds.Push<Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
 		cmds.Push<Commands::Clear>(GL_COLOR_BUFFER_BIT);
+
+		cmds.Push<Commands::BindFramebuffer>(mRenderTarget->GetFramebuffer());
+		cmds.Push<Commands::Viewport>(0, 0, mRenderTarget->GetSize().x, mRenderTarget->GetSize().y);
 
 		cmds.Push<Commands::UseProgram>(mProgram->mProgram);
 		cmds.Push<Commands::Uniform>(mFrameLoc, frame);
 		cmds.Push<Commands::Uniform>(mTimeLoc, time);
-		cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(size.x, size.y));
+		cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
 		mEditor.RegisterCommands(cmds, mProgram);
 
 		cmds.Push<Commands::BindVertexArray>(mVertexArray);
 		cmds.Push<Commands::VertexAttribPointer>(mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
 		cmds.Push<Commands::EnableVertexAttribArray>(mPosLoc);
 		cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+
+		cmds.Push<Commands::BindFramebuffer>(0);
+		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
+
+		ImGui::Image((void*)(intptr_t)mRenderTarget->GetRenderTexture(), mRenderTarget->GetSize(), {0, 1}, {1, 0});
 
 		mRenderer.ProcessCommands();
 
@@ -93,17 +104,7 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	GLuint mFramebuffer;
-	GLuint mRenderTarget;
-	glGenTextures(1, &mRenderTarget);
-
-	glBindTexture(GL_TEXTURE_2D, mRenderTarget);
-
-	auto size = mWindow.GetFramebufferSize();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	mRenderTarget = std::make_unique<RenderTarget>(mWindow.GetFramebufferSize());
 }
 
 
@@ -163,6 +164,9 @@ void Takoyaki::LoadShader() {
 	mFrameLoc      = mProgram->GetUniformLocation("iFrame");
 	mTimeLoc       = mProgram->GetUniformLocation("iTime");
 	mResolutionLoc = mProgram->GetUniformLocation("iResolution");
+}
+
+void Takoyaki::CreateCopyProgram() {
 }
 
 }  // namespace ty
