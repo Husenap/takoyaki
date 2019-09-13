@@ -115,10 +115,10 @@ void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std:
 void UniformsMenu::OpenFile(std::string_view file) {
 	mUniforms.clear();
 
-	std::ifstream f(std::string(file) + ".uniforms");
+	std::ifstream f(std::string(file) + ".uniforms", std::ios_base::binary);
 	if (!f.is_open()) return;
 
-	size_t numUniforms;
+	unsigned char numUniforms;
 	f.read((char*)&numUniforms, sizeof(numUniforms));
 
 	mUniforms.resize(numUniforms);
@@ -134,10 +134,10 @@ void UniformsMenu::OpenFile(std::string_view file) {
 }
 
 void UniformsMenu::SaveFile(std::string_view file) {
-	std::ofstream f(std::string(file) + ".uniforms");
+	std::ofstream f(std::string(file) + ".uniforms", std::ios_base::binary);
 	if (!f.is_open()) return;
 
-	size_t numUniforms = mUniforms.size();
+	unsigned char numUniforms = (unsigned char)mUniforms.size();
 	f.write((char*)&numUniforms, sizeof(numUniforms));
 	
 	for(const auto & uniform : mUniforms) {
@@ -163,6 +163,8 @@ std::string UniformsMenu::GetUniformDeclarations() {
 	}
 
 	return output;
+
+	0.99f;
 }
 
 }  // namespace ty

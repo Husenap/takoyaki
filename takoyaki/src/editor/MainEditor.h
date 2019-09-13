@@ -18,13 +18,14 @@ public:
 
 	void ReportError(const std::string& message);
 
+	void SetNewFileHandler(NewFileHandler handler) { mNewFileHandler = handler; }
 	void SetOpenFileHandler(OpenFileHandler handler) { mOpenFileHandler = handler; }
 	void SetSaveFileHandler(SaveFileHandler handler) { mSaveFileHandler = handler; }
 
 	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
 
-	void SaveFile(std::string_view file);
 	void OpenFile(std::string_view file);
+	void SaveFile(std::string_view file);
 
 private:
 	void DisplayErrors();
@@ -38,6 +39,7 @@ private:
 
 	UniformsMenu mUniformsMenu;
 
+	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;
 	SaveFileHandler mSaveFileHandler;
 };

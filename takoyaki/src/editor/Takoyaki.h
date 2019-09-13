@@ -22,8 +22,11 @@ private:
 
 	void LoadShader();
 
-	void OnSaveFile();
+	void OnNewFile();
 	void OnOpenFile();
+	void OnSaveFile();
+
+	void LoadProjectFile(const char* fileToLoad);
 
 	Renderer mRenderer;
 	MainWindow mWindow;
@@ -37,6 +40,8 @@ private:
 	GLint mFrameLoc;
 	GLint mTimeLoc;
 	GLint mResolutionLoc;
+	GLint mCameraOriginLoc;
+	GLint mCameraTargetLoc;
 
 	std::unique_ptr<RenderTarget> mRenderTarget;
 

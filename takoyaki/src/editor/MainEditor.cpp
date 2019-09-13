@@ -12,6 +12,9 @@ void MainEditor::Update() {
 	if (ImGui::BeginMainMenuBar()) {
 		mMenuBarSize = ImGui::GetWindowSize();
 		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("New", "Ctrl + N")) {
+				mNewFileHandler();
+			}
 			if (ImGui::MenuItem("Open", "Ctrl + O")) {
 				mOpenFileHandler();
 			}
@@ -41,11 +44,14 @@ void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::u
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
-	if (input.key == GLFW_KEY_S && (input.mods == GLFW_MOD_CONTROL)) {
-		mSaveFileHandler();
+	if (input.key == GLFW_KEY_N && input.mods == GLFW_MOD_CONTROL) {
+		mNewFileHandler();
 	}
 	if (input.key == GLFW_KEY_O && input.mods == GLFW_MOD_CONTROL) {
 		mOpenFileHandler();
+	}
+	if (input.key == GLFW_KEY_S && (input.mods == GLFW_MOD_CONTROL)) {
+		mSaveFileHandler();
 	}
 
 	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {

@@ -23,6 +23,8 @@ out vec4 frag_color;
 uniform float iTime;
 uniform vec2 iResolution;
 uniform int iFrame;
+uniform vec3 iCameraOrigin;
+uniform vec3 iCameraTarget;
 )";
 
 static const char* fragmentShaderCodeEnd = R"(
@@ -30,6 +32,27 @@ void main(){
 	mainImage(frag_color, gl_FragCoord.xy);
 }
 )";
+
+static const char* templateShaderCode = R"(// Available uniforms
+//#=============================#
+//* uniform float iTime;        *
+//* uniform vec2 iResolution;   *
+//* uniform int iFrame;         *
+//* uniform vec3 iCameraOrigin; *
+//* uniform vec3 iCameraTarget; *
+//#=============================#
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) { 
+    vec2 uv = (fragCoord*2.0 - iResolution.xy) / iResolution.y;
+
+    vec3 col = vec3(0.0);
+	col.rg = uv.xy;
+
+    fragColor = vec4(col, 1.0);
+}
+)";
+
+static const char* glslFileTypeFilter = "*.glsl";
 }  // namespace
 
 namespace ty {
@@ -72,10 +95,13 @@ Takoyaki::Takoyaki()
 			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
 			cmds.Push<Commands::Uniform>(mTimeLoc, time);
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
+			cmds.Push<Commands::Uniform>(mCameraOriginLoc, glm::vec3(0.f, 1.5f, -3.f));
+			cmds.Push<Commands::Uniform>(mCameraTargetLoc, glm::vec3(0.f, 0.f, 0.f));
 			mEditor.RegisterCommands(cmds, mProgram);
 
 			cmds.Push<Commands::BindVertexArray>(mVertexArray);
-			cmds.Push<Commands::VertexAttribPointer>(mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
+			cmds.Push<Commands::VertexAttribPointer>(
+			    mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
 			cmds.Push<Commands::EnableVertexAttribArray>(mPosLoc);
 			cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
 		}
@@ -110,6 +136,7 @@ void Takoyaki::SetupListeners() {
 	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
 	mWindow.AddContentScaleListener([this](const glm::vec2& scale) { OnContentScale(scale); });
 
+	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
 	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
 }
@@ -149,28 +176,48 @@ void Takoyaki::LoadShader() {
 		mEditor.ReportError(error.value());
 	}
 
-	mPosLoc        = mProgram->GetAttributeLocation("vPos");
-	mFrameLoc      = mProgram->GetUniformLocation("iFrame");
-	mTimeLoc       = mProgram->GetUniformLocation("iTime");
-	mResolutionLoc = mProgram->GetUniformLocation("iResolution");
+	mPosLoc          = mProgram->GetAttributeLocation("vPos");
+	mFrameLoc        = mProgram->GetUniformLocation("iFrame");
+	mTimeLoc         = mProgram->GetUniformLocation("iTime");
+	mResolutionLoc   = mProgram->GetUniformLocation("iResolution");
+	mCameraOriginLoc = mProgram->GetUniformLocation("iCameraOrigin");
+	mCameraTargetLoc = mProgram->GetUniformLocation("iCameraTarget");
 }
 
 void Takoyaki::CreateCopyProgram() {}
 
+void Takoyaki::OnNewFile() {
+	const char* fileToCreate = tinyfd_saveFileDialog("Open TakoYaki file", "", 1, &glslFileTypeFilter, nullptr);
+	if (fileToCreate) {
+		std::ofstream f(fileToCreate, std::ios_base::trunc);
+		if (!f.is_open()) {
+			mEditor.ReportError("Failed to create new file!");
+			return;
+		}
+
+		f << templateShaderCode;
+		f.close();
+		LoadProjectFile(fileToCreate);
+	}
+}
+
 void Takoyaki::OnOpenFile() {
-	const char* filter     = "*.glsl";
-	const char* fileToLoad = tinyfd_openFileDialog("Open TakoYaki file", "", 1, &filter, nullptr, 0);
+	const char* fileToLoad = tinyfd_openFileDialog("Open TakoYaki file", "", 1, &glslFileTypeFilter, nullptr, 0);
 	if (fileToLoad) {
-		mCurrentProject = fileToLoad;
-		mEditor.OpenFile(mCurrentProject);
-		LoadShader();
-		mFileWatcher.Clear();
-		mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
+		LoadProjectFile(fileToLoad);
 	}
 }
 
 void Takoyaki::OnSaveFile() {
 	mEditor.SaveFile(mCurrentProject);
+}
+
+void Takoyaki::LoadProjectFile(const char* fileToLoad) {
+	mCurrentProject = fileToLoad;
+	mEditor.OpenFile(mCurrentProject);
+	LoadShader();
+	mFileWatcher.Clear();
+	mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
 }
 
 }  // namespace ty
