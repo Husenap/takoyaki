@@ -10,6 +10,7 @@ public:
 	~MainEditor() = default;
 
 	void Update();
+	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
 
 	void OnInput(const KeyInput& input);
 	void OnFramebufferSize(const glm::ivec2& size);
@@ -17,9 +18,14 @@ public:
 
 	void ReportError(const std::string& message);
 
-	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+	void SetNewFileHandler(NewFileHandler handler) { mNewFileHandler = handler; }
+	void SetOpenFileHandler(OpenFileHandler handler) { mOpenFileHandler = handler; }
+	void SetSaveFileHandler(SaveFileHandler handler) { mSaveFileHandler = handler; }
 
 	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
+
+	void OpenFile(std::string_view file);
+	void SaveFile(std::string_view file);
 
 private:
 	void DisplayErrors();
@@ -32,6 +38,10 @@ private:
 	std::vector<std::string> mErrors;
 
 	UniformsMenu mUniformsMenu;
+
+	OpenFileHandler mNewFileHandler;
+	OpenFileHandler mOpenFileHandler;
+	SaveFileHandler mSaveFileHandler;
 };
 
 }  // namespace ty

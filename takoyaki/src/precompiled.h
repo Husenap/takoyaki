@@ -33,7 +33,11 @@
 
 #include "util/KeyInput.h"
 #include "util/VariantPolyfill.h"
+#include "util/FileWatcher.h"
 
 #include "graphics/gl/Shader.h"
 #include "graphics/gl/ShaderProgram.h"
 #include "graphics/gl/RenderCommand.h"
+#include "graphics/gl/RenderTarget.h"
+
+#include "editor/handlers/Handlers.h"

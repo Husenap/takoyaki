@@ -35,8 +35,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     vec2 uv = (fragCoord*2.0 - iResolution.xy) / iResolution.y;
 
     vec3 col = vec3(0.0);
-    
-    col += voronoi(uv*5.);
+
+    col += voronoi(uv*exp(1.+4.*fract(iTime*0.1)));
+    //col += step(1., length(uv));
 
     fragColor = vec4(col, 1.0);
 }

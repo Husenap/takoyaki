@@ -16,6 +16,7 @@ set(graphics_files
     "src/graphics/MainWindow.cpp")
 
 set(editor_files
+    "src/editor/handlers/Handlers.h"
     "src/editor/MainEditor.h"
     "src/editor/MainEditor.cpp"
     "src/editor/Takoyaki.h"

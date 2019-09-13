@@ -23,6 +23,8 @@ out vec4 frag_color;
 uniform float iTime;
 uniform vec2 iResolution;
 uniform int iFrame;
+uniform vec3 iCameraOrigin;
+uniform vec3 iCameraTarget;
 )";
 
 static const char* fragmentShaderCodeEnd = R"(
@@ -30,19 +32,37 @@ void main(){
 	mainImage(frag_color, gl_FragCoord.xy);
 }
 )";
+
+static const char* templateShaderCode = R"(// Available uniforms
+//#=============================#
+//* uniform float iTime;        *
+//* uniform vec2 iResolution;   *
+//* uniform int iFrame;         *
+//* uniform vec3 iCameraOrigin; *
+//* uniform vec3 iCameraTarget; *
+//#=============================#
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) { 
+    vec2 uv = (fragCoord*2.0 - iResolution.xy) / iResolution.y;
+
+    vec3 col = vec3(0.0);
+	col.rg = uv.xy;
+
+    fragColor = vec4(col, 1.0);
+}
+)";
+
+static const char* glslFileTypeFilter = "*.glsl";
 }  // namespace
 
 namespace ty {
 
 Takoyaki::Takoyaki()
-    : mWindow(1024, 768, "Takoyaki")
-    , mShaderFileToLoad("assets/shaders/main_shader.glsl") {
+    : mWindow(1024, 768, "Takoyaki") {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
-
-	mFileWatcher.Watch(mShaderFileToLoad, [this](auto&) { LoadShader(); });
-	LoadShader();
+	CreateCopyProgram();
 
 	mFileWatcher.StartThread();
 
@@ -61,20 +81,35 @@ Takoyaki::Takoyaki()
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
 
+		cmds.Push<Commands::BindFramebuffer>(0);
 		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
+
 		cmds.Push<Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
 		cmds.Push<Commands::Clear>(GL_COLOR_BUFFER_BIT);
 
-		cmds.Push<Commands::UseProgram>(mProgram->mProgram);
-		cmds.Push<Commands::Uniform>(mFrameLoc, frame);
-		cmds.Push<Commands::Uniform>(mTimeLoc, time);
-		cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(size.x, size.y));
-		mEditor.RegisterCommands(cmds, mProgram);
+		if (!mCurrentProject.empty()) {
+			cmds.Push<Commands::BindFramebuffer>(mRenderTarget->GetFramebuffer());
+			cmds.Push<Commands::Viewport>(0, 0, mRenderTarget->GetSize().x, mRenderTarget->GetSize().y);
 
-		cmds.Push<Commands::BindVertexArray>(mVertexArray);
-		cmds.Push<Commands::VertexAttribPointer>(mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
-		cmds.Push<Commands::EnableVertexAttribArray>(mPosLoc);
-		cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+			cmds.Push<Commands::UseProgram>(mProgram->mProgram);
+			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
+			cmds.Push<Commands::Uniform>(mTimeLoc, time);
+			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
+			cmds.Push<Commands::Uniform>(mCameraOriginLoc, glm::vec3(0.f, 1.5f, -3.f));
+			cmds.Push<Commands::Uniform>(mCameraTargetLoc, glm::vec3(0.f, 0.f, 0.f));
+			mEditor.RegisterCommands(cmds, mProgram);
+
+			cmds.Push<Commands::BindVertexArray>(mVertexArray);
+			cmds.Push<Commands::VertexAttribPointer>(
+			    mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
+			cmds.Push<Commands::EnableVertexAttribArray>(mPosLoc);
+			cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+		}
+
+		cmds.Push<Commands::BindFramebuffer>(0);
+		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
+
+		ImGui::Image((void*)(intptr_t)mRenderTarget->GetRenderTexture(), mRenderTarget->GetSize(), {0, 1}, {1, 0});
 
 		mRenderer.ProcessCommands();
 
@@ -93,41 +128,23 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	GLuint mFramebuffer;
-	GLuint mRenderTarget;
-	glGenTextures(1, &mRenderTarget);
-
-	glBindTexture(GL_TEXTURE_2D, mRenderTarget);
-
-	auto size = mWindow.GetFramebufferSize();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	mRenderTarget = std::make_unique<RenderTarget>(mWindow.GetFramebufferSize());
 }
-
 
 void Takoyaki::SetupListeners() {
 	mWindow.AddInputListener([this](const KeyInput& input) { OnInput(input); });
 	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
 	mWindow.AddContentScaleListener([this](const glm::vec2& scale) { OnContentScale(scale); });
+
+	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
+	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
+	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
 }
 
 Takoyaki::~Takoyaki() {}
 
 void Takoyaki::OnInput(const KeyInput& input) {
 	mEditor.OnInput(input);
-
-	if (input.key == GLFW_KEY_F2 && input.action == GLFW_PRESS) {
-		LoadShader();
-	}
-	if (input.key == GLFW_KEY_F3 && input.action == GLFW_PRESS) {
-		const char* fileToLoad = tinyfd_openFileDialog("Open TakoYaki file", "", 0, nullptr, nullptr, 0);
-		if (fileToLoad) {
-			mShaderFileToLoad = fileToLoad;
-			LoadShader();
-		}
-	}
 }
 
 void Takoyaki::OnFramebufferSize(const glm::ivec2& size) {
@@ -141,7 +158,7 @@ void Takoyaki::OnContentScale(const glm::vec2& scale) {
 void Takoyaki::LoadShader() {
 	mProgram = nullptr;
 
-	std::ifstream shaderFile(mShaderFileToLoad);
+	std::ifstream shaderFile(mCurrentProject);
 	std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
 	shaderFile.close();
 	std::string shaderCode = fragmentShaderCodeBegin;
@@ -159,10 +176,48 @@ void Takoyaki::LoadShader() {
 		mEditor.ReportError(error.value());
 	}
 
-	mPosLoc        = mProgram->GetAttributeLocation("vPos");
-	mFrameLoc      = mProgram->GetUniformLocation("iFrame");
-	mTimeLoc       = mProgram->GetUniformLocation("iTime");
-	mResolutionLoc = mProgram->GetUniformLocation("iResolution");
+	mPosLoc          = mProgram->GetAttributeLocation("vPos");
+	mFrameLoc        = mProgram->GetUniformLocation("iFrame");
+	mTimeLoc         = mProgram->GetUniformLocation("iTime");
+	mResolutionLoc   = mProgram->GetUniformLocation("iResolution");
+	mCameraOriginLoc = mProgram->GetUniformLocation("iCameraOrigin");
+	mCameraTargetLoc = mProgram->GetUniformLocation("iCameraTarget");
+}
+
+void Takoyaki::CreateCopyProgram() {}
+
+void Takoyaki::OnNewFile() {
+	const char* fileToCreate = tinyfd_saveFileDialog("Open TakoYaki file", "", 1, &glslFileTypeFilter, nullptr);
+	if (fileToCreate) {
+		std::ofstream f(fileToCreate, std::ios_base::trunc);
+		if (!f.is_open()) {
+			mEditor.ReportError("Failed to create new file!");
+			return;
+		}
+
+		f << templateShaderCode;
+		f.close();
+		LoadProjectFile(fileToCreate);
+	}
+}
+
+void Takoyaki::OnOpenFile() {
+	const char* fileToLoad = tinyfd_openFileDialog("Open TakoYaki file", "", 1, &glslFileTypeFilter, nullptr, 0);
+	if (fileToLoad) {
+		LoadProjectFile(fileToLoad);
+	}
+}
+
+void Takoyaki::OnSaveFile() {
+	mEditor.SaveFile(mCurrentProject);
+}
+
+void Takoyaki::LoadProjectFile(const char* fileToLoad) {
+	mCurrentProject = fileToLoad;
+	mEditor.OpenFile(mCurrentProject);
+	LoadShader();
+	mFileWatcher.Clear();
+	mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
 }
 
 }  // namespace ty

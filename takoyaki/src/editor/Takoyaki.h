@@ -2,7 +2,6 @@
 
 #include "../graphics/MainWindow.h"
 #include "../graphics/Renderer.h"
-#include "../util/FileWatcher.h"
 #include "MainEditor.h"
 
 namespace ty {
@@ -14,6 +13,7 @@ public:
 
 private:
 	void OnInput(const KeyInput& input);
+
 	void OnFramebufferSize(const glm::ivec2& size);
 	void OnContentScale(const glm::vec2& scale);
 	void CreateVertexBuffer();
@@ -22,6 +22,12 @@ private:
 
 	void LoadShader();
 
+	void OnNewFile();
+	void OnOpenFile();
+	void OnSaveFile();
+
+	void LoadProjectFile(const char* fileToLoad);
+
 	Renderer mRenderer;
 	MainWindow mWindow;
 	MainEditor mEditor;
@@ -29,12 +35,18 @@ private:
 
 	GLuint mVertexArray;
 	std::unique_ptr<ShaderProgram> mProgram;
+	std::unique_ptr<ShaderProgram> mCopyProgram;
 	GLint mPosLoc;
 	GLint mFrameLoc;
 	GLint mTimeLoc;
 	GLint mResolutionLoc;
+	GLint mCameraOriginLoc;
+	GLint mCameraTargetLoc;
 
-	std::string mShaderFileToLoad;
+	std::unique_ptr<RenderTarget> mRenderTarget;
+
+	std::string mCurrentProject;
+	void CreateCopyProgram();
 };
 
 }  // namespace ty

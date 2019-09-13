@@ -13,7 +13,8 @@ using RenderCommand = std::variant<std::monostate,
                                    Commands::VertexAttribPointer,
                                    Commands::EnableVertexAttribArray,
                                    Commands::DrawArrays,
-                                   Commands::Uniform>;
+                                   Commands::Uniform,
+                                   Commands::BindFramebuffer>;
 
 template <typename RenderCommand>
 struct ImmediateRenderCommand {
@@ -43,9 +44,7 @@ public:
 		mCommandList.emplace_back(std::in_place_type_t<CommandType>{}, std::forward<Args>(args)...);
 	}
 
-	void Clear() {
-		mCommandList.clear();
-	}
+	void Clear() { mCommandList.clear(); }
 
 	template <typename Visitor>
 	void Visit(Visitor&& visitor) {

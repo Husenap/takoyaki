@@ -112,6 +112,45 @@ void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std:
 	}
 }
 
+void UniformsMenu::OpenFile(std::string_view file) {
+	mUniforms.clear();
+
+	std::ifstream f(std::string(file) + ".uniforms", std::ios_base::binary);
+	if (!f.is_open()) return;
+
+	unsigned char numUniforms;
+	f.read((char*)&numUniforms, sizeof(numUniforms));
+
+	mUniforms.resize(numUniforms);
+	for (size_t i = 0; i < numUniforms; ++i) {
+		f.read((char*)&mUniforms[i].mItem, sizeof(mUniforms[i].mItem));
+	}
+
+	for (size_t i = 0; i < numUniforms; ++i) {
+		std::getline(f, mUniforms[i].mName);
+	}
+
+	f.close();
+}
+
+void UniformsMenu::SaveFile(std::string_view file) {
+	std::ofstream f(std::string(file) + ".uniforms", std::ios_base::binary);
+	if (!f.is_open()) return;
+
+	unsigned char numUniforms = (unsigned char)mUniforms.size();
+	f.write((char*)&numUniforms, sizeof(numUniforms));
+	
+	for(const auto & uniform : mUniforms) {
+		f.write((char*)&uniform.mItem, sizeof(uniform.mItem));
+	}
+
+	for(const auto & uniform : mUniforms) {
+		f << uniform.mName << std::endl;
+	}
+
+	f.close();
+}
+
 std::string UniformsMenu::GetUniformDeclarations() {
 	std::string output = "";
 
@@ -124,6 +163,8 @@ std::string UniformsMenu::GetUniformDeclarations() {
 	}
 
 	return output;
+
+	0.99f;
 }
 
 }  // namespace ty

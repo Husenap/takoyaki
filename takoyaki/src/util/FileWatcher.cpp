@@ -15,7 +15,11 @@ void FileWatcher::Job() {
 
 	while (mIsRunning) {
 		for (auto& [file, data] : mFiles) {
-			auto writeTime = std::filesystem::last_write_time(file);
+			std::error_code ec;
+			auto writeTime = std::filesystem::last_write_time(file, ec);
+			if (ec) {
+				continue;
+			}
 			if (data.mLastWriteTime != writeTime) {
 				data.mLastWriteTime = writeTime;
 				std::lock_guard<std::mutex> lock(mMutex);

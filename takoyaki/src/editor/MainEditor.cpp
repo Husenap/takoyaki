@@ -2,7 +2,7 @@
 
 namespace ty {
 
-const char* ErrorPopupName         = "Error##Popup";
+const char* ErrorPopupName = "Error##Popup";
 
 void MainEditor::Update() {
 	if (mShowDemoWindow) {
@@ -12,11 +12,20 @@ void MainEditor::Update() {
 	if (ImGui::BeginMainMenuBar()) {
 		mMenuBarSize = ImGui::GetWindowSize();
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Open")) {
-				tinyfd_openFileDialog("Open TakoYaki file", "", 0, nullptr, nullptr, 0);
+			if (ImGui::MenuItem("New", "Ctrl + N")) {
+				mNewFileHandler();
 			}
-			if (ImGui::MenuItem("Save As..")) {
-				tinyfd_saveFileDialog("Save TakoYaki file", "", 0, nullptr, nullptr);
+			if (ImGui::MenuItem("Open", "Ctrl + O")) {
+				mOpenFileHandler();
+			}
+			if (ImGui::MenuItem("Save", "Ctrl + S")) {
+				mSaveFileHandler();
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("View")) {
+			if (ImGui::MenuItem("Uniforms", "F1")) {
+				mUniformsMenu.ToggleVisibility();
 			}
 			ImGui::EndMenu();
 		}
@@ -30,7 +39,21 @@ void MainEditor::Update() {
 	}
 }
 
+void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
+	mUniformsMenu.RegisterCommands(cmds, program);
+}
+
 void MainEditor::OnInput(const KeyInput& input) {
+	if (input.key == GLFW_KEY_N && input.mods == GLFW_MOD_CONTROL) {
+		mNewFileHandler();
+	}
+	if (input.key == GLFW_KEY_O && input.mods == GLFW_MOD_CONTROL) {
+		mOpenFileHandler();
+	}
+	if (input.key == GLFW_KEY_S && (input.mods == GLFW_MOD_CONTROL)) {
+		mSaveFileHandler();
+	}
+
 	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {
 		mUniformsMenu.ToggleVisibility();
 	}
@@ -56,7 +79,7 @@ void MainEditor::DisplayErrors() {
 		ImGui::OpenPopup(ErrorPopupName);
 	}
 	if (ImGui::BeginPopupModal(ErrorPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
-		ImGui::SetWindowSize({300.f*mContentScale.x, 0.f});
+		ImGui::SetWindowSize({300.f * mContentScale.x, 0.f});
 		ImGui::TextWrapped(mErrors.front().c_str());
 		if (ImGui::Button("Ok", {-FLT_EPSILON, 0.0})) {
 			mErrors.erase(mErrors.begin());
@@ -67,8 +90,12 @@ void MainEditor::DisplayErrors() {
 	}
 }
 
-void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
-	mUniformsMenu.RegisterCommands(cmds, program);
+void MainEditor::OpenFile(std::string_view file) {
+	mUniformsMenu.OpenFile(file);
+}
+
+void MainEditor::SaveFile(std::string_view file) {
+	mUniformsMenu.SaveFile(file);
 }
 
 }  // namespace ty
