@@ -112,6 +112,21 @@ void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std:
 	}
 }
 
+void UniformsMenu::OpenFile(std::string_view file) {
+	std::ifstream f(std::string(file) + ".uniforms");
+	std::string fileContent((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+
+	std::cout << fileContent << std::endl;
+
+	f.close();
+}
+
+void UniformsMenu::SaveFile(std::string_view file) {
+	std::ofstream f(std::string(file) + ".uniforms");
+	f << "hejsan";
+	f.close();
+}
+
 std::string UniformsMenu::GetUniformDeclarations() {
 	std::string output = "";
 

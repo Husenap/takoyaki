@@ -36,13 +36,14 @@ namespace ty {
 
 Takoyaki::Takoyaki()
     : mWindow(1024, 768, "Takoyaki")
-    , mShaderFileToLoad("assets/shaders/main_shader.glsl") {
+    , mCurrentProject("assets/shaders/main_shader.glsl") {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
 	CreateCopyProgram();
 
-	mFileWatcher.Watch(mShaderFileToLoad, [this](auto&) { LoadShader(); });
+	mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
+
 	LoadShader();
 
 	mFileWatcher.StartThread();
@@ -107,28 +108,19 @@ void Takoyaki::CreateRenderTarget() {
 	mRenderTarget = std::make_unique<RenderTarget>(mWindow.GetFramebufferSize());
 }
 
-
 void Takoyaki::SetupListeners() {
 	mWindow.AddInputListener([this](const KeyInput& input) { OnInput(input); });
 	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
 	mWindow.AddContentScaleListener([this](const glm::vec2& scale) { OnContentScale(scale); });
+
+	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
+	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
 }
 
 Takoyaki::~Takoyaki() {}
 
 void Takoyaki::OnInput(const KeyInput& input) {
 	mEditor.OnInput(input);
-
-	if (input.key == GLFW_KEY_F2 && input.action == GLFW_PRESS) {
-		LoadShader();
-	}
-	if (input.key == GLFW_KEY_F3 && input.action == GLFW_PRESS) {
-		const char* fileToLoad = tinyfd_openFileDialog("Open TakoYaki file", "", 0, nullptr, nullptr, 0);
-		if (fileToLoad) {
-			mShaderFileToLoad = fileToLoad;
-			LoadShader();
-		}
-	}
 }
 
 void Takoyaki::OnFramebufferSize(const glm::ivec2& size) {
@@ -142,7 +134,7 @@ void Takoyaki::OnContentScale(const glm::vec2& scale) {
 void Takoyaki::LoadShader() {
 	mProgram = nullptr;
 
-	std::ifstream shaderFile(mShaderFileToLoad);
+	std::ifstream shaderFile(mCurrentProject);
 	std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
 	shaderFile.close();
 	std::string shaderCode = fragmentShaderCodeBegin;
@@ -166,7 +158,20 @@ void Takoyaki::LoadShader() {
 	mResolutionLoc = mProgram->GetUniformLocation("iResolution");
 }
 
-void Takoyaki::CreateCopyProgram() {
+void Takoyaki::CreateCopyProgram() {}
+
+void Takoyaki::OnOpenFile() {
+	const char* filter     = "*.glsl";
+	const char* fileToLoad = tinyfd_openFileDialog("Open TakoYaki file", "", 1, &filter, nullptr, 0);
+	if (fileToLoad) {
+		mCurrentProject = fileToLoad;
+		mEditor.OpenFile(mCurrentProject);
+		LoadShader();
+	}
+}
+
+void Takoyaki::OnSaveFile() {
+	mEditor.SaveFile(mCurrentProject);
 }
 
 }  // namespace ty

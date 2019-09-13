@@ -16,6 +16,9 @@ public:
 	void ToggleVisibility();
 	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
 
+	void OpenFile(std::string_view file);
+	void SaveFile(std::string_view file);
+
 	std::string GetUniformDeclarations();
 
 private:

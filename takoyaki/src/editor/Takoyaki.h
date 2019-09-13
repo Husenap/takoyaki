@@ -13,6 +13,7 @@ public:
 
 private:
 	void OnInput(const KeyInput& input);
+
 	void OnFramebufferSize(const glm::ivec2& size);
 	void OnContentScale(const glm::vec2& scale);
 	void CreateVertexBuffer();
@@ -20,6 +21,9 @@ private:
 	void SetupListeners();
 
 	void LoadShader();
+
+	void OnSaveFile();
+	void OnOpenFile();
 
 	Renderer mRenderer;
 	MainWindow mWindow;
@@ -36,7 +40,7 @@ private:
 
 	std::unique_ptr<RenderTarget> mRenderTarget;
 
-	std::string mShaderFileToLoad;
+	std::string mCurrentProject;
 	void CreateCopyProgram();
 };
 

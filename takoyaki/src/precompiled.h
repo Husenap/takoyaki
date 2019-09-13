@@ -39,3 +39,5 @@
 #include "graphics/gl/ShaderProgram.h"
 #include "graphics/gl/RenderCommand.h"
 #include "graphics/gl/RenderTarget.h"
+
+#include "editor/handlers/Handlers.h"
