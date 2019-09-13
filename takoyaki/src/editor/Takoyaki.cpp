@@ -35,16 +35,11 @@ void main(){
 namespace ty {
 
 Takoyaki::Takoyaki()
-    : mWindow(1024, 768, "Takoyaki")
-    , mCurrentProject("assets/shaders/main_shader.glsl") {
+    : mWindow(1024, 768, "Takoyaki") {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
 	CreateCopyProgram();
-
-	mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
-
-	LoadShader();
 
 	mFileWatcher.StartThread();
 
@@ -69,19 +64,21 @@ Takoyaki::Takoyaki()
 		cmds.Push<Commands::ClearColor>(0.18f, 0.18f, 0.18f, 1.0f);
 		cmds.Push<Commands::Clear>(GL_COLOR_BUFFER_BIT);
 
-		cmds.Push<Commands::BindFramebuffer>(mRenderTarget->GetFramebuffer());
-		cmds.Push<Commands::Viewport>(0, 0, mRenderTarget->GetSize().x, mRenderTarget->GetSize().y);
+		if (!mCurrentProject.empty()) {
+			cmds.Push<Commands::BindFramebuffer>(mRenderTarget->GetFramebuffer());
+			cmds.Push<Commands::Viewport>(0, 0, mRenderTarget->GetSize().x, mRenderTarget->GetSize().y);
 
-		cmds.Push<Commands::UseProgram>(mProgram->mProgram);
-		cmds.Push<Commands::Uniform>(mFrameLoc, frame);
-		cmds.Push<Commands::Uniform>(mTimeLoc, time);
-		cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
-		mEditor.RegisterCommands(cmds, mProgram);
+			cmds.Push<Commands::UseProgram>(mProgram->mProgram);
+			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
+			cmds.Push<Commands::Uniform>(mTimeLoc, time);
+			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
+			mEditor.RegisterCommands(cmds, mProgram);
 
-		cmds.Push<Commands::BindVertexArray>(mVertexArray);
-		cmds.Push<Commands::VertexAttribPointer>(mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
-		cmds.Push<Commands::EnableVertexAttribArray>(mPosLoc);
-		cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+			cmds.Push<Commands::BindVertexArray>(mVertexArray);
+			cmds.Push<Commands::VertexAttribPointer>(mPosLoc, 2, GL_FLOAT, GL_FALSE, (GLsizei)sizeof(vertices[0]), nullptr);
+			cmds.Push<Commands::EnableVertexAttribArray>(mPosLoc);
+			cmds.Push<Commands::DrawArrays>(GL_TRIANGLES, 0, 3);
+		}
 
 		cmds.Push<Commands::BindFramebuffer>(0);
 		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
@@ -167,6 +164,8 @@ void Takoyaki::OnOpenFile() {
 		mCurrentProject = fileToLoad;
 		mEditor.OpenFile(mCurrentProject);
 		LoadShader();
+		mFileWatcher.Clear();
+		mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
 	}
 }
 
