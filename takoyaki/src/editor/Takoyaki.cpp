@@ -62,11 +62,11 @@ Takoyaki::Takoyaki()
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
-	CreateCopyProgram();
 
 	mFileWatcher.StartThread();
 
-	float time = (float)glfwGetTime();
+	float time      = (float)glfwGetTime();
+	float deltaTime = time;
 
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
@@ -75,7 +75,8 @@ Takoyaki::Takoyaki()
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
 
-		time            = (float)glfwGetTime();
+		deltaTime = glfwGetTime() - time;
+		time      = (float)glfwGetTime();
 
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
@@ -98,8 +99,8 @@ Takoyaki::Takoyaki()
 			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
 			cmds.Push<Commands::Uniform>(mTimeLoc, time);
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
-			cmds.Push<Commands::Uniform>(mCameraOriginLoc, glm::vec3(0.f, 1.5f, -3.f));
-			cmds.Push<Commands::Uniform>(mCameraTargetLoc, glm::vec3(0.f, 0.f, 0.f));
+			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mEditor.GetCamera().GetPosition());
+			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mEditor.GetCamera().GetTarget());
 			mEditor.RegisterCommands(cmds, mProgram);
 
 			cmds.Push<Commands::BindVertexArray>(mVertexArray);
@@ -112,7 +113,15 @@ Takoyaki::Takoyaki()
 		cmds.Push<Commands::BindFramebuffer>(0);
 		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
 
-		ImGui::Image((void*)(intptr_t)mRenderTarget->GetRenderTexture(), mRenderTarget->GetSize(), {0, 1}, {1, 0});
+		if (ImGui::Begin("Preview")) {
+			if (ImGui::IsWindowHovered() && ImGui::GetIO().MouseDown[1]) {
+				ImVec2 mouseMovement = ImGui::GetIO().MouseDelta;
+				mEditor.GetCamera().ProcessMouseMovement(mouseMovement.x, mouseMovement.y);
+				mEditor.GetCamera().ProcessKeyInput(ImGui::GetIO().KeysDown, deltaTime);
+			}
+			ImGui::Image((void*)(intptr_t)mRenderTarget->GetRenderTexture(), mRenderTarget->GetSize(), {0, 1}, {1, 0});
+		}
+		ImGui::End();
 
 		mRenderer.ProcessCommands();
 
@@ -187,8 +196,6 @@ void Takoyaki::LoadShader() {
 	mCameraOriginLoc = mProgram->GetUniformLocation("iCameraOrigin");
 	mCameraTargetLoc = mProgram->GetUniformLocation("iCameraTarget");
 }
-
-void Takoyaki::CreateCopyProgram() {}
 
 void Takoyaki::OnNewFile() {
 	const char* fileToCreate = tinyfd_saveFileDialog("Open TakoYaki file", "", 1, &glslFileTypeFilter, nullptr);

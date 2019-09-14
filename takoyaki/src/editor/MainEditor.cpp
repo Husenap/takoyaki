@@ -36,6 +36,8 @@ void MainEditor::Update(bool hasProjectLoaded) {
 		mUniformsMenu.Update();
 	}
 
+	mCamera.Update();
+
 	if (!mErrors.empty()) {
 		DisplayErrors();
 	}

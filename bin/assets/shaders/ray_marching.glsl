@@ -95,7 +95,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord*2.0 - iResolution.xy) / iResolution.y;
 
     vec3 lookAt = iCameraTarget;
-    vec3 cameraPosition = iCameraPosition; //iCameraOrigin;
+    vec3 cameraPosition = iCameraOrigin;
     
     vec3 forward = normalize(lookAt-cameraPosition);
     vec3 right = normalize(vec3(forward.z, 0., -forward.x ));

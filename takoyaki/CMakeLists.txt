@@ -23,6 +23,8 @@ set(editor_files
     "src/editor/Takoyaki.cpp")
 
 set(editor_components_files
+    "src/editor/components/Camera.h"
+    "src/editor/components/Camera.cpp"
     "src/editor/components/UniformsMenu.h"
     "src/editor/components/UniformsMenu.cpp"
     "src/editor/components/UniformItem.h")

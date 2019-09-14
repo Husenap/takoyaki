@@ -35,7 +35,6 @@ private:
 
 	GLuint mVertexArray;
 	std::unique_ptr<ShaderProgram> mProgram;
-	std::unique_ptr<ShaderProgram> mCopyProgram;
 	GLint mPosLoc;
 	GLint mFrameLoc;
 	GLint mTimeLoc;
@@ -46,7 +45,6 @@ private:
 	std::unique_ptr<RenderTarget> mRenderTarget;
 
 	std::string mCurrentProject;
-	void CreateCopyProgram();
 	void OnUniformsChanged();
 };
 

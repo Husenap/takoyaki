@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/UniformsMenu.h"
+#include "components/Camera.h"
 
 namespace ty {
 
@@ -23,6 +24,7 @@ public:
 	void SetSaveFileHandler(SaveFileHandler handler) { mSaveFileHandler = handler; }
 
 	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
+	Camera& GetCamera() { return mCamera; }
 
 private:
 	void DisplayErrors();
@@ -35,6 +37,7 @@ private:
 	std::vector<std::string> mErrors;
 
 	UniformsMenu mUniformsMenu;
+	Camera mCamera;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;
