@@ -47,6 +47,7 @@ private:
 
 	std::string mCurrentProject;
 	void CreateCopyProgram();
+	void OnUniformsChanged();
 };
 
 }  // namespace ty

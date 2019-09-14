@@ -17,15 +17,19 @@ const char* UniformsName           = "Uniforms";
 const char* AddNewUniformPopupName = "AddNewUniform";
 
 void UniformsMenu::Update() {
-	if (!mVisibility) {
-		return;
+	size_t numUniforms = mUniforms.size();
+
+	if (mVisibility) {
+		if (ImGui::Begin(UniformsName, &mVisibility)) {
+			DrawUniforms();
+
+			DrawAddUniformPopup();
+			ImGui::End();
+		}
 	}
 
-	if (ImGui::Begin(UniformsName, &mVisibility)) {
-		DrawUniforms();
-
-		DrawAddUniformPopup();
-		ImGui::End();
+	if (numUniforms != mUniforms.size()) {
+		if (mUniformsChangedHandler) mUniformsChangedHandler();
 	}
 }
 
@@ -50,7 +54,7 @@ void UniformsMenu::DrawUniforms() {
 void UniformsMenu::DrawAddUniformPopup() {
 	if (ImGui::BeginPopupModal(AddNewUniformPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
 		ImGui::SetWindowSize({0.f, 0.f});
-		ImGui::Combo("Type", (int*)&mSelectedType, "float\0vec2\0vec3\0vec4\0\0");
+		ImGui::Combo("Type", (int*)&mSelectedType, "float\0vec2\0vec3\0vec4\0color\0\0");
 
 		int numChars = static_cast<int>(std::string(mNameBuffer.data()).size());
 		ImGui::InputText("Variable Name",
@@ -83,6 +87,11 @@ void UniformsMenu::HandleNewUniform() {
 		return;
 	}
 
+	auto pred = [& n = name](const UniformData& data) { return n == data.mName; };
+	if (std::any_of(mUniforms.begin(), mUniforms.end(), pred)) {
+		return;
+	}
+
 	switch (mSelectedType) {
 	case UniformType::Float:
 		mUniforms.push_back({name.data(), UniformItemFloat{}});
@@ -96,6 +105,9 @@ void UniformsMenu::HandleNewUniform() {
 	case UniformType::Vec4:
 		mUniforms.push_back({name.data(), UniformItemVec4{}});
 		break;
+	case UniformType::Color:
+		mUniforms.push_back({name.data(), UniformColor{}});
+		break;
 	}
 }
 
@@ -105,9 +117,7 @@ void UniformsMenu::ToggleVisibility() {
 
 void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
 	for (auto& uniform : mUniforms) {
-		auto pred = [&](auto& item) {
-			cmds.Push<Commands::Uniform>(program->mProgram, uniform.mName, item.value);
-		};
+		auto pred = [&](auto& item) { cmds.Push<Commands::Uniform>(program->mProgram, uniform.mName, item.value); };
 		std::visit(make_overloaded{pred}, uniform.mItem);
 	}
 }
@@ -139,12 +149,12 @@ void UniformsMenu::SaveFile(std::string_view file) {
 
 	unsigned char numUniforms = (unsigned char)mUniforms.size();
 	f.write((char*)&numUniforms, sizeof(numUniforms));
-	
-	for(const auto & uniform : mUniforms) {
+
+	for (const auto& uniform : mUniforms) {
 		f.write((char*)&uniform.mItem, sizeof(uniform.mItem));
 	}
 
-	for(const auto & uniform : mUniforms) {
+	for (const auto& uniform : mUniforms) {
 		f << uniform.mName << std::endl;
 	}
 
