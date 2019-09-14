@@ -213,7 +213,9 @@ void Takoyaki::OnOpenFile() {
 }
 
 void Takoyaki::OnSaveFile() {
-	mEditor.GetUniformsMenu().SaveFile(mCurrentProject);
+	if (!mCurrentProject.empty()) {
+		mEditor.GetUniformsMenu().SaveFile(mCurrentProject);
+	}
 }
 
 void Takoyaki::LoadProjectFile(const char* fileToLoad) {

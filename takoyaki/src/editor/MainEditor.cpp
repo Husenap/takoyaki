@@ -18,13 +18,13 @@ void MainEditor::Update(bool hasProjectLoaded) {
 			if (ImGui::MenuItem("Open", "Ctrl + O")) {
 				mOpenFileHandler();
 			}
-			if (ImGui::MenuItem("Save", "Ctrl + S")) {
+			if (ImGui::MenuItem("Save", "Ctrl + S", nullptr, hasProjectLoaded)) {
 				mSaveFileHandler();
 			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("View")) {
-			if (ImGui::MenuItem("Uniforms", "F1")) {
+			if (ImGui::MenuItem("Uniforms", "F1", nullptr, hasProjectLoaded)) {
 				mUniformsMenu.ToggleVisibility();
 			}
 			ImGui::EndMenu();
