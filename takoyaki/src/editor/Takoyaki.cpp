@@ -66,6 +66,8 @@ Takoyaki::Takoyaki()
 
 	mFileWatcher.StartThread();
 
+	float time = (float)glfwGetTime();
+
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
 		++frame;
@@ -73,10 +75,11 @@ Takoyaki::Takoyaki()
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
 
-		float time      = (float)glfwGetTime();
+		time            = (float)glfwGetTime();
+
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
-		mEditor.Update();
+		mEditor.Update(!mCurrentProject.empty());
 
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
@@ -139,6 +142,7 @@ void Takoyaki::SetupListeners() {
 	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
 	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
+	mEditor.GetUniformsMenu().SetUniformsChangedHandler([this]() { OnUniformsChanged(); });
 }
 
 Takoyaki::~Takoyaki() {}
@@ -209,15 +213,21 @@ void Takoyaki::OnOpenFile() {
 }
 
 void Takoyaki::OnSaveFile() {
-	mEditor.SaveFile(mCurrentProject);
+	mEditor.GetUniformsMenu().SaveFile(mCurrentProject);
 }
 
 void Takoyaki::LoadProjectFile(const char* fileToLoad) {
 	mCurrentProject = fileToLoad;
-	mEditor.OpenFile(mCurrentProject);
+
+	mEditor.GetUniformsMenu().OpenFile(mCurrentProject);
+
 	LoadShader();
 	mFileWatcher.Clear();
 	mFileWatcher.Watch(mCurrentProject, [this](auto&) { LoadShader(); });
+}
+
+void Takoyaki::OnUniformsChanged() {
+	LoadShader();
 }
 
 }  // namespace ty

@@ -19,21 +19,25 @@ public:
 	void OpenFile(std::string_view file);
 	void SaveFile(std::string_view file);
 
+	void SetUniformsChangedHandler(UniformsChangedHandler handler) { mUniformsChangedHandler = handler; }
+
 	std::string GetUniformDeclarations();
 
 private:
-	enum class UniformType : int { Float, Vec2, Vec3, Vec4 };
+	enum class UniformType : int { Float, Vec2, Vec3, Vec4, Color };
 	struct UniformData {
 		std::string mName;
 		UniformItem mItem;
 	};
 
 	std::vector<UniformData> mUniforms;
+	bool mVisibility;
 
+	UniformsChangedHandler mUniformsChangedHandler;
+
+	// Create Uniform Popup Data
 	std::array<char, 64> mNameBuffer;
 	UniformType mSelectedType;
-
-	bool mVisibility;
 };
 
 }  // namespace ty

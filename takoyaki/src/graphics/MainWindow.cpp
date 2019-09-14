@@ -167,9 +167,6 @@ const glm::ivec2& MainWindow::GetFramebufferSize() const {
 }
 
 void MainWindow::OnInput(const KeyInput& input) {
-	if (input.key == GLFW_KEY_ESCAPE && input.action == GLFW_PRESS) {
-		RequestClose();
-	}
 }
 
 void MainWindow::OnFramebufferSize(const glm::ivec2& size) {

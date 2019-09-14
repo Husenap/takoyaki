@@ -4,7 +4,7 @@ namespace ty {
 
 const char* ErrorPopupName = "Error##Popup";
 
-void MainEditor::Update() {
+void MainEditor::Update(bool hasProjectLoaded) {
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
 	}
@@ -32,7 +32,9 @@ void MainEditor::Update() {
 		ImGui::EndMainMenuBar();
 	}
 
-	mUniformsMenu.Update();
+	if (hasProjectLoaded) {
+		mUniformsMenu.Update();
+	}
 
 	if (!mErrors.empty()) {
 		DisplayErrors();
@@ -88,14 +90,6 @@ void MainEditor::DisplayErrors() {
 
 		ImGui::EndPopup();
 	}
-}
-
-void MainEditor::OpenFile(std::string_view file) {
-	mUniformsMenu.OpenFile(file);
-}
-
-void MainEditor::SaveFile(std::string_view file) {
-	mUniformsMenu.SaveFile(file);
 }
 
 }  // namespace ty

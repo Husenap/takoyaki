@@ -9,7 +9,7 @@ public:
 	MainEditor()  = default;
 	~MainEditor() = default;
 
-	void Update();
+	void Update(bool hasProjectLoaded);
 	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
 
 	void OnInput(const KeyInput& input);
@@ -23,9 +23,6 @@ public:
 	void SetSaveFileHandler(SaveFileHandler handler) { mSaveFileHandler = handler; }
 
 	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
-
-	void OpenFile(std::string_view file);
-	void SaveFile(std::string_view file);
 
 private:
 	void DisplayErrors();

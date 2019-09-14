@@ -23,7 +23,13 @@ struct UniformItemVec4 {
 	static constexpr const char* type() { return "vec4"; }
 };
 
-using UniformItem = std::variant<UniformItemFloat, UniformItemVec2, UniformItemVec3, UniformItemVec4>;
+struct UniformColor {
+	glm::vec4 value;
+	void Update(const char* name) { ImGui::ColorEdit4(name, &value.x, ImGuiColorEditFlags_HDR |ImGuiColorEditFlags_Float); }
+	static constexpr const char* type() { return "vec4"; }
+};
+
+using UniformItem = std::variant<UniformItemFloat, UniformItemVec2, UniformItemVec3, UniformItemVec4, UniformColor>;
 
 struct GetUniformType {
 	template <typename T>
