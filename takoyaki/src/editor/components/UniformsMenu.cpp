@@ -173,8 +173,6 @@ std::string UniformsMenu::GetUniformDeclarations() {
 	}
 
 	return output;
-
-	0.99f;
 }
 
 }  // namespace ty

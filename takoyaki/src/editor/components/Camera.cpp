@@ -13,8 +13,12 @@ void Camera::Update() {
 	ImGui::End();
 }
 
-void Camera::ProcessKeyInput(bool keys[512], float dt) {
-	float velocity = mSpeed * dt;
+void Camera::ProcessKeyInput(bool keys[512], float deltaTime) {
+	float velocity = mSpeed * deltaTime;
+
+	if (keys[GLFW_MOD_CONTROL]) velocity *= 0.5f;
+	if (keys[GLFW_MOD_SHIFT]) velocity *= 2.f;
+
 	if (keys[GLFW_KEY_W]) mPosition += mForward * velocity;
 	if (keys[GLFW_KEY_S]) mPosition -= mForward * velocity;
 	if (keys[GLFW_KEY_D]) mPosition += mRight * velocity;
@@ -25,9 +29,9 @@ void Camera::ProcessKeyInput(bool keys[512], float dt) {
 	mTarget = mPosition + mForward;
 }
 
-void Camera::ProcessMouseMovement(float dx, float dy) {
-	mYaw -= dx * mSensitivity;
-	mPitch -= dy * mSensitivity;
+void Camera::ProcessMouseMovement(const glm::vec2& delta) {
+	mYaw -= delta.x * mSensitivity;
+	mPitch -= delta.y * mSensitivity;
 
 	mPitch = glm::clamp(mPitch, -89.9f, 89.9f);
 
@@ -43,5 +47,9 @@ void Camera::UpdateCameraVectors() {
 	mUp      = glm::normalize(glm::cross(mForward, mRight));
 	mTarget  = mPosition + mForward;
 }
+
+void Camera::CaptureInput() {}
+
+void Camera::ReleaseInput() {}
 
 }  // namespace ty

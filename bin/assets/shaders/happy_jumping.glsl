@@ -414,8 +414,8 @@ mat3 setCamera( in vec3 ro, in vec3 ta, float cr )
 {
 	vec3 cw = normalize(ta-ro);
 	vec3 cp = vec3(sin(cr), cos(cr),0.0);
-	vec3 cu = normalize( cross(cw,cp) );
-	vec3 cv =          ( cross(cu,cw) );
+	vec3 cu = normalize( cross(cp, cw) );
+	vec3 cv =          ( cross(cw, cu) );
     return mat3( cu, cv, cw );
 }
 
@@ -447,11 +447,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         float ti = fract(time-0.15);
         ti = 4.0*ti*(1.0-ti);        
         ta.y += 0.15*ti*ti*(3.0-2.0*ti)*smoothstep(0.4,0.9,cl);
-        
+
         // camera bounce
         float t4 = abs(fract(time*0.5)-0.5)/0.5;
         float bou = -1.0 + 2.0*t4;
         ro += 0.06*sin(time*12.0+vec3(0.0,2.0,4.0))*smoothstep( 0.85, 1.0, abs(bou) );
+
+        ta = iCameraTarget;
+        ro = iCameraOrigin;
 
         // camera-to-world rotation
         mat3 ca = setCamera( ro, ta, 0.0 );

@@ -13,6 +13,8 @@ public:
 
 private:
 	void OnInput(const KeyInput& input);
+	void OnInput(const MouseInput& input);
+	void OnInput(const CursorInput& input);
 
 	void OnFramebufferSize(const glm::ivec2& size);
 	void OnContentScale(const glm::vec2& scale);
@@ -25,6 +27,9 @@ private:
 	void OnNewFile();
 	void OnOpenFile();
 	void OnSaveFile();
+
+	void OnCameraCaptureInput();
+	void OnCameraReleaseInput();
 
 	void LoadProjectFile(const char* fileToLoad);
 

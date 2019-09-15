@@ -66,7 +66,7 @@ Takoyaki::Takoyaki()
 	mFileWatcher.StartThread();
 
 	float time      = (float)glfwGetTime();
-	float deltaTime = time;
+	float deltaTime = 0.0f;
 
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
@@ -75,12 +75,12 @@ Takoyaki::Takoyaki()
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
 
-		deltaTime = glfwGetTime() - time;
+		deltaTime = (float)glfwGetTime() - time;
 		time      = (float)glfwGetTime();
 
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
-		mEditor.Update(!mCurrentProject.empty());
+		mEditor.Update(deltaTime, !mCurrentProject.empty(), mRenderTarget);
 
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
@@ -111,17 +111,6 @@ Takoyaki::Takoyaki()
 		}
 
 		cmds.Push<Commands::BindFramebuffer>(0);
-		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
-
-		if (ImGui::Begin("Preview")) {
-			if (ImGui::IsWindowHovered() && ImGui::GetIO().MouseDown[1]) {
-				ImVec2 mouseMovement = ImGui::GetIO().MouseDelta;
-				mEditor.GetCamera().ProcessMouseMovement(mouseMovement.x, mouseMovement.y);
-				mEditor.GetCamera().ProcessKeyInput(ImGui::GetIO().KeysDown, deltaTime);
-			}
-			ImGui::Image((void*)(intptr_t)mRenderTarget->GetRenderTexture(), mRenderTarget->GetSize(), {0, 1}, {1, 0});
-		}
-		ImGui::End();
 
 		mRenderer.ProcessCommands();
 
@@ -145,18 +134,30 @@ void Takoyaki::CreateRenderTarget() {
 
 void Takoyaki::SetupListeners() {
 	mWindow.AddInputListener([this](const KeyInput& input) { OnInput(input); });
+	mWindow.AddInputListener([this](const MouseInput& input) { OnInput(input); });
+	mWindow.AddInputListener([this](const CursorInput& input) { OnInput(input); });
 	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
 	mWindow.AddContentScaleListener([this](const glm::vec2& scale) { OnContentScale(scale); });
 
 	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
 	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
+	mEditor.SetCameraCaptureInputHandler([this]() { OnCameraCaptureInput(); });
+	mEditor.SetCameraReleaseInputHandler([this]() { OnCameraReleaseInput(); });
 	mEditor.GetUniformsMenu().SetUniformsChangedHandler([this]() { OnUniformsChanged(); });
 }
 
 Takoyaki::~Takoyaki() {}
 
 void Takoyaki::OnInput(const KeyInput& input) {
+	mEditor.OnInput(input);
+}
+
+void Takoyaki::OnInput(const MouseInput& input) {
+	mEditor.OnInput(input);
+}
+
+void Takoyaki::OnInput(const CursorInput& input) {
 	mEditor.OnInput(input);
 }
 
@@ -223,6 +224,14 @@ void Takoyaki::OnSaveFile() {
 	if (!mCurrentProject.empty()) {
 		mEditor.GetUniformsMenu().SaveFile(mCurrentProject);
 	}
+}
+
+void Takoyaki::OnCameraCaptureInput() {
+	mWindow.SetInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void Takoyaki::OnCameraReleaseInput() {
+	mWindow.SetInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 void Takoyaki::LoadProjectFile(const char* fileToLoad) {

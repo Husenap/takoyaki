@@ -2,6 +2,7 @@
 
 #include "components/UniformsMenu.h"
 #include "components/Camera.h"
+#include "components/Preview.h"
 
 namespace ty {
 
@@ -10,10 +11,13 @@ public:
 	MainEditor()  = default;
 	~MainEditor() = default;
 
-	void Update(bool hasProjectLoaded);
+	void Update(float deltaTime, bool hasProjectLoaded, const std::unique_ptr<RenderTarget>& renderTarget);
 	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
 
 	void OnInput(const KeyInput& input);
+	void OnInput(const MouseInput& input);
+	void OnInput(const CursorInput& input);
+
 	void OnFramebufferSize(const glm::ivec2& size);
 	void OnContentScale(const glm::vec2& scale);
 
@@ -22,6 +26,8 @@ public:
 	void SetNewFileHandler(NewFileHandler handler) { mNewFileHandler = handler; }
 	void SetOpenFileHandler(OpenFileHandler handler) { mOpenFileHandler = handler; }
 	void SetSaveFileHandler(SaveFileHandler handler) { mSaveFileHandler = handler; }
+	void SetCameraCaptureInputHandler(CameraCaptureInputHandler handler) { mCameraCaptureHandler = handler; }
+	void SetCameraReleaseInputHandler(CameraReleaseInputHandler handler) { mCameraReleaseHandler = handler; }
 
 	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
 	Camera& GetCamera() { return mCamera; }
@@ -30,6 +36,7 @@ private:
 	void DisplayErrors();
 
 	bool mShowDemoWindow = false;
+	bool mCameraMode     = false;
 
 	ImVec2 mMenuBarSize;
 	glm::ivec2 mFramebufferSize;
@@ -37,11 +44,15 @@ private:
 	std::vector<std::string> mErrors;
 
 	UniformsMenu mUniformsMenu;
+	Preview mPreview;
 	Camera mCamera;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;
 	SaveFileHandler mSaveFileHandler;
+
+	CameraCaptureInputHandler mCameraCaptureHandler;
+	CameraReleaseInputHandler mCameraReleaseHandler;
 };
 
 }  // namespace ty

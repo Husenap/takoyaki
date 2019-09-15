@@ -31,7 +31,7 @@
 
 #include <tinyfiledialogs.h>
 
-#include "util/KeyInput.h"
+#include "util/Input.h"
 #include "util/VariantPolyfill.h"
 #include "util/FileWatcher.h"
 

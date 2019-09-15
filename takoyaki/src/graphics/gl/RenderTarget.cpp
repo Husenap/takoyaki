@@ -26,7 +26,7 @@ RenderTarget::~RenderTarget() {
 	glDeleteTextures(1, &mRenderTexture);
 	glDeleteFramebuffers(1, &mFramebuffer);
 }
-void RenderTarget::Resize(const glm::ivec2& size) {}
+void RenderTarget::Resize(const glm::ivec2&) {}
 
 void RenderTarget::SetAsTarget() {
 	glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);

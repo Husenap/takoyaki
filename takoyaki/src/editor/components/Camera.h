@@ -12,16 +12,19 @@ public:
 	    , mWorldUp(up)
 	    , mYaw(yaw)
 	    , mPitch(pitch)
-	    , mSpeed(2.5f)
-	    , mSensitivity(0.1f)
+	    , mSpeed(5.0f)
+	    , mSensitivity(0.25f)
 	    , mZoom(45.f) {
 		UpdateCameraVectors();
 	}
 
 	void Update();
 
-	void ProcessKeyInput(bool keys[512], float dt);
-	void ProcessMouseMovement(float dx, float dy);
+	void ProcessKeyInput(bool keys[512], float deltaTime);
+	void ProcessMouseMovement(const glm::vec2& delta);
+
+	void CaptureInput();
+	void ReleaseInput();
 
 	const glm::vec3& GetPosition() const { return mPosition; }
 	const glm::vec3& GetTarget() const { return mTarget; }
@@ -35,6 +38,7 @@ private:
 	glm::vec3 mUp;
 	glm::vec3 mWorldUp;
 	glm::vec3 mTarget;
+	glm::vec3 mVelocity;
 	float mYaw;
 	float mPitch;
 	float mSpeed;
