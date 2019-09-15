@@ -33,6 +33,8 @@ private:
 
 	void LoadProjectFile(const char* fileToLoad);
 
+	float mCurrentTime;
+
 	Renderer mRenderer;
 	MainWindow mWindow;
 	MainEditor mEditor;

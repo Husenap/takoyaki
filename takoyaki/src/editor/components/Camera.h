@@ -1,23 +1,17 @@
 #pragma once
 
+#include "Widget.h"
+
 namespace ty {
 
-class Camera {
+class Camera : public Widget {
 public:
-	Camera(glm::vec3 position = glm::vec3(0.f, 1.f, -5.f),
-	       glm::vec3 up       = glm::vec3(0.f, 1.f, 0.f),
-	       float yaw          = 90.f,
-	       float pitch        = 0.f)
-	    : mPosition(position)
-	    , mWorldUp(up)
-	    , mYaw(yaw)
-	    , mPitch(pitch)
-	    , mSpeed(5.0f)
-	    , mSensitivity(0.25f)
-	    , mZoom(45.f) {
+	Camera() {
+		Reset();
 		UpdateCameraVectors();
 	}
 
+	void Reset();
 	void Update();
 
 	void ProcessKeyInput(bool keys[512], float deltaTime);

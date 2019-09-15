@@ -67,6 +67,7 @@ Takoyaki::Takoyaki()
 
 	float time      = (float)glfwGetTime();
 	float deltaTime = 0.0f;
+	float mCurrentTime = 0.0f;
 
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
@@ -77,6 +78,7 @@ Takoyaki::Takoyaki()
 
 		deltaTime = (float)glfwGetTime() - time;
 		time      = (float)glfwGetTime();
+		mCurrentTime += deltaTime;
 
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
@@ -97,7 +99,7 @@ Takoyaki::Takoyaki()
 
 			cmds.Push<Commands::UseProgram>(mProgram->mProgram);
 			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
-			cmds.Push<Commands::Uniform>(mTimeLoc, time);
+			cmds.Push<Commands::Uniform>(mTimeLoc, mCurrentTime);
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
 			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mEditor.GetCamera().GetPosition());
 			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mEditor.GetCamera().GetTarget());
@@ -235,9 +237,11 @@ void Takoyaki::OnCameraReleaseInput() {
 }
 
 void Takoyaki::LoadProjectFile(const char* fileToLoad) {
+	mCurrentTime = 0.0f;
+
 	mCurrentProject = fileToLoad;
 
-	mEditor.GetUniformsMenu().OpenFile(mCurrentProject);
+	mEditor.LoadProjectFile(mCurrentProject);
 
 	LoadShader();
 	mFileWatcher.Clear();

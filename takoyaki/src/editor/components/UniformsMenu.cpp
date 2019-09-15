@@ -111,10 +111,6 @@ void UniformsMenu::HandleNewUniform() {
 	}
 }
 
-void UniformsMenu::ToggleVisibility() {
-	mVisibility = !mVisibility;
-}
-
 void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
 	for (auto& uniform : mUniforms) {
 		auto pred = [&](auto& item) { cmds.Push<Commands::Uniform>(program->mProgram, uniform.mName, item.value); };

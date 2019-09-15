@@ -1,8 +1,8 @@
 #pragma once
 
-#include "components/UniformsMenu.h"
 #include "components/Camera.h"
 #include "components/Preview.h"
+#include "components/UniformsMenu.h"
 
 namespace ty {
 
@@ -10,6 +10,8 @@ class MainEditor {
 public:
 	MainEditor()  = default;
 	~MainEditor() = default;
+
+	void LoadProjectFile(const std::string& fileToLoad);
 
 	void Update(float deltaTime, bool hasProjectLoaded, const std::unique_ptr<RenderTarget>& renderTarget);
 	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);

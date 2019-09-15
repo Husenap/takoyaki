@@ -23,6 +23,7 @@ set(editor_files
     "src/editor/Takoyaki.cpp")
 
 set(editor_components_files
+    "src/editor/components/Widget.h"
     "src/editor/components/Preview.h"
     "src/editor/components/Preview.cpp"
     "src/editor/components/Camera.h"
