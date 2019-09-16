@@ -15,6 +15,7 @@ namespace ty {
 
 const char* UniformsName           = "Uniforms";
 const char* AddNewUniformPopupName = "AddNewUniform";
+const char* UniformDragAndDropName = "REORDER_UNIFORMS_DRAG_AND_DROP";
 
 void UniformsMenu::Update() {
 	size_t numUniforms = mUniforms.size();
@@ -42,13 +43,47 @@ void UniformsMenu::DrawUniforms() {
 		}
 	}
 
-	auto pred = [](auto& uniform) {
-		bool wasButtonPressed = ImGui::Button(("X##" + uniform.mName).c_str());
+	SwapData uniformSwap{-1, -1};
+	for (int i = 0; i < mUniforms.size();) {
+		ImGui::PushID(i);
+
+		auto& uniform = mUniforms[i];
+
+		ImGui::BeginGroup();
+		bool wasButtonPressed = ImGui::Button("X");
 		ImGui::SameLine();
 		std::visit(make_overloaded{[&](auto& item) { item.Update(uniform.mName.c_str()); }}, uniform.mItem);
-		return wasButtonPressed;
-	};
-	mUniforms.erase(std::remove_if(mUniforms.begin(), mUniforms.end(), pred), mUniforms.end());
+		ImGui::EndGroup();
+
+		const static int dragDropFlags = ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptNoDrawDefaultRect;
+		if (ImGui::BeginDragDropSource(dragDropFlags)) {
+			ImGui::SetDragDropPayload(UniformDragAndDropName, &i, sizeof(int));
+			ImGui::Text(uniform.mName.c_str());
+			ImGui::EndDragDropSource();
+		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(UniformDragAndDropName)) {
+				int payload_index = *(const int*)payload->Data;
+				//std::swap(mUniforms[i], mUniforms[payload_index]);
+				uniformSwap = {payload_index, i};
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::PopID();
+
+		if (wasButtonPressed) {
+			mUniforms.erase(mUniforms.begin() + i);
+		} else {
+			++i;
+		}
+	}
+
+	if (uniformSwap.mSourceIndex != -1 && uniformSwap.mTargetIndex != -1) {
+		UniformData data = mUniforms[uniformSwap.mSourceIndex];
+		mUniforms.erase(mUniforms.begin() + uniformSwap.mSourceIndex);
+		mUniforms.insert(mUniforms.begin() + uniformSwap.mTargetIndex, data);
+	}
 }
 
 void UniformsMenu::DrawAddUniformPopup() {
