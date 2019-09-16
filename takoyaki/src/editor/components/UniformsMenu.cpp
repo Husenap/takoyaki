@@ -55,7 +55,7 @@ void UniformsMenu::DrawUniforms() {
 		std::visit(make_overloaded{[&](auto& item) { item.Update(uniform.mName.c_str()); }}, uniform.mItem);
 		ImGui::EndGroup();
 
-		const static int dragDropFlags = ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptNoDrawDefaultRect;
+		const static int dragDropFlags = ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptBeforeDelivery;
 		if (ImGui::BeginDragDropSource(dragDropFlags)) {
 			ImGui::SetDragDropPayload(UniformDragAndDropName, &i, sizeof(int));
 			ImGui::Text(uniform.mName.c_str());
@@ -64,7 +64,6 @@ void UniformsMenu::DrawUniforms() {
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(UniformDragAndDropName)) {
 				int payload_index = *(const int*)payload->Data;
-				//std::swap(mUniforms[i], mUniforms[payload_index]);
 				uniformSwap = {payload_index, i};
 			}
 			ImGui::EndDragDropTarget();
