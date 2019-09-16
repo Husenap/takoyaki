@@ -8,7 +8,6 @@ class Camera : public Widget {
 public:
 	Camera() {
 		Reset();
-		UpdateCameraVectors();
 	}
 
 	void Reset();

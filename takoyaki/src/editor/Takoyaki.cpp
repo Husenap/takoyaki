@@ -67,7 +67,6 @@ Takoyaki::Takoyaki()
 
 	float time      = (float)glfwGetTime();
 	float deltaTime = 0.0f;
-	float mCurrentTime = 0.0f;
 
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
