@@ -1,16 +1,50 @@
 #pragma once
 
+namespace {
+void ErrorCallback(int error, const char* description) {
+	std::cout << "Error[" << error << "]: " << description << std::endl;
+}
+}  // namespace
+
 namespace ty {
 
 template <typename DERIVED_TYPE>
 class BaseWindow {
 public:
-	using InputCallbackType           = std::function<void(const KeyInput&)>;
+	using KeyInputCallbackType        = std::function<void(const KeyInput&)>;
+	using MouseInputCallbackType      = std::function<void(const MouseInput&)>;
+	using CursorInputCallbackType     = std::function<void(const CursorInput&)>;
 	using FramebufferSizeCallbackType = std::function<void(const glm::ivec2&)>;
 	using ContentScaleCallbackType    = std::function<void(const glm::vec2&)>;
 
 public:
-	BaseWindow() {}
+	BaseWindow(int width, int height, const char* title) {
+		glfwSetErrorCallback(::ErrorCallback);
+		if (!glfwInit()) {
+			throw std::runtime_error("Failed to initialize GLFW!");
+		}
+
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+		mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
+		if (!mWindow) {
+			throw std::runtime_error("Failed to create a GLFW window!");
+		}
+
+		glfwSetKeyCallback(mWindow, WindowInputCallback);
+		glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
+		glfwSetWindowContentScaleCallback(mWindow, WindowContentScaleCallback);
+		glfwSetCursorPosCallback(mWindow, WindowCursorPosCallback);
+		glfwSetMouseButtonCallback(mWindow, WindowMouseButtonCallback);
+
+		glfwGetFramebufferSize(mWindow, &mFramebufferSize.x, &mFramebufferSize.y);
+		glfwGetWindowContentScale(mWindow, &mContentScale.x, &mContentScale.y);
+
+		double mx, my;
+		glfwGetCursorPos(mWindow, &mx, &my);
+		mMousePos   = glm::vec2((float)mx, (float)my);
+		mMouseDelta = glm::vec2(0.0f, 0.0f);
+	}
 	virtual ~BaseWindow() {}
 
 	static void WindowInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -18,9 +52,36 @@ public:
 		if (userWindow) {
 			KeyInput input{key, scancode, action, mods};
 			userWindow->OnInput(input);
-			for (auto callback : userWindow->mInputListeners) callback(input);
+			for (auto callback : userWindow->mKeyInputListeners) callback(input);
 		} else {
 			throw std::runtime_error("Failed to process window input callback");
+		}
+	}
+
+	static void WindowCursorPosCallback(GLFWwindow* window, double x, double y) {
+		auto userWindow = reinterpret_cast<DERIVED_TYPE*>(glfwGetWindowUserPointer(window));
+		if (userWindow) {
+			glm::vec2 newPos((float)x, (float)y);
+			userWindow->mMouseDelta = newPos - userWindow->mMousePos;
+			userWindow->mMousePos   = newPos;
+			CursorInput input;
+			input.pos   = userWindow->mMousePos;
+			input.delta = userWindow->mMouseDelta;
+			userWindow->OnInput(input);
+			for (auto callback : userWindow->mCursorInputListeners) callback(input);
+		} else {
+			throw std::runtime_error("Failed to process window cursor callback");
+		}
+	}
+
+	static void WindowMouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+		auto userWindow = reinterpret_cast<DERIVED_TYPE*>(glfwGetWindowUserPointer(window));
+		if (userWindow) {
+			MouseInput input{button, action, mods};
+			userWindow->OnInput(input);
+			for (auto callback : userWindow->mMouseInputListeners) callback(input);
+		} else {
+			throw std::runtime_error("Failed to process window mouse button callback");
 		}
 	}
 
@@ -48,11 +109,19 @@ public:
 
 public:
 	virtual void OnInput(const KeyInput& keyInput)         = 0;
+	virtual void OnInput(const MouseInput& mouseInput)     = 0;
+	virtual void OnInput(const CursorInput& mouseInput)    = 0;
 	virtual void OnFramebufferSize(const glm::ivec2& size) = 0;
 	virtual void OnContentScale(const glm::vec2& size)     = 0;
 
-	void AddInputListener(InputCallbackType callback) {
-		if (callback) mInputListeners.emplace_back(callback);
+	void AddInputListener(KeyInputCallbackType callback) {
+		if (callback) mKeyInputListeners.emplace_back(callback);
+	}
+	void AddInputListener(MouseInputCallbackType callback) {
+		if (callback) mMouseInputListeners.emplace_back(callback);
+	}
+	void AddInputListener(CursorInputCallbackType callback) {
+		if (callback) mCursorInputListeners.emplace_back(callback);
 	}
 	void AddFramebufferSizeListener(FramebufferSizeCallbackType callback) {
 		if (callback) {
@@ -67,13 +136,27 @@ public:
 		}
 	}
 
+	void PollEvents() { glfwPollEvents(); }
+
+	void SwapBuffers() { glfwSwapBuffers(mWindow); }
+	void SetInputMode(int mode, int value) { glfwSetInputMode(mWindow, mode, value); }
+
+	void RequestClose() { glfwSetWindowShouldClose(mWindow, GLFW_TRUE); }
+	bool ShouldClose() const { return glfwWindowShouldClose(mWindow); }
+
+	const glm::ivec2& GetFramebufferSize() const { return mFramebufferSize; }
+
 protected:
 	GLFWwindow* mWindow;
 	glm::ivec2 mFramebufferSize;
 	glm::vec2 mContentScale;
+	glm::vec2 mMousePos;
+	glm::vec2 mMouseDelta;
 
 private:
-	std::vector<InputCallbackType> mInputListeners;
+	std::vector<KeyInputCallbackType> mKeyInputListeners;
+	std::vector<MouseInputCallbackType> mMouseInputListeners;
+	std::vector<CursorInputCallbackType> mCursorInputListeners;
 	std::vector<FramebufferSizeCallbackType> mFramebufferSizeListeners;
 	std::vector<ContentScaleCallbackType> mContentScaleListeners;
 };

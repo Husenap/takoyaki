@@ -62,11 +62,12 @@ Takoyaki::Takoyaki()
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
-	CreateCopyProgram();
 
 	mFileWatcher.StartThread();
 
-	float time = (float)glfwGetTime();
+	float time      = (float)glfwGetTime();
+	float deltaTime = 0.0f;
+	float mCurrentTime = 0.0f;
 
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
@@ -75,11 +76,13 @@ Takoyaki::Takoyaki()
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
 
-		time            = (float)glfwGetTime();
+		deltaTime = (float)glfwGetTime() - time;
+		time      = (float)glfwGetTime();
+		mCurrentTime += deltaTime;
 
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
-		mEditor.Update(!mCurrentProject.empty());
+		mEditor.Update(deltaTime, !mCurrentProject.empty(), mRenderTarget);
 
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
@@ -96,10 +99,10 @@ Takoyaki::Takoyaki()
 
 			cmds.Push<Commands::UseProgram>(mProgram->mProgram);
 			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
-			cmds.Push<Commands::Uniform>(mTimeLoc, time);
+			cmds.Push<Commands::Uniform>(mTimeLoc, mCurrentTime);
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
-			cmds.Push<Commands::Uniform>(mCameraOriginLoc, glm::vec3(0.f, 1.5f, -3.f));
-			cmds.Push<Commands::Uniform>(mCameraTargetLoc, glm::vec3(0.f, 0.f, 0.f));
+			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mEditor.GetCamera().GetPosition());
+			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mEditor.GetCamera().GetTarget());
 			mEditor.RegisterCommands(cmds, mProgram);
 
 			cmds.Push<Commands::BindVertexArray>(mVertexArray);
@@ -110,9 +113,6 @@ Takoyaki::Takoyaki()
 		}
 
 		cmds.Push<Commands::BindFramebuffer>(0);
-		cmds.Push<Commands::Viewport>(0, 0, size.x, size.y);
-
-		ImGui::Image((void*)(intptr_t)mRenderTarget->GetRenderTexture(), mRenderTarget->GetSize(), {0, 1}, {1, 0});
 
 		mRenderer.ProcessCommands();
 
@@ -136,18 +136,30 @@ void Takoyaki::CreateRenderTarget() {
 
 void Takoyaki::SetupListeners() {
 	mWindow.AddInputListener([this](const KeyInput& input) { OnInput(input); });
+	mWindow.AddInputListener([this](const MouseInput& input) { OnInput(input); });
+	mWindow.AddInputListener([this](const CursorInput& input) { OnInput(input); });
 	mWindow.AddFramebufferSizeListener([this](const glm::ivec2& size) { OnFramebufferSize(size); });
 	mWindow.AddContentScaleListener([this](const glm::vec2& scale) { OnContentScale(scale); });
 
 	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
 	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
+	mEditor.SetCameraCaptureInputHandler([this]() { OnCameraCaptureInput(); });
+	mEditor.SetCameraReleaseInputHandler([this]() { OnCameraReleaseInput(); });
 	mEditor.GetUniformsMenu().SetUniformsChangedHandler([this]() { OnUniformsChanged(); });
 }
 
 Takoyaki::~Takoyaki() {}
 
 void Takoyaki::OnInput(const KeyInput& input) {
+	mEditor.OnInput(input);
+}
+
+void Takoyaki::OnInput(const MouseInput& input) {
+	mEditor.OnInput(input);
+}
+
+void Takoyaki::OnInput(const CursorInput& input) {
 	mEditor.OnInput(input);
 }
 
@@ -188,8 +200,6 @@ void Takoyaki::LoadShader() {
 	mCameraTargetLoc = mProgram->GetUniformLocation("iCameraTarget");
 }
 
-void Takoyaki::CreateCopyProgram() {}
-
 void Takoyaki::OnNewFile() {
 	const char* fileToCreate = tinyfd_saveFileDialog("Open TakoYaki file", "", 1, &glslFileTypeFilter, nullptr);
 	if (fileToCreate) {
@@ -218,10 +228,20 @@ void Takoyaki::OnSaveFile() {
 	}
 }
 
+void Takoyaki::OnCameraCaptureInput() {
+	mWindow.SetInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void Takoyaki::OnCameraReleaseInput() {
+	mWindow.SetInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
 void Takoyaki::LoadProjectFile(const char* fileToLoad) {
+	mCurrentTime = 0.0f;
+
 	mCurrentProject = fileToLoad;
 
-	mEditor.GetUniformsMenu().OpenFile(mCurrentProject);
+	mEditor.LoadProjectFile(mCurrentProject);
 
 	LoadShader();
 	mFileWatcher.Clear();

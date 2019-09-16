@@ -1,10 +1,11 @@
 #pragma once
 
 #include "UniformItem.h"
+#include "Widget.h"
 
 namespace ty {
 
-class UniformsMenu {
+class UniformsMenu : public Widget {
 public:
 	void Update();
 
@@ -13,7 +14,6 @@ public:
 
 	void HandleNewUniform();
 
-	void ToggleVisibility();
 	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
 
 	void OpenFile(std::string_view file);
@@ -31,7 +31,6 @@ private:
 	};
 
 	std::vector<UniformData> mUniforms;
-	bool mVisibility;
 
 	UniformsChangedHandler mUniformsChangedHandler;
 

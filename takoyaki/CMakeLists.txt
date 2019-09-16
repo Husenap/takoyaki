@@ -23,6 +23,11 @@ set(editor_files
     "src/editor/Takoyaki.cpp")
 
 set(editor_components_files
+    "src/editor/components/Widget.h"
+    "src/editor/components/Preview.h"
+    "src/editor/components/Preview.cpp"
+    "src/editor/components/Camera.h"
+    "src/editor/components/Camera.cpp"
     "src/editor/components/UniformsMenu.h"
     "src/editor/components/UniformsMenu.cpp"
     "src/editor/components/UniformItem.h")
@@ -30,7 +35,7 @@ set(editor_components_files
 set(util_files
     "src/util/FileWatcher.h"
     "src/util/FileWatcher.cpp"
-    "src/util/KeyInput.h"
+    "src/util/Input.h"
     "src/util/glmvecToImVec.h"
     "src/util/VariantPolyfill.h")
 

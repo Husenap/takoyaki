@@ -1,31 +1,11 @@
 #include "MainWindow.h"
 
-namespace {
-static void ErrorCallback(int error, const char* description) {
-	std::cout << "Error[" << error << "]: " << description << std::endl;
-}
-
-}  // namespace
 
 namespace ty {
 
-MainWindow::MainWindow(int width, int height, const char* title) {
-	glfwSetErrorCallback(::ErrorCallback);
-	if (!glfwInit()) {
-		throw std::runtime_error("Failed to initialize GLFW!");
-	}
+MainWindow::MainWindow(int width, int height, const char* title) : BaseWindow(width, height, title) {
+	glfwSetWindowUserPointer(mWindow, this);
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
-	if (!mWindow) {
-		throw std::runtime_error("Failed to create a GLFW window!");
-	}
-
-	glfwGetFramebufferSize(mWindow, &mFramebufferSize.x, &mFramebufferSize.y);
-	glfwGetWindowContentScale(mWindow, &mContentScale.x, &mContentScale.y);
-
-	InitCallbacks();
 	InitGL();
 	InitImGui();
 }
@@ -37,14 +17,6 @@ MainWindow::~MainWindow() {
 
 	glfwDestroyWindow(mWindow);
 	glfwTerminate();
-}
-
-void MainWindow::InitCallbacks() {
-	glfwSetWindowUserPointer(mWindow, this);
-
-	glfwSetKeyCallback(mWindow, WindowInputCallback);
-	glfwSetFramebufferSizeCallback(mWindow, WindowFramebufferSizeCallback);
-	glfwSetWindowContentScaleCallback(mWindow, WindowContentScaleCallback);
 }
 
 void MainWindow::InitGL() {
@@ -146,28 +118,12 @@ void MainWindow::SetupImGuiStyle() {
 	style.TabRounding   = 3.f;
 }
 
-bool MainWindow::ShouldClose() const {
-	return glfwWindowShouldClose(mWindow);
+void MainWindow::OnInput(const KeyInput&) {
 }
 
-void MainWindow::RequestClose() {
-	glfwSetWindowShouldClose(mWindow, GLFW_TRUE);
-}
+void MainWindow::OnInput(const MouseInput&) {}
 
-void MainWindow::SwapBuffers() {
-	glfwSwapBuffers(mWindow);
-}
-
-void MainWindow::PollEvents() {
-	glfwPollEvents();
-}
-
-const glm::ivec2& MainWindow::GetFramebufferSize() const {
-	return mFramebufferSize;
-}
-
-void MainWindow::OnInput(const KeyInput& input) {
-}
+void MainWindow::OnInput(const CursorInput&) {}
 
 void MainWindow::OnFramebufferSize(const glm::ivec2& size) {
 	mFramebufferSize = size;

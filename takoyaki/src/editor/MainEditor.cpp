@@ -4,7 +4,12 @@ namespace ty {
 
 const char* ErrorPopupName = "Error##Popup";
 
-void MainEditor::Update(bool hasProjectLoaded) {
+void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
+	mUniformsMenu.OpenFile(fileToLoad);
+	mCamera.Reset();
+}
+
+void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const std::unique_ptr<RenderTarget>& renderTarget) {
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
 	}
@@ -27,6 +32,12 @@ void MainEditor::Update(bool hasProjectLoaded) {
 			if (ImGui::MenuItem("Uniforms", "F1", nullptr, hasProjectLoaded)) {
 				mUniformsMenu.ToggleVisibility();
 			}
+			if (ImGui::MenuItem("Preview", "F2", nullptr, hasProjectLoaded)) {
+				mPreview.ToggleVisibility();
+			}
+			if (ImGui::MenuItem("Camera", "F3", nullptr, hasProjectLoaded)) {
+				mCamera.ToggleVisibility();
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -34,6 +45,12 @@ void MainEditor::Update(bool hasProjectLoaded) {
 
 	if (hasProjectLoaded) {
 		mUniformsMenu.Update();
+		mPreview.Update(renderTarget);
+
+		if (mCameraMode) {
+			mCamera.ProcessKeyInput(ImGui::GetIO().KeysDown, deltaTime);
+		}
+		mCamera.Update();
 	}
 
 	if (!mErrors.empty()) {
@@ -46,21 +63,49 @@ void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::u
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
+	if (mCameraMode) {
+		return;
+	}
+
 	if (input.key == GLFW_KEY_N && input.mods == GLFW_MOD_CONTROL) {
-		mNewFileHandler();
+		if (mNewFileHandler) mNewFileHandler();
 	}
 	if (input.key == GLFW_KEY_O && input.mods == GLFW_MOD_CONTROL) {
-		mOpenFileHandler();
+		if (mOpenFileHandler) mOpenFileHandler();
 	}
 	if (input.key == GLFW_KEY_S && (input.mods == GLFW_MOD_CONTROL)) {
-		mSaveFileHandler();
+		if (mSaveFileHandler) mSaveFileHandler();
 	}
 
 	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {
 		mUniformsMenu.ToggleVisibility();
 	}
+	if (input.key == GLFW_KEY_F2 && input.action == GLFW_PRESS) {
+		mPreview.ToggleVisibility();
+	}
+	if (input.key == GLFW_KEY_F3 && input.action == GLFW_PRESS) {
+		mCamera.ToggleVisibility();
+	}
 	if (input.key == GLFW_KEY_F4 && input.action == GLFW_PRESS) {
 		mShowDemoWindow = !mShowDemoWindow;
+	}
+}
+
+void MainEditor::OnInput(const MouseInput& input) {
+	if (input.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		if (mPreview.IsHovered() && input.action == GLFW_PRESS) {
+			mCameraMode = true;
+			if (mCameraCaptureHandler) mCameraCaptureHandler();
+		} else if (input.action == GLFW_RELEASE) {
+			mCameraMode = false;
+			if (mCameraReleaseHandler) mCameraReleaseHandler();
+		}
+	}
+}
+
+void MainEditor::OnInput(const CursorInput& input) {
+	if (mCameraMode) {
+		mCamera.ProcessMouseMovement(input.delta);
 	}
 }
 

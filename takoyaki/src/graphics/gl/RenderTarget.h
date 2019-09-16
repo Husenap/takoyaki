@@ -11,8 +11,8 @@ public:
 	void SetAsTarget();
 
 	const glm::ivec2& GetSize() const { return mSize; }
-	GLuint GetFramebuffer() { return mFramebuffer; }
-	GLuint GetRenderTexture() { return mRenderTexture; }
+	GLuint GetFramebuffer() const { return mFramebuffer; }
+	GLuint GetRenderTexture() const { return mRenderTexture; }
 
 private:
 	GLuint mFramebuffer;

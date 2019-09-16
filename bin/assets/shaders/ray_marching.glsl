@@ -31,7 +31,7 @@ float RayMarch(vec3 ro, vec3 rd){
     for(int i = ZERO; i < MAX_STEPS; ++i){
         p = rd*t + ro;
 
-        float d = GetDist(p);
+        float d = abs(GetDist(p));
 
         t += d;
 
@@ -69,7 +69,7 @@ vec3 GetColor(vec3 ro, vec3 rd){
         float sun_dif = saturate(dot(n, sun_dir));
         float sun_spe = pow(saturate(dot(n, sun_hal)), 8.0)*sun_dif*(0.04+0.96*pow(saturate(1.+dot(sun_hal,rd)),5.0));
         float sky_dif = sqrt(saturate(n.y*0.5+0.5));
-        float sky_spe = smoothstep(0., 0.5, h.y)*(0.04+0.96*pow(fre,4.0));
+        float sky_spe = smoothstep(0., 0.5, h.y)*(0.04+0.96*pow(fre,2.0));
         float bou_dif = sqrt(saturate(0.1-0.9*n.y)) * saturate(1.-0.1*p.y);
 
         vec3 light = vec3(0.0);
@@ -95,7 +95,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord*2.0 - iResolution.xy) / iResolution.y;
 
     vec3 lookAt = iCameraTarget;
-    vec3 cameraPosition = iCameraPosition; //iCameraOrigin;
+    vec3 cameraPosition = iCameraOrigin;
     
     vec3 forward = normalize(lookAt-cameraPosition);
     vec3 right = normalize(vec3(forward.z, 0., -forward.x ));
