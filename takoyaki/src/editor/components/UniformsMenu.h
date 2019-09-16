@@ -29,6 +29,10 @@ private:
 		std::string mName;
 		UniformItem mItem;
 	};
+	struct SwapData {
+		int mSourceIndex;
+		int mTargetIndex;
+	};
 
 	std::vector<UniformData> mUniforms;
 
