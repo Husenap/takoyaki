@@ -15,8 +15,9 @@ jobs:
     - name: Compile
       run: cmake --build _build
     - name: Run Tests
-      run: cd _build/
-      run: ctest .
+      run:
+        cd _build/
+        ctest .
 
 #  build-macOS:
 #    name: Build-macOS
