@@ -179,7 +179,8 @@ void UniformsMenu::OpenFile(std::string_view file) {
 }
 
 void UniformsMenu::SaveFile(std::string_view file) {
-	std::ofstream f(std::string(file) + ".uniforms", std::ios_base::binary);
+	std::string uniformsFile = std::string(file) + ".uniforms";
+	std::ofstream f(uniformsFile, std::ios_base::binary);
 	if (!f.is_open()) return;
 
 	unsigned char numUniforms = (unsigned char)mUniforms.size();
@@ -194,6 +195,9 @@ void UniformsMenu::SaveFile(std::string_view file) {
 	}
 
 	f.close();
+
+	dubu::FileBuffer fb(uniformsFile + "_new", dubu::FileBuffer::Mode::Write);
+	fb << mUniforms << std::string("hejsan");
 }
 
 std::string UniformsMenu::GetUniformDeclarations() {

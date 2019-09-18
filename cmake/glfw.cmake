@@ -1,3 +1,4 @@
+message("-- External Project: glfw")
 include(FetchContent)
 
 FetchContent_Declare(
@@ -14,8 +15,8 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_GetProperties(glfw)
 if(NOT glfw_POPULATED)
-  FetchContent_Populate(glfw)
-  add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
+	FetchContent_Populate(glfw)
+	add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
 endif()
 #FetchContent_MakeAvailable(glfw)
 

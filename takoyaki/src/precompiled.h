@@ -41,3 +41,5 @@
 #include "graphics/gl/RenderTarget.h"
 
 #include "editor/handlers/Handlers.h"
+
+#include <serializer/Serializer.h>
