@@ -47,16 +47,17 @@ float sdSphere(in vec3 p, float r){
 }
 
 vec2 sdGuy(in vec3 p){
-    float t = fract(iTime);
+    float time = iTime;
+    float t = fract(time);
     float y = 4. * t * (1.0-t);
-    float eart = fract(iTime+0.2);
+    float eart = fract(+time+0.2);
     float eary = 4. * eart * (1.0-eart);
     float dy = 4.0*(1.0-2.0*t);
 
     vec2 u = normalize(vec2(1.0, dy));
     vec2 v = normalize(vec2(-dy, 1.0));
 
-    vec3 center = vec3(0., y, 0.);
+    vec3 center = vec3(0., y-0.15, 0.);
 
     float sy = 0.5 + 0.5*y;
     float sz = 0.75/sy;
@@ -79,14 +80,14 @@ vec2 sdGuy(in vec3 p){
     d = smoothMin(d, d2, 0.15);
 
     // eyebrows
-    vec3 eyebrow = sh - vec3(0.12, 0.34, -0.15);
-    eyebrow.xy = (mat2(3.,4.,-4.,3.)/5.)*eyebrow.xy;
-    d2 = sdEllipsoid(eyebrow, vec3(0.06, 0.035, 0.05));
+    vec3 eyebrow = sh - iEyebrowOffset;
+    eyebrow.xy = (mat2(24.,7.,-7.,24.)/25.)*eyebrow.xy;
+    d2 = sdEllipsoid(eyebrow, iEyebrowSize);
     d = smoothMin(d, d2, 0.04);
 
     // mouth
-    d2 = sdEllipsoid(h-vec3(0.0, 0.15 + 3.0*h.x*h.x, -0.15), vec3(0.1, 0.04, 0.2));
-    d = smoothMax(d, -d2, 0.03);
+    d2 = 0.8*sdEllipsoid(h-vec3(0.0, 0.15 + 3.0*h.x*h.x, -0.15), vec3(0.1, 0.04, 0.2));
+    d = smoothMax(d, -d2, 0.02);
 
     //ears
     d2 = sdStick(sh, vec3(0.15, 0.4, 0.02), vec3(0.25, 0.55-eary*0.2, -0.02), 0.01, 0.04);
@@ -100,7 +101,6 @@ vec2 sdGuy(in vec3 p){
 
     d4 = sdSphere(sh - vec3(0.09, 0.28, -0.18), 0.03);
     if(d4 < res.x) res = vec2(d4, ID_PUPILS);
-
 
     return res;
 }
@@ -136,12 +136,12 @@ vec2 RayMarch(in vec3 ro, in vec3 rd){
 float CalcShadow(in vec3 ro, in vec3 rd){
     float res = 1.0;
 
-    float t = 0.001;
+    float t = 0.01;
     for(int i = 0; i < 100; ++i){
         vec3 p = rd * t + ro;
         float h = Map(p).x;
 
-        res = min(16.0*h.x/t, res);
+        res = min(32.0*h.x/t, res);
 
         t += h;
         if(t > 20.0)break;
@@ -196,7 +196,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
         vec3 sunDirection = normalize(iSunDirection);
         float sunDiffuse = saturate(dot(n, sunDirection));
-        float sunShadow = 1.0;//CalcShadow(p+n*0.01, sunDirection);
+        float sunShadow = CalcShadow(p+n*0.01, sunDirection);
 
         float skyDiffuse = saturate(0.5+0.5*dot(n, vec3(0.,1.,0.)));
 

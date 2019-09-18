@@ -81,7 +81,7 @@ Takoyaki::Takoyaki()
 
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
-		mEditor.Update(deltaTime, !mCurrentProject.empty(), mRenderTarget);
+		mEditor.Update(deltaTime, !mCurrentProject.empty(), *mRenderTarget);
 
 		auto& cmds = mRenderer.Commands();
 		cmds.Clear();
@@ -102,7 +102,7 @@ Takoyaki::Takoyaki()
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
 			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mEditor.GetCamera().GetPosition());
 			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mEditor.GetCamera().GetTarget());
-			mEditor.RegisterCommands(cmds, mProgram);
+			mEditor.RegisterCommands(cmds, *mProgram);
 
 			cmds.Push<Commands::BindVertexArray>(mVertexArray);
 			cmds.Push<Commands::VertexAttribPointer>(

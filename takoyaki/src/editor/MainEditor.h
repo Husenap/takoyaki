@@ -13,8 +13,8 @@ public:
 
 	void LoadProjectFile(const std::string& fileToLoad);
 
-	void Update(float deltaTime, bool hasProjectLoaded, const std::unique_ptr<RenderTarget>& renderTarget);
-	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+	void Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget);
+	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program);
 
 	void OnInput(const KeyInput& input);
 	void OnInput(const MouseInput& input);
