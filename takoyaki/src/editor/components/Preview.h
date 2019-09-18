@@ -6,7 +6,7 @@ namespace ty {
 
 class Preview : public Widget {
 public:
-	void Update(const std::unique_ptr<RenderTarget>& renderTarget);
+	void Update(const RenderTarget& renderTarget);
 
 	const bool& IsHovered() const { return mIsHovered; }
 

@@ -14,7 +14,7 @@ public:
 
 	void HandleNewUniform();
 
-	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program);
+	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program);
 
 	void OpenFile(std::string_view file);
 	void SaveFile(std::string_view file);

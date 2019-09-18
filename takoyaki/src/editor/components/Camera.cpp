@@ -22,6 +22,7 @@ void Camera::Reset() {
 	mSpeed       = 5.0f;
 	mSensitivity = 0.25f;
 	mZoom        = 45.f;
+	UpdateCameraVectors();
 }
 void Camera::Update() {
 	if (mVisibility) {
@@ -38,9 +39,6 @@ void Camera::Update() {
 
 void Camera::ProcessKeyInput(bool keys[512], float deltaTime) {
 	float velocity = mSpeed * deltaTime;
-
-	if (keys[GLFW_MOD_CONTROL]) velocity *= 0.5f;
-	if (keys[GLFW_MOD_SHIFT]) velocity *= 2.f;
 
 	if (keys[GLFW_KEY_W]) mPosition += mForward * velocity;
 	if (keys[GLFW_KEY_S]) mPosition -= mForward * velocity;

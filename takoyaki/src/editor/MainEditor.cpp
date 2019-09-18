@@ -9,7 +9,7 @@ void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 	mCamera.Reset();
 }
 
-void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const std::unique_ptr<RenderTarget>& renderTarget) {
+void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget) {
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
 	}
@@ -58,7 +58,7 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const std::uniqu
 	}
 }
 
-void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
+void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program) {
 	mUniformsMenu.RegisterCommands(cmds, program);
 }
 

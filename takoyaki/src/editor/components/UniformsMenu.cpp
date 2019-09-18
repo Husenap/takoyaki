@@ -52,8 +52,10 @@ void UniformsMenu::DrawUniforms() {
 		ImGui::BeginGroup();
 		bool wasButtonPressed = ImGui::Button("X");
 		ImGui::SameLine();
-		std::visit(make_overloaded{[&](auto& item) { item.Update(uniform.mName.c_str()); }}, uniform.mItem);
-		ImGui::EndGroup();
+		std::visit(make_overloaded{[](auto& item) { item.Update(); }}, uniform.mItem);
+		ImGui::SameLine();
+
+		ImGui::Text(uniform.mName.c_str());
 
 		const static int dragDropFlags = ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptBeforeDelivery;
 		if (ImGui::BeginDragDropSource(dragDropFlags)) {
@@ -61,6 +63,9 @@ void UniformsMenu::DrawUniforms() {
 			ImGui::Text(uniform.mName.c_str());
 			ImGui::EndDragDropSource();
 		}
+
+		ImGui::EndGroup();
+
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(UniformDragAndDropName)) {
 				int payload_index = *(const int*)payload->Data;
@@ -145,9 +150,9 @@ void UniformsMenu::HandleNewUniform() {
 	}
 }
 
-void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, std::unique_ptr<ShaderProgram>& program) {
+void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program) {
 	for (auto& uniform : mUniforms) {
-		auto pred = [&](auto& item) { cmds.Push<Commands::Uniform>(program->mProgram, uniform.mName, item.value); };
+		auto pred = [&](auto& item) { cmds.Push<Commands::Uniform>(program.mProgram, uniform.mName, item.value); };
 		std::visit(make_overloaded{pred}, uniform.mItem);
 	}
 }
