@@ -8,10 +8,10 @@ namespace dubu {
 template <typename T, bool IsPod>
 struct Serializer {
 	void Read(T& object, ReadBuffer& buffer) {
-		//object.Serialize(buffer);
+		object.Serialize(buffer);
 	}
 	void Write(const T& object, WriteBuffer& buffer) {
-		//object.Serialize(buffer);
+		object.Serialize(buffer);
 	}
 };
 

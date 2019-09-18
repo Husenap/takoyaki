@@ -197,7 +197,7 @@ void UniformsMenu::SaveFile(std::string_view file) {
 	f.close();
 
 	dubu::FileBuffer fb(uniformsFile + "_new", dubu::FileBuffer::Mode::Write);
-	fb << mUniforms << std::string("hejsan");
+	fb << mUniforms;
 }
 
 std::string UniformsMenu::GetUniformDeclarations() {
