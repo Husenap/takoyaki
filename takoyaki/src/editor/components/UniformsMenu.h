@@ -26,19 +26,6 @@ public:
 	std::string GetUniformDeclarations();
 
 private:
-	enum class UniformType : int { Float, Vec2, Vec3, Vec4, Color };
-	struct UniformData {
-		std::string mName;
-		UniformItem mItem;
-		void Serialize(dubu::ReadBuffer& buffer) {
-			buffer >> mName;
-			std::visit(make_overloaded{[&buffer](auto& data) { buffer >> data; }}, mItem);
-		}
-		void Serialize(dubu::WriteBuffer& buffer) const {
-			buffer << mName;
-			std::visit(make_overloaded{[&buffer](const auto& data) { buffer << data; }}, mItem);
-		}
-	};
 	struct SwapData {
 		int mSourceIndex;
 		int mTargetIndex;

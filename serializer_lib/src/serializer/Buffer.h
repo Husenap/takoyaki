@@ -18,13 +18,16 @@ struct FileBuffer : WriteBuffer, ReadBuffer {
 	enum class Mode { Read, Write };
 	FileBuffer(const std::string& file, Mode mode) {
 		if (mode == Mode::Read) {
-			mStream.open(file, std::ios_base::in);
+			mStream.open(file, std::ios_base::in | std::ios_base::binary);
 		} else {
-			mStream.open(file, std::ios_base::out);
+			mStream.open(file, std::ios_base::out | std::ios_base::binary);
 		}
 	}
 	~FileBuffer() {
 		mStream.close();
+	}
+	bool IsOpen() const {
+		return mStream.is_open();
 	}
 	virtual void Write(const void* buffer, std::size_t size) override {
 		mStream.write((const char*)buffer, size);

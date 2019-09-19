@@ -17,12 +17,12 @@ struct Serializer {
 
 template <typename T>
 WriteBuffer& operator<<(WriteBuffer& buffer, const T& object) {
-	Serializer<T, std::is_pod_v<T>>().Write(object, buffer);
+	Serializer<T, std::is_pod_v<std::decay_t<T>>>().Write(object, buffer);
 	return buffer;
 }
 template <typename T>
 ReadBuffer& operator>>(ReadBuffer& buffer, T& object) {
-	Serializer<T, std::is_pod_v<T>>().Read(object, buffer);
+	Serializer<T, std::is_pod_v<std::decay_t<T>>>().Read(object, buffer);
 	return buffer;
 }
 
