@@ -46,7 +46,7 @@ struct UniformItemMat4 {
 		ImGui::EndGroup();
 	}
 	static constexpr const char* GetShaderType() { return "mat4"; }
-	static constexpr UniformType EnumType = UniformType::Color;
+	static constexpr UniformType EnumType = UniformType::Mat4;
 };
 // clang-format on
 

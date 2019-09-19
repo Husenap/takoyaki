@@ -1,7 +1,5 @@
 #include "UniformsMenu.h"
 
-#define USE_OLD_UNIFORMS 0
-
 namespace {
 static int CharacterFilter(ImGuiTextEditCallbackData* data) {
 	ImWchar c    = data->EventChar;
@@ -147,63 +145,16 @@ void UniformsMenu::OpenFile(std::string_view file) {
 	mUniforms.clear();
 
 	std::string uniformsFile = std::string(file) + ".uniforms";
-
-#if USE_OLD_UNIFORMS
-
-	std::ifstream f(uniformsFile, std::ios_base::binary);
-	if (!f.is_open()) return;
-
-	unsigned char numUniforms;
-	f.read((char*)&numUniforms, sizeof(numUniforms));
-
-	mUniforms.resize(numUniforms);
-	for (size_t i = 0; i < numUniforms; ++i) {
-		f.read((char*)&mUniforms[i].mItem, sizeof(mUniforms[i].mItem));
-	}
-
-	for (size_t i = 0; i < numUniforms; ++i) {
-		std::getline(f, mUniforms[i].mName);
-	}
-
-	f.close();
-
-#else
-
-	dubu::FileBuffer fb(uniformsFile + "_new", dubu::FileBuffer::Mode::Read);
+	dubu::FileBuffer fb(uniformsFile, dubu::FileBuffer::Mode::Read);
 	if (!fb.IsOpen()) return;
 	fb >> mUniforms;
-
-#endif
 }
 
 void UniformsMenu::SaveFile(std::string_view file) {
 	std::string uniformsFile = std::string(file) + ".uniforms";
-
-#if USE_OLD_UNIFORMS
-
-	std::ofstream f(uniformsFile, std::ios_base::binary);
-	if (!f.is_open()) return;
-
-	unsigned char numUniforms = (unsigned char)mUniforms.size();
-	f.write((char*)&numUniforms, sizeof(numUniforms));
-
-	for (const auto& uniform : mUniforms) {
-		f.write((char*)&uniform.mItem, sizeof(uniform.mItem));
-	}
-
-	for (const auto& uniform : mUniforms) {
-		f << uniform.mName << std::endl;
-	}
-
-	f.close();
-
-	#else
-
-	dubu::FileBuffer fb(uniformsFile + "_new", dubu::FileBuffer::Mode::Write);
+	dubu::FileBuffer fb(uniformsFile, dubu::FileBuffer::Mode::Write);
 	if (!fb.IsOpen()) return;
 	fb << mUniforms;
-
-#endif
 }
 
 std::string UniformsMenu::GetUniformDeclarations() {
