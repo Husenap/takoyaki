@@ -25,8 +25,8 @@ void UniformsMenu::Update() {
 			DrawUniforms();
 
 			DrawAddUniformPopup();
-			ImGui::End();
 		}
+		ImGui::End();
 	}
 
 	if (numUniforms != mUniforms.size()) {
