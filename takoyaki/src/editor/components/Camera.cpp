@@ -26,7 +26,7 @@ void Camera::Reset() {
 }
 void Camera::Update() {
 	if (mVisibility) {
-		if (ImGui::Begin("Camera")) {
+		if (ImGui::Begin("Camera", &mVisibility)) {
 			ImGui::InputFloat3("position", &mPosition.x, 3, ImGuiInputTextFlags_ReadOnly);
 			ImGui::InputFloat3("target", &mTarget.x, 3, ImGuiInputTextFlags_ReadOnly);
 			ImGui::InputFloat3("forward", &mForward.x, 3, ImGuiInputTextFlags_ReadOnly);

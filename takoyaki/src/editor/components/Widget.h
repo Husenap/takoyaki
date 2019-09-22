@@ -7,7 +7,7 @@ public:
     void ToggleVisibility() { mVisibility = !mVisibility;}
 
 protected:
-    bool mVisibility;
+    bool mVisibility = true;
 };
 
 }

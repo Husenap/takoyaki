@@ -1,14 +1,17 @@
 #pragma once
 
-#include "../graphics/MainWindow.h"
-#include "../graphics/Renderer.h"
-#include "MainEditor.h"
+#include "ServiceManager.h"
 
 namespace ty {
 
 class Takoyaki {
 public:
-	Takoyaki();
+	Takoyaki(MainWindow& window,
+	         Renderer& renderer,
+	         FileWatcher& fileWatcher,
+	         MainEditor& editor,
+	         Camera& camera,
+	         UniformsMenu& uniformsMenu);
 	~Takoyaki();
 
 private:
@@ -30,15 +33,12 @@ private:
 
 	void OnCameraCaptureInput();
 	void OnCameraReleaseInput();
+	void OnUniformsChanged();
 
 	void LoadProjectFile(const char* fileToLoad);
 
+	std::string mCurrentProject;
 	float mCurrentTime;
-
-	Renderer mRenderer;
-	MainWindow mWindow;
-	MainEditor mEditor;
-	FileWatcher mFileWatcher;
 
 	GLuint mVertexArray;
 	std::unique_ptr<ShaderProgram> mProgram;
@@ -48,11 +48,14 @@ private:
 	GLint mResolutionLoc;
 	GLint mCameraOriginLoc;
 	GLint mCameraTargetLoc;
-
 	std::unique_ptr<RenderTarget> mRenderTarget;
 
-	std::string mCurrentProject;
-	void OnUniformsChanged();
+	MainWindow& mWindow;
+	Renderer& mRenderer;
+	FileWatcher& mFileWatcher;
+	MainEditor& mEditor;
+	Camera& mCamera;
+	UniformsMenu& mUniformsMenu;
 };
 
 }  // namespace ty

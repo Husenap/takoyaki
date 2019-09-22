@@ -19,6 +19,8 @@ set(editor_files
     "src/editor/handlers/Handlers.h"
     "src/editor/MainEditor.h"
     "src/editor/MainEditor.cpp"
+    "src/editor/ServiceManager.h"
+    "src/editor/ServiceManager.cpp"
     "src/editor/Takoyaki.h"
     "src/editor/Takoyaki.cpp")
 

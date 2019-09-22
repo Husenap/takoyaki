@@ -1,6 +1,10 @@
 #include "Takoyaki.h"
 
+#include "../graphics/MainWindow.h"
+#include "../graphics/Renderer.h"
 #include "../graphics/gl/RenderCommand.h"
+#include "MainEditor.h"
+#include "components/Camera.h"
 
 namespace {
 ImVec2 vertices[3] = {
@@ -56,14 +60,21 @@ static const char* glslFileTypeFilter = "*.glsl";
 }  // namespace
 
 namespace ty {
-
-Takoyaki::Takoyaki()
-    : mWindow(1024, 768, "Takoyaki") {
+Takoyaki::Takoyaki(MainWindow& window,
+                   Renderer& renderer,
+                   FileWatcher& fileWatcher,
+                   MainEditor& editor,
+                   Camera& camera,
+                   UniformsMenu& uniformsMenu)
+    : mWindow(window)
+    , mRenderer(renderer)
+    , mFileWatcher(fileWatcher)
+    , mEditor(editor)
+    , mCamera(camera)
+    , mUniformsMenu(uniformsMenu) {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
-
-	mFileWatcher.StartThread();
 
 	float time      = (float)glfwGetTime();
 	float deltaTime = 0.0f;
@@ -100,8 +111,8 @@ Takoyaki::Takoyaki()
 			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
 			cmds.Push<Commands::Uniform>(mTimeLoc, mCurrentTime);
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
-			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mEditor.GetCamera().GetPosition());
-			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mEditor.GetCamera().GetTarget());
+			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mCamera.GetPosition());
+			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mCamera.GetTarget());
 			mEditor.RegisterCommands(cmds, *mProgram);
 
 			cmds.Push<Commands::BindVertexArray>(mVertexArray);
@@ -119,7 +130,6 @@ Takoyaki::Takoyaki()
 
 		mFileWatcher.Flush();
 	}
-	mFileWatcher.StopThread();
 }
 
 void Takoyaki::CreateVertexBuffer() {
@@ -145,7 +155,8 @@ void Takoyaki::SetupListeners() {
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
 	mEditor.SetCameraCaptureInputHandler([this]() { OnCameraCaptureInput(); });
 	mEditor.SetCameraReleaseInputHandler([this]() { OnCameraReleaseInput(); });
-	mEditor.GetUniformsMenu().SetUniformsChangedHandler([this]() { OnUniformsChanged(); });
+
+	mUniformsMenu.SetUniformsChangedHandler([this]() { OnUniformsChanged(); });
 }
 
 Takoyaki::~Takoyaki() {}
@@ -177,8 +188,8 @@ void Takoyaki::LoadShader() {
 	std::string shaderFileCode((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
 	shaderFile.close();
 	std::string shaderCode = fragmentShaderCodeBegin;
-	shaderCode += mEditor.GetUniformsMenu().GetUniformDeclarations();
-	shaderCode += "#line 1\n"+shaderFileCode;
+	shaderCode += mUniformsMenu.GetUniformDeclarations();
+	shaderCode += "#line 1\n" + shaderFileCode;
 	shaderCode += fragmentShaderCodeEnd;
 
 	VertexShader vShader(vertexShaderCode);
@@ -223,7 +234,7 @@ void Takoyaki::OnOpenFile() {
 
 void Takoyaki::OnSaveFile() {
 	if (!mCurrentProject.empty()) {
-		mEditor.GetUniformsMenu().SaveFile(mCurrentProject);
+		mUniformsMenu.SaveFile(mCurrentProject);
 	}
 }
 

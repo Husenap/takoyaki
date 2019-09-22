@@ -8,7 +8,10 @@ namespace ty {
 
 class MainEditor {
 public:
-	MainEditor()  = default;
+	MainEditor(Camera& camera, Preview& preview, UniformsMenu& uniformsMenu)
+	    : mCamera(camera)
+	    , mPreview(preview)
+	    , mUniformsMenu(uniformsMenu) {}
 	~MainEditor() = default;
 
 	void LoadProjectFile(const std::string& fileToLoad);
@@ -31,9 +34,6 @@ public:
 	void SetCameraCaptureInputHandler(CameraCaptureInputHandler handler) { mCameraCaptureHandler = handler; }
 	void SetCameraReleaseInputHandler(CameraReleaseInputHandler handler) { mCameraReleaseHandler = handler; }
 
-	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
-	Camera& GetCamera() { return mCamera; }
-
 private:
 	void DisplayErrors();
 
@@ -45,9 +45,9 @@ private:
 	glm::vec2 mContentScale;
 	std::vector<std::string> mErrors;
 
-	UniformsMenu mUniformsMenu;
-	Preview mPreview;
-	Camera mCamera;
+	UniformsMenu& mUniformsMenu;
+	Preview& mPreview;
+	Camera& mCamera;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;

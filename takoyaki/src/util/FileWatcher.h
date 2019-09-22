@@ -6,8 +6,8 @@ using FileChangeCallback = std::function<void(const std::string&)>;
 
 class FileWatcher {
 public:
-	void StartThread();
-	void StopThread();
+	FileWatcher();
+	~FileWatcher();
 
 	void Flush();
 

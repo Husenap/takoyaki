@@ -28,7 +28,7 @@ void MainWindow::InitGL() {
 void MainWindow::InitImGui() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
 

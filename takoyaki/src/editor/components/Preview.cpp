@@ -4,7 +4,7 @@ namespace ty {
 
 void Preview::Update(const RenderTarget& renderTarget) {
 	if (mVisibility) {
-		if (ImGui::Begin("Preview")) {
+		if (ImGui::Begin("Preview", &mVisibility)) {
 			mIsHovered = ImGui::IsWindowHovered();
 			ImGui::Image((void*)(intptr_t)renderTarget.GetRenderTexture(), renderTarget.GetSize(), {0, 1}, {1, 0});
 		}
