@@ -15,14 +15,37 @@ const float MIN_DIST = 1e-3;
 
 #define ZERO (min(0, iFrame))
 
+float Hash21(vec2 p){
+    p = fract(p*vec2(233.34, 851.74));
+    p += dot(p, p+23.45);
+    return fract(p.x*p.y);
+}
+
 float saturate(float f){
     return clamp(f, 0., 1.);
+}
+
+float sdBox(in vec3 p, in vec3 s){
+    vec3 d = abs(p)-s;
+    return max(max(d.x, d.y), d.z);
+}
+
+vec2 pMod2(inout vec2 p, vec2 size) {
+	vec2 c = floor((p + size*0.5)/size);
+	p = mod(p + size*0.5,size) - size*0.5;
+	return c;
 }
 
 float GetDist(vec3 p){
     float sphere = length(p - iSpherePosition) - 0.5;
     float plane = p.y + 0.5;
-    return min(sphere, plane);
+
+    float d = min(sphere, plane);
+
+    vec2 c = pMod2(p.xz, vec2(4.0));
+    d = min(d, sdBox(p, 0.2+0.8*vec3(Hash21(c)))*0.5);
+
+    return d;
 }
 
 float RayMarch(vec3 ro, vec3 rd){

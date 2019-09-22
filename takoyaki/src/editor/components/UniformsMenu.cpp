@@ -25,8 +25,8 @@ void UniformsMenu::Update() {
 			DrawUniforms();
 
 			DrawAddUniformPopup();
-			ImGui::End();
 		}
+		ImGui::End();
 	}
 
 	if (numUniforms != mUniforms.size()) {
@@ -93,7 +93,7 @@ void UniformsMenu::DrawUniforms() {
 void UniformsMenu::DrawAddUniformPopup() {
 	if (ImGui::BeginPopupModal(AddNewUniformPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
 		ImGui::SetWindowSize({0.f, 0.f});
-		ImGui::Combo("Type", (int*)&mSelectedType, "float\0vec2\0vec3\0vec4\0color\0\0");
+		ImGui::Combo("Type", (int*)&mSelectedType, "float\0vec2\0vec3\0vec4\0color\0mat4\0\0");
 
 		int numChars = static_cast<int>(std::string(mNameBuffer.data()).size());
 		ImGui::InputText("Variable Name",
@@ -131,23 +131,7 @@ void UniformsMenu::HandleNewUniform() {
 		return;
 	}
 
-	switch (mSelectedType) {
-	case UniformType::Float:
-		mUniforms.push_back({name.data(), UniformItemFloat{}});
-		break;
-	case UniformType::Vec2:
-		mUniforms.push_back({name.data(), UniformItemVec2{}});
-		break;
-	case UniformType::Vec3:
-		mUniforms.push_back({name.data(), UniformItemVec3{}});
-		break;
-	case UniformType::Vec4:
-		mUniforms.push_back({name.data(), UniformItemVec4{}});
-		break;
-	case UniformType::Color:
-		mUniforms.push_back({name.data(), UniformColor{}});
-		break;
-	}
+	mUniforms.push_back({name.data(), UniformItemFromType(mSelectedType)});
 }
 
 void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program) {
@@ -160,40 +144,17 @@ void UniformsMenu::RegisterCommands(RenderCommandList<RenderCommand>& cmds, cons
 void UniformsMenu::OpenFile(std::string_view file) {
 	mUniforms.clear();
 
-	std::ifstream f(std::string(file) + ".uniforms", std::ios_base::binary);
-	if (!f.is_open()) return;
-
-	unsigned char numUniforms;
-	f.read((char*)&numUniforms, sizeof(numUniforms));
-
-	mUniforms.resize(numUniforms);
-	for (size_t i = 0; i < numUniforms; ++i) {
-		f.read((char*)&mUniforms[i].mItem, sizeof(mUniforms[i].mItem));
-	}
-
-	for (size_t i = 0; i < numUniforms; ++i) {
-		std::getline(f, mUniforms[i].mName);
-	}
-
-	f.close();
+	std::string uniformsFile = std::string(file) + ".uniforms";
+	dubu::FileBuffer fb(uniformsFile, dubu::FileBuffer::Mode::Read);
+	if (!fb.IsOpen()) return;
+	fb >> mUniforms;
 }
 
 void UniformsMenu::SaveFile(std::string_view file) {
-	std::ofstream f(std::string(file) + ".uniforms", std::ios_base::binary);
-	if (!f.is_open()) return;
-
-	unsigned char numUniforms = (unsigned char)mUniforms.size();
-	f.write((char*)&numUniforms, sizeof(numUniforms));
-
-	for (const auto& uniform : mUniforms) {
-		f.write((char*)&uniform.mItem, sizeof(uniform.mItem));
-	}
-
-	for (const auto& uniform : mUniforms) {
-		f << uniform.mName << std::endl;
-	}
-
-	f.close();
+	std::string uniformsFile = std::string(file) + ".uniforms";
+	dubu::FileBuffer fb(uniformsFile, dubu::FileBuffer::Mode::Write);
+	if (!fb.IsOpen()) return;
+	fb << mUniforms;
 }
 
 std::string UniformsMenu::GetUniformDeclarations() {

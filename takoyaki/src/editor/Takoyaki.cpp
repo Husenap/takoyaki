@@ -178,7 +178,7 @@ void Takoyaki::LoadShader() {
 	shaderFile.close();
 	std::string shaderCode = fragmentShaderCodeBegin;
 	shaderCode += mEditor.GetUniformsMenu().GetUniformDeclarations();
-	shaderCode += shaderFileCode;
+	shaderCode += "#line 1\n"+shaderFileCode;
 	shaderCode += fragmentShaderCodeEnd;
 
 	VertexShader vShader(vertexShaderCode);

@@ -19,16 +19,13 @@ public:
 	void OpenFile(std::string_view file);
 	void SaveFile(std::string_view file);
 
-	void SetUniformsChangedHandler(UniformsChangedHandler handler) { mUniformsChangedHandler = handler; }
+	void SetUniformsChangedHandler(UniformsChangedHandler handler) {
+		mUniformsChangedHandler = handler;
+	}
 
 	std::string GetUniformDeclarations();
 
 private:
-	enum class UniformType : int { Float, Vec2, Vec3, Vec4, Color };
-	struct UniformData {
-		std::string mName;
-		UniformItem mItem;
-	};
 	struct SwapData {
 		int mSourceIndex;
 		int mTargetIndex;
