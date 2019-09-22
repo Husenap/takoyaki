@@ -9,8 +9,8 @@
 		y = v.y;                  \
 	}                             \
 	ImVec2(const glm::ivec2& v) { \
-		x = v.x;                  \
-		y = v.y;                  \
+		x = (float)v.x;           \
+		y = (float)v.y;           \
 	}
 
 #define IM_VEC4_CLASS_EXTRA       \
@@ -21,8 +21,8 @@
 		w = v.w;                  \
 	}                             \
 	ImVec4(const glm::ivec4& v) { \
-		x = v.x;                  \
-		y = v.y;                  \
-		z = v.z;                  \
-		w = v.w;                  \
+		x = (float)v.x;           \
+		y = (float)v.y;           \
+		z = (float)v.z;           \
+		w = (float)v.w;           \
 	}
