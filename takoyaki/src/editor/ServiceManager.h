@@ -9,6 +9,7 @@ class Takoyaki;
 class Camera;
 class UniformsMenu;
 class Preview;
+class DockSpace;
 }  // namespace ty
 
 namespace ty {
@@ -25,6 +26,7 @@ private:
 	std::unique_ptr<ty::Renderer> mRenderer;
 	std::unique_ptr<ty::Camera> mCamera;
 	std::unique_ptr<ty::Preview> mPreview;
+	std::unique_ptr<ty::DockSpace> mDockSpace;
 	std::unique_ptr<ty::UniformsMenu> mUniformsMenu;
 
 	std::unique_ptr<ty::Takoyaki> mTakoyaki;

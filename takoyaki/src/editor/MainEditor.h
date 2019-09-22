@@ -1,17 +1,21 @@
 #pragma once
 
-#include "components/Camera.h"
-#include "components/Preview.h"
-#include "components/UniformsMenu.h"
+namespace ty {
+class Camera;
+class Preview;
+class UniformsMenu;
+class DockSpace;
+}  // namespace ty
 
 namespace ty {
 
 class MainEditor {
 public:
-	MainEditor(Camera& camera, Preview& preview, UniformsMenu& uniformsMenu)
+	MainEditor(Camera& camera, Preview& preview, UniformsMenu& uniformsMenu, DockSpace& dockSpace)
 	    : mCamera(camera)
 	    , mPreview(preview)
-	    , mUniformsMenu(uniformsMenu) {}
+	    , mUniformsMenu(uniformsMenu)
+	    , mDockSpace(dockSpace) {}
 	~MainEditor() = default;
 
 	void LoadProjectFile(const std::string& fileToLoad);
@@ -48,6 +52,7 @@ private:
 	UniformsMenu& mUniformsMenu;
 	Preview& mPreview;
 	Camera& mCamera;
+	DockSpace& mDockSpace;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;

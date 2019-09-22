@@ -1,10 +1,13 @@
 #include "MainEditor.h"
 
+#include "components/Camera.h"
+#include "components/DockSpace.h"
+#include "components/Preview.h"
+#include "components/UniformsMenu.h"
+
 namespace ty {
 
 const char* ErrorPopupName      = "Error##Popup";
-const char* DockSpaceName       = "TakoyakiDockSpace";
-const char* DockSpaceWindowName = "TakoyakiDockSpaceWindow";
 
 void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 	mUniformsMenu.OpenFile(fileToLoad);
@@ -12,27 +15,11 @@ void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 }
 
 void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget) {
+	mDockSpace.Update();
+
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
 	}
-
-	ImGuiWindowFlags dockSpaceWindowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
-	                                        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-	                                        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-	                                        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->Pos);
-	ImGui::SetNextWindowSize(viewport->Size);
-	ImGui::SetNextWindowViewport(viewport->ID);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::Begin(DockSpaceWindowName, nullptr, dockSpaceWindowFlags);
-
-	ImGuiID dockSpaceId = ImGui::GetID(DockSpaceName);
-	ImGui::DockSpace(dockSpaceId);
-	ImGui::End();
-	ImGui::PopStyleVar(2);
 
 	if (ImGui::BeginMainMenuBar()) {
 		mMenuBarSize = ImGui::GetWindowSize();

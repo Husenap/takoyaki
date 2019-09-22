@@ -5,6 +5,7 @@
 #include "../graphics/gl/RenderCommand.h"
 #include "MainEditor.h"
 #include "components/Camera.h"
+#include "components/UniformsMenu.h"
 
 namespace {
 ImVec2 vertices[3] = {
@@ -140,7 +141,7 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	mRenderTarget = std::make_unique<RenderTarget>(mWindow.GetFramebufferSize());
+	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
 }
 
 void Takoyaki::SetupListeners() {
