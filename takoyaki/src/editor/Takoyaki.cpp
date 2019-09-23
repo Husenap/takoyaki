@@ -142,6 +142,7 @@ void Takoyaki::CreateVertexBuffer() {
 
 void Takoyaki::CreateRenderTarget() {
 	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
+	//mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350, 1000});
 }
 
 void Takoyaki::SetupListeners() {

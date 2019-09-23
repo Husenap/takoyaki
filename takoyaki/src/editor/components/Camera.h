@@ -6,23 +6,21 @@ namespace ty {
 
 class Camera : public Widget {
 public:
-	Camera() {
-		Reset();
-	}
+	Camera() { Reset(); }
 
 	void Reset();
-	void Update();
+	void Update(float deltaTime);
 
-	void ProcessKeyInput(bool keys[512], float deltaTime);
+	void ProcessKeyInput(const KeyInput& input);
 	void ProcessMouseMovement(const glm::vec2& delta);
-
-	void CaptureInput();
-	void ReleaseInput();
 
 	const glm::vec3& GetPosition() const { return mPosition; }
 	const glm::vec3& GetTarget() const { return mTarget; }
 
+	void SetActive(bool active) { mIsActive = active; }
+
 private:
+	void UpdateMovement(float deltaTime);
 	void UpdateCameraVectors();
 
 	glm::vec3 mPosition;
@@ -31,12 +29,15 @@ private:
 	glm::vec3 mUp;
 	glm::vec3 mWorldUp;
 	glm::vec3 mTarget;
-	glm::vec3 mVelocity;
 	float mYaw;
 	float mPitch;
 	float mSpeed;
 	float mSensitivity;
 	float mZoom;
+
+	bool mIsActive;
+	std::array<bool, GLFW_KEY_LAST> mKeys;
+	int mKeyMods;
 };
 
 }  // namespace ty

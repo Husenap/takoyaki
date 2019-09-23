@@ -53,11 +53,7 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 	if (hasProjectLoaded) {
 		mUniformsMenu.Update();
 		mPreview.Update(renderTarget);
-
-		if (mCameraMode) {
-			mCamera.ProcessKeyInput(ImGui::GetIO().KeysDown, deltaTime);
-		}
-		mCamera.Update();
+		mCamera.Update(deltaTime);
 	}
 
 	if (!mErrors.empty()) {
@@ -70,6 +66,8 @@ void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const 
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
+	mCamera.ProcessKeyInput(input);
+
 	if (mCameraMode) {
 		return;
 	}
@@ -102,9 +100,11 @@ void MainEditor::OnInput(const MouseInput& input) {
 	if (input.button == GLFW_MOUSE_BUTTON_RIGHT) {
 		if (mPreview.IsHovered() && input.action == GLFW_PRESS) {
 			mCameraMode = true;
+			mCamera.SetActive(true);
 			if (mCameraCaptureHandler) mCameraCaptureHandler();
 		} else if (input.action == GLFW_RELEASE) {
 			mCameraMode = false;
+			mCamera.SetActive(false);
 			if (mCameraReleaseHandler) mCameraReleaseHandler();
 		}
 	}
@@ -125,7 +125,8 @@ void MainEditor::OnContentScale(const glm::vec2& scale) {
 }
 
 void MainEditor::ReportError(const std::string& message) {
-	mErrors.emplace_back(message);
+	//mErrors.emplace_back(message);
+	tinyfd_notifyPopup("Error!", message.c_str(), "error");
 }
 
 void MainEditor::DisplayErrors() {
