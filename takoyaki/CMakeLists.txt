@@ -19,11 +19,16 @@ set(editor_files
     "src/editor/handlers/Handlers.h"
     "src/editor/MainEditor.h"
     "src/editor/MainEditor.cpp"
+    "src/editor/ServiceManager.h"
+    "src/editor/ServiceManager.cpp"
     "src/editor/Takoyaki.h"
     "src/editor/Takoyaki.cpp")
 
 set(editor_components_files
     "src/editor/components/Widget.h"
+    "src/editor/components/DockSpace.cpp"
+    "src/editor/components/DockSpace.h"
+    "src/editor/components/DockSpace.cpp"
     "src/editor/components/Preview.h"
     "src/editor/components/Preview.cpp"
     "src/editor/components/Camera.h"
@@ -53,7 +58,15 @@ set(src_files
 
 add_executable(${target_name} ${src_files})
 
-target_link_libraries(${target_name} PUBLIC serializer_lib glfw glad glm_static imgui tinyfd compiler-warnings)
+target_link_libraries(${target_name} PUBLIC
+    serializer_lib
+    glfw
+    glad
+    glm_static
+    imgui
+    tinyfd
+    bass_lib
+    compiler-warnings)
 
 source_group("src" FILES "src/main.cpp")
 source_group("src\\precompiled" FILES ${precompiled_files})

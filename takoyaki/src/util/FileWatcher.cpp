@@ -1,10 +1,10 @@
 #include "FileWatcher.h"
 
 namespace ty {
-void FileWatcher::StartThread() {
+FileWatcher::FileWatcher() {
 	mThread = std::thread([&]() { Job(); });
 }
-void FileWatcher::StopThread() {
+FileWatcher::~FileWatcher() {
 	mIsRunning = false;
 	if (mThread.joinable()) {
 		mThread.join();

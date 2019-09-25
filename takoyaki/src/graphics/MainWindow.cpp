@@ -1,9 +1,9 @@
 #include "MainWindow.h"
 
-
 namespace ty {
 
-MainWindow::MainWindow(int width, int height, const char* title) : BaseWindow(width, height, title) {
+MainWindow::MainWindow(int width, int height, const char* title)
+    : BaseWindow(width, height, title) {
 	glfwSetWindowUserPointer(mWindow, this);
 
 	InitGL();
@@ -28,7 +28,7 @@ void MainWindow::InitGL() {
 void MainWindow::InitImGui() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
 
@@ -94,6 +94,9 @@ void MainWindow::SetupImGuiStyle() {
 	colors[ImGuiCol_TabActive]             = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
 	colors[ImGuiCol_TabUnfocused]          = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
 	colors[ImGuiCol_TabUnfocusedActive]    = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
+	colors[ImGuiCol_DockingPreview]        = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+
+
 
 	style.PopupRounding = 3.f;
 
@@ -119,8 +122,7 @@ void MainWindow::SetupImGuiStyle() {
 	style.TabRounding   = 3.f;
 }
 
-void MainWindow::OnInput(const KeyInput&) {
-}
+void MainWindow::OnInput(const KeyInput&) {}
 
 void MainWindow::OnInput(const MouseInput&) {}
 

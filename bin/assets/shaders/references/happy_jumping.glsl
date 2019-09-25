@@ -380,7 +380,7 @@ vec3 render( in vec3 ro, in vec3 rd, float time )
         float occ = calcOcclusion( pos, nor, time )*focc;
         float fre = clamp(1.0+dot(nor,rd),0.0,1.0);
         
-        vec3  sun_lig = normalize(iSunDirection); //normalize( vec3(0.6, 0.35, 0.5) );
+        vec3  sun_lig = normalize(iSunDirection.rgb); //normalize( vec3(0.6, 0.35, 0.5) );
         float sun_dif = clamp(dot( nor, sun_lig ), 0.0, 1.0 );
         vec3  sun_hal = normalize( sun_lig-rd );
         float sun_sha = calcSoftshadow( pos, sun_lig, time );

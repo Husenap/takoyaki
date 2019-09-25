@@ -1,4 +1,4 @@
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
 BasedOnStyle: Google
 BinPackArguments: false
 BinPackParameters: false

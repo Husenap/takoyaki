@@ -48,6 +48,8 @@ public:
 	virtual ~BaseWindow() {}
 
 	static void WindowInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+		if (key < 0 || key > GLFW_KEY_LAST) return;
+
 		auto userWindow = reinterpret_cast<DERIVED_TYPE*>(glfwGetWindowUserPointer(window));
 		if (userWindow) {
 			KeyInput input{key, scancode, action, mods};
@@ -63,12 +65,16 @@ public:
 		if (userWindow) {
 			glm::vec2 newPos((float)x, (float)y);
 			userWindow->mMouseDelta = newPos - userWindow->mMousePos;
-			userWindow->mMousePos   = newPos;
+			userWindow->mMousePos = newPos;
 			CursorInput input;
 			input.pos   = userWindow->mMousePos;
 			input.delta = userWindow->mMouseDelta;
-			userWindow->OnInput(input);
-			for (auto callback : userWindow->mCursorInputListeners) callback(input);
+			if (userWindow->mSkipMouseInput > 0) {
+				--userWindow->mSkipMouseInput;
+			} else {
+				userWindow->OnInput(input);
+				for (auto callback : userWindow->mCursorInputListeners) callback(input);
+			}
 		} else {
 			throw std::runtime_error("Failed to process window cursor callback");
 		}
@@ -139,7 +145,10 @@ public:
 	void PollEvents() { glfwPollEvents(); }
 
 	void SwapBuffers() { glfwSwapBuffers(mWindow); }
-	void SetInputMode(int mode, int value) { glfwSetInputMode(mWindow, mode, value); }
+	void SetInputMode(int mode, int value) {
+		glfwSetInputMode(mWindow, mode, value);
+		mSkipMouseInput = 2;
+	}
 
 	void RequestClose() { glfwSetWindowShouldClose(mWindow, GLFW_TRUE); }
 	bool ShouldClose() const { return glfwWindowShouldClose(mWindow); }
@@ -152,6 +161,7 @@ protected:
 	glm::vec2 mContentScale;
 	glm::vec2 mMousePos;
 	glm::vec2 mMouseDelta;
+	int mSkipMouseInput = 0;
 
 private:
 	std::vector<KeyInputCallbackType> mKeyInputListeners;

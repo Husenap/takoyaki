@@ -1,14 +1,21 @@
 #pragma once
 
-#include "components/Camera.h"
-#include "components/Preview.h"
-#include "components/UniformsMenu.h"
+namespace ty {
+class Camera;
+class Preview;
+class UniformsMenu;
+class DockSpace;
+}  // namespace ty
 
 namespace ty {
 
 class MainEditor {
 public:
-	MainEditor()  = default;
+	MainEditor(Camera& camera, Preview& preview, UniformsMenu& uniformsMenu, DockSpace& dockSpace)
+	    : mCamera(camera)
+	    , mPreview(preview)
+	    , mUniformsMenu(uniformsMenu)
+	    , mDockSpace(dockSpace) {}
 	~MainEditor() = default;
 
 	void LoadProjectFile(const std::string& fileToLoad);
@@ -31,9 +38,6 @@ public:
 	void SetCameraCaptureInputHandler(CameraCaptureInputHandler handler) { mCameraCaptureHandler = handler; }
 	void SetCameraReleaseInputHandler(CameraReleaseInputHandler handler) { mCameraReleaseHandler = handler; }
 
-	UniformsMenu& GetUniformsMenu() { return mUniformsMenu; }
-	Camera& GetCamera() { return mCamera; }
-
 private:
 	void DisplayErrors();
 
@@ -45,9 +49,10 @@ private:
 	glm::vec2 mContentScale;
 	std::vector<std::string> mErrors;
 
-	UniformsMenu mUniformsMenu;
-	Preview mPreview;
-	Camera mCamera;
+	UniformsMenu& mUniformsMenu;
+	Preview& mPreview;
+	Camera& mCamera;
+	DockSpace& mDockSpace;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;

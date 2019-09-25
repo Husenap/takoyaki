@@ -15,6 +15,9 @@ namespace ty {
         , mZoom(45.f) {
         */
 void Camera::Reset() {
+	mIsActive = false;
+	std::fill(mKeys.begin(), mKeys.end(), false);
+
 	mPosition    = glm::vec3(0.f, 1.f, -5.f);
 	mWorldUp     = glm::vec3(0.f, 1.f, 0.f);
 	mYaw         = 90.f;
@@ -24,9 +27,13 @@ void Camera::Reset() {
 	mZoom        = 45.f;
 	UpdateCameraVectors();
 }
-void Camera::Update() {
+void Camera::Update(float deltaTime) {
+	if (mIsActive) {
+		UpdateMovement(deltaTime);
+	}
+
 	if (mVisibility) {
-		if (ImGui::Begin("Camera")) {
+		if (ImGui::Begin("Camera", &mVisibility)) {
 			ImGui::InputFloat3("position", &mPosition.x, 3, ImGuiInputTextFlags_ReadOnly);
 			ImGui::InputFloat3("target", &mTarget.x, 3, ImGuiInputTextFlags_ReadOnly);
 			ImGui::InputFloat3("forward", &mForward.x, 3, ImGuiInputTextFlags_ReadOnly);
@@ -37,17 +44,9 @@ void Camera::Update() {
 	}
 }
 
-void Camera::ProcessKeyInput(bool keys[512], float deltaTime) {
-	float velocity = mSpeed * deltaTime;
-
-	if (keys[GLFW_KEY_W]) mPosition += mForward * velocity;
-	if (keys[GLFW_KEY_S]) mPosition -= mForward * velocity;
-	if (keys[GLFW_KEY_D]) mPosition += mRight * velocity;
-	if (keys[GLFW_KEY_A]) mPosition -= mRight * velocity;
-	if (keys[GLFW_KEY_E]) mPosition += mUp * velocity;
-	if (keys[GLFW_KEY_Q]) mPosition -= mUp * velocity;
-
-	mTarget = mPosition + mForward;
+void Camera::ProcessKeyInput(const KeyInput& input) {
+	mKeys[input.key] = input.action != GLFW_RELEASE;
+	mKeyMods         = input.mods;
 }
 
 void Camera::ProcessMouseMovement(const glm::vec2& delta) {
@@ -69,8 +68,20 @@ void Camera::UpdateCameraVectors() {
 	mTarget  = mPosition + mForward;
 }
 
-void Camera::CaptureInput() {}
+void Camera::UpdateMovement(float deltaTime) {
+	float velocity = mSpeed * deltaTime;
 
-void Camera::ReleaseInput() {}
+	if (mKeyMods & GLFW_MOD_CONTROL) velocity *= 0.5f;
+	if (mKeyMods & GLFW_MOD_SHIFT) velocity *= 2.0f;
+
+	if (mKeys[GLFW_KEY_W]) mPosition += mForward * velocity;
+	if (mKeys[GLFW_KEY_S]) mPosition -= mForward * velocity;
+	if (mKeys[GLFW_KEY_D]) mPosition += mRight * velocity;
+	if (mKeys[GLFW_KEY_A]) mPosition -= mRight * velocity;
+	if (mKeys[GLFW_KEY_E]) mPosition += mUp * velocity;
+	if (mKeys[GLFW_KEY_Q]) mPosition -= mUp * velocity;
+
+	mTarget = mPosition + mForward;
+}
 
 }  // namespace ty

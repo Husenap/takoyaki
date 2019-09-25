@@ -1,10 +1,13 @@
 #include "MainEditor.h"
 
+#include "components/Camera.h"
+#include "components/DockSpace.h"
+#include "components/Preview.h"
+#include "components/UniformsMenu.h"
+
 namespace ty {
 
 const char* ErrorPopupName      = "Error##Popup";
-const char* DockSpaceName       = "TakoyakiDockSpace";
-const char* DockSpaceWindowName = "TakoyakiDockSpaceWindow";
 
 void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 	mUniformsMenu.OpenFile(fileToLoad);
@@ -12,27 +15,11 @@ void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 }
 
 void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget) {
+	mDockSpace.Update();
+
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
 	}
-
-	ImGuiWindowFlags dockSpaceWindowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
-	                                        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-	                                        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-	                                        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->Pos);
-	ImGui::SetNextWindowSize(viewport->Size);
-	ImGui::SetNextWindowViewport(viewport->ID);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::Begin(DockSpaceWindowName, nullptr, dockSpaceWindowFlags);
-
-	ImGuiID dockSpaceId = ImGui::GetID(DockSpaceName);
-	ImGui::DockSpace(dockSpaceId);
-	ImGui::End();
-	ImGui::PopStyleVar(2);
 
 	if (ImGui::BeginMainMenuBar()) {
 		mMenuBarSize = ImGui::GetWindowSize();
@@ -66,11 +53,7 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 	if (hasProjectLoaded) {
 		mUniformsMenu.Update();
 		mPreview.Update(renderTarget);
-
-		if (mCameraMode) {
-			mCamera.ProcessKeyInput(ImGui::GetIO().KeysDown, deltaTime);
-		}
-		mCamera.Update();
+		mCamera.Update(deltaTime);
 	}
 
 	if (!mErrors.empty()) {
@@ -83,6 +66,8 @@ void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const 
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
+	mCamera.ProcessKeyInput(input);
+
 	if (mCameraMode) {
 		return;
 	}
@@ -115,9 +100,11 @@ void MainEditor::OnInput(const MouseInput& input) {
 	if (input.button == GLFW_MOUSE_BUTTON_RIGHT) {
 		if (mPreview.IsHovered() && input.action == GLFW_PRESS) {
 			mCameraMode = true;
+			mCamera.SetActive(true);
 			if (mCameraCaptureHandler) mCameraCaptureHandler();
 		} else if (input.action == GLFW_RELEASE) {
 			mCameraMode = false;
+			mCamera.SetActive(false);
 			if (mCameraReleaseHandler) mCameraReleaseHandler();
 		}
 	}
@@ -138,7 +125,8 @@ void MainEditor::OnContentScale(const glm::vec2& scale) {
 }
 
 void MainEditor::ReportError(const std::string& message) {
-	mErrors.emplace_back(message);
+	//mErrors.emplace_back(message);
+	tinyfd_notifyPopup("Error!", message.c_str(), "error");
 }
 
 void MainEditor::DisplayErrors() {
