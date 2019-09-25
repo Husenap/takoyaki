@@ -1,13 +1,15 @@
 #include "MainEditor.h"
 
+#include "components/Animator/Animator.h"
 #include "components/Camera.h"
 #include "components/DockSpace.h"
 #include "components/Preview.h"
+#include "components/Timeline/Timeline.h"
 #include "components/UniformsMenu.h"
 
 namespace ty {
 
-const char* ErrorPopupName      = "Error##Popup";
+const char* ErrorPopupName = "Error##Popup";
 
 void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 	mUniformsMenu.OpenFile(fileToLoad);
@@ -45,6 +47,9 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			if (ImGui::MenuItem("Camera", "F3", nullptr, hasProjectLoaded)) {
 				mCamera.ToggleVisibility();
 			}
+			if (ImGui::MenuItem("Timeline", "F4", nullptr, hasProjectLoaded)) {
+				mAnimator.ToggleVisibility();
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -55,6 +60,8 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 		mPreview.Update(renderTarget);
 		mCamera.Update(deltaTime);
 	}
+	mTimeline.Update();
+	mAnimator.Update();
 
 	if (!mErrors.empty()) {
 		DisplayErrors();
@@ -66,6 +73,7 @@ void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const 
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
+	mAnimator.OnInput(input);
 	mCamera.ProcessKeyInput(input);
 
 	if (mCameraMode) {
@@ -92,6 +100,9 @@ void MainEditor::OnInput(const KeyInput& input) {
 		mCamera.ToggleVisibility();
 	}
 	if (input.key == GLFW_KEY_F4 && input.action == GLFW_PRESS) {
+		mAnimator.ToggleVisibility();
+	}
+	if (input.key == GLFW_KEY_F5 && input.action == GLFW_PRESS) {
 		mShowDemoWindow = !mShowDemoWindow;
 	}
 }
@@ -125,7 +136,7 @@ void MainEditor::OnContentScale(const glm::vec2& scale) {
 }
 
 void MainEditor::ReportError(const std::string& message) {
-	//mErrors.emplace_back(message);
+	// mErrors.emplace_back(message);
 	tinyfd_notifyPopup("Error!", message.c_str(), "error");
 }
 

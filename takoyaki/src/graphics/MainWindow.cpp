@@ -107,8 +107,8 @@ void MainWindow::SetupImGuiStyle() {
 
 	style.ScrollbarSize = 18.f;
 
-	style.WindowBorderSize = 0.f;
-	style.ChildBorderSize  = 0.f;
+	style.WindowBorderSize = 1.f;
+	style.ChildBorderSize  = 1.f;
 	style.PopupBorderSize  = 1.f;
 	style.FrameBorderSize  = 0.f;
 

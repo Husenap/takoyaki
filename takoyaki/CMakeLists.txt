@@ -26,6 +26,12 @@ set(editor_files
 
 set(editor_components_files
     "src/editor/components/Widget.h"
+    "src/editor/components/Animator/AnimationTrack.cpp"
+    "src/editor/components/Animator/AnimationTrack.h"
+    "src/editor/components/Animator/Animator.cpp"
+    "src/editor/components/Animator/Animator.h"
+    "src/editor/components/Timeline/Timeline.cpp"
+    "src/editor/components/Timeline/Timeline.h"
     "src/editor/components/DockSpace.cpp"
     "src/editor/components/DockSpace.h"
     "src/editor/components/DockSpace.cpp"
@@ -65,7 +71,7 @@ target_link_libraries(${target_name} PUBLIC
     glm_static
     imgui
     tinyfd
-    bass_lib
+    bass
     compiler-warnings)
 
 source_group("src" FILES "src/main.cpp")
