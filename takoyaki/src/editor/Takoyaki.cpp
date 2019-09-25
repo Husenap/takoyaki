@@ -80,6 +80,9 @@ Takoyaki::Takoyaki(MainWindow& window,
 	float time      = (float)glfwGetTime();
 	float deltaTime = 0.0f;
 
+	const float bpm = 129.0f;
+	const float timePerBeat = 60000.f / bpm;
+
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
 		++frame;
@@ -141,8 +144,8 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
-	//mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350, 1000});
+	//mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
+	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350, 1000});
 }
 
 void Takoyaki::SetupListeners() {

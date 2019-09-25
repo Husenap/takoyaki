@@ -58,7 +58,15 @@ set(src_files
 
 add_executable(${target_name} ${src_files})
 
-target_link_libraries(${target_name} PUBLIC serializer_lib glfw glad glm_static imgui tinyfd compiler-warnings)
+target_link_libraries(${target_name} PUBLIC
+    serializer_lib
+    glfw
+    glad
+    glm_static
+    imgui
+    tinyfd
+    bass_lib
+    compiler-warnings)
 
 source_group("src" FILES "src/main.cpp")
 source_group("src\\precompiled" FILES ${precompiled_files})
