@@ -43,6 +43,10 @@ set(editor_components_files
     "src/editor/components/UniformsMenu.cpp"
     "src/editor/components/UniformItem.h")
 
+set(editor_systems_files
+    "src/editor/systems/music/MusicSystem.h"
+    "src/editor/systems/music/MusicSystem.cpp")
+
 set(util_files
     "src/util/FileWatcher.h"
     "src/util/FileWatcher.cpp"
@@ -58,6 +62,7 @@ set(src_files
     ${graphics_files}
     ${editor_files}
     ${editor_components_files}
+    ${editor_systems_files}
     ${util_files}
     ${precompiled_files}
     "src/main.cpp")
@@ -78,6 +83,7 @@ source_group("src" FILES "src/main.cpp")
 source_group("src\\precompiled" FILES ${precompiled_files})
 source_group("src\\editor" FILES ${editor_files})
 source_group("src\\editor\\components" FILES ${editor_components_files})
+source_group("src\\editor\\systems" FILES ${editor_systems_files})
 source_group("src\\graphics" FILES ${graphics_files})
 source_group("src\\graphics\\gl" FILES ${graphics_gl_files})
 source_group("src\\util" FILES ${util_files})

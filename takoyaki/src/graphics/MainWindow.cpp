@@ -40,7 +40,7 @@ void MainWindow::SetupImGuiStyle() {
 	for (float f = 1.0f; f <= 3.f; ++f) {
 		FontData data;
 		data.mScale = f;
-		data.mFont  = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f * f);
+		data.mFont  = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/RobotoMono-Regular.ttf", 16.0f * f);
 		mFonts.emplace_back(data);
 	}
 

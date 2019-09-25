@@ -1,19 +1,36 @@
 #include "Timeline.h"
 
+#include "../../systems/music/MusicSystem.h"
+
 namespace ty {
 
 const char* TimelineWindowName = "Timeline";
 
-Timeline::Timeline() {}
+Timeline::Timeline(MusicSystem& musicSystem)
+    : mMusic(musicSystem)
+    , mCurrentTime(0.f) {}
 
 Timeline::~Timeline() {}
 
 void Timeline::Update() {
-	static float time = 0.4f;
 	if (mVisibility) {
-		if (ImGui::Begin(TimelineWindowName, &mVisibility)) {
+		std::string title = TimelineWindowName;
+		if (mMusic.IsLoaded()) {
+			title += " (" + std::to_string(mMusic.GetCurrentPosition()) + ")";
+		}
+		title += "###Timeline";
+		if (ImGui::Begin(title.c_str(), &mVisibility)) {
 			ImGui::SetNextItemWidth(-FLT_EPSILON);
-			ImGui::SliderFloat(" ", &time, 0.0f, 1.0f);
+
+			if (mMusic.IsLoaded()) {
+				if (mMusic.IsPlaying()) {
+					mCurrentTime = mMusic.GetCurrentPosition() / mMusic.GetLengthSeconds();
+				}
+				if (ImGui::SliderFloat("##apa", &mCurrentTime, 0.0f, 1.0f, "")) {
+					mMusic.Seek(mCurrentTime * mMusic.GetLengthSeconds());
+					mMusic.Pause();
+				}
+			}
 		}
 		ImGui::End();
 	}

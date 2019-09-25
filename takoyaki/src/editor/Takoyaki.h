@@ -11,7 +11,8 @@ public:
 	         FileWatcher& fileWatcher,
 	         MainEditor& editor,
 	         Camera& camera,
-	         UniformsMenu& uniformsMenu);
+	         UniformsMenu& uniformsMenu,
+	         MusicSystem& musicSystem);
 	~Takoyaki();
 
 private:
@@ -56,6 +57,7 @@ private:
 	MainEditor& mEditor;
 	Camera& mCamera;
 	UniformsMenu& mUniformsMenu;
+	MusicSystem& mMusic;
 };
 
 }  // namespace ty

@@ -6,6 +6,7 @@
 #include "MainEditor.h"
 #include "components/Camera.h"
 #include "components/UniformsMenu.h"
+#include "systems/music/MusicSystem.h"
 
 namespace {
 ImVec2 vertices[3] = {
@@ -66,13 +67,15 @@ Takoyaki::Takoyaki(MainWindow& window,
                    FileWatcher& fileWatcher,
                    MainEditor& editor,
                    Camera& camera,
-                   UniformsMenu& uniformsMenu)
+                   UniformsMenu& uniformsMenu,
+                   MusicSystem& musicSystem)
     : mWindow(window)
     , mRenderer(renderer)
     , mFileWatcher(fileWatcher)
     , mEditor(editor)
     , mCamera(camera)
-    , mUniformsMenu(uniformsMenu) {
+    , mUniformsMenu(uniformsMenu)
+    , mMusic(musicSystem) {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
@@ -80,12 +83,19 @@ Takoyaki::Takoyaki(MainWindow& window,
 	float time      = (float)glfwGetTime();
 	float deltaTime = 0.0f;
 
-	const float bpm = 129.0f;
-	const float timePerBeat = 60000.f / bpm;
+	const char* filter     = "*.*";
+	const char* fileToLoad = tinyfd_openFileDialog("Choose a soundtrack", "", 1, &filter, nullptr, 0);
+	if (fileToLoad) {
+		if (mMusic.LoadMusic(fileToLoad)) {
+			mMusic.Play();
+		}
+	}
 
 	while (!mWindow.ShouldClose()) {
 		static int frame = 0;
 		++frame;
+
+		std::cout << mMusic.GetCurrentPosition() << std::endl;
 
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
@@ -144,7 +154,7 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	//mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
+	// mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
 	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350, 1000});
 }
 
