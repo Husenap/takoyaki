@@ -22,7 +22,7 @@ ServiceManager::ServiceManager() {
 	mPreview      = std::make_unique<ty::Preview>();
 	mUniformsMenu = std::make_unique<ty::UniformsMenu>();
 	mDockSpace    = std::make_unique<ty::DockSpace>();
-	mAnimator     = std::make_unique<ty::Animator>();
+	mAnimator     = std::make_unique<ty::Animator>(*mMusicManager);
 	mTimeline     = std::make_unique<ty::Timeline>(*mMusicManager);
 	mEditor =
 	    std::make_unique<ty::MainEditor>(*mCamera, *mPreview, *mUniformsMenu, *mDockSpace, *mAnimator, *mTimeline);

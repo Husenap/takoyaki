@@ -37,6 +37,13 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			}
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Edit")) {
+			if (ImGui::MenuItem("Undo", "Ctrl+Z", nullptr, false)) {
+			}
+			if (ImGui::MenuItem("Redo", "Ctrl+Shift+Z", nullptr, false)) {
+			}
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("View")) {
 			if (ImGui::MenuItem("Uniforms", "F1", nullptr, hasProjectLoaded)) {
 				mUniformsMenu.ToggleVisibility();
@@ -44,11 +51,14 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			if (ImGui::MenuItem("Preview", "F2", nullptr, hasProjectLoaded)) {
 				mPreview.ToggleVisibility();
 			}
-			if (ImGui::MenuItem("Camera", "F3", nullptr, hasProjectLoaded)) {
-				mCamera.ToggleVisibility();
+			if (ImGui::MenuItem("Animator", "F3", nullptr, hasProjectLoaded)) {
+				mAnimator.ToggleVisibility();
 			}
 			if (ImGui::MenuItem("Timeline", "F4", nullptr, hasProjectLoaded)) {
-				mAnimator.ToggleVisibility();
+				mTimeline.ToggleVisibility();
+			}
+			if (ImGui::MenuItem("Camera", "F5", nullptr, hasProjectLoaded)) {
+				mCamera.ToggleVisibility();
 			}
 			ImGui::EndMenu();
 		}
@@ -97,12 +107,15 @@ void MainEditor::OnInput(const KeyInput& input) {
 		mPreview.ToggleVisibility();
 	}
 	if (input.key == GLFW_KEY_F3 && input.action == GLFW_PRESS) {
-		mCamera.ToggleVisibility();
-	}
-	if (input.key == GLFW_KEY_F4 && input.action == GLFW_PRESS) {
 		mAnimator.ToggleVisibility();
 	}
+	if (input.key == GLFW_KEY_F4 && input.action == GLFW_PRESS) {
+		mTimeline.ToggleVisibility();
+	}
 	if (input.key == GLFW_KEY_F5 && input.action == GLFW_PRESS) {
+		mCamera.ToggleVisibility();
+	}
+	if (input.key == GLFW_KEY_F6 && input.action == GLFW_PRESS) {
 		mShowDemoWindow = !mShowDemoWindow;
 	}
 }

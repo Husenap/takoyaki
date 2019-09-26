@@ -82,6 +82,7 @@ Takoyaki::Takoyaki(MainWindow& window,
 
 	float time      = (float)glfwGetTime();
 	float deltaTime = 0.0f;
+	float demoTime  = 0.0f;
 
 	const char* filter     = "*.*";
 	const char* fileToLoad = tinyfd_openFileDialog("Choose a soundtrack", "", 1, &filter, nullptr, 0);
@@ -104,6 +105,10 @@ Takoyaki::Takoyaki(MainWindow& window,
 		time      = (float)glfwGetTime();
 		mCurrentTime += deltaTime;
 
+		if (mMusic.IsLoaded()) {
+			demoTime = mMusic.GetCurrentPosition();
+		}
+
 		glm::ivec2 size = mWindow.GetFramebufferSize();
 
 		mEditor.Update(deltaTime, !mCurrentProject.empty(), *mRenderTarget);
@@ -123,7 +128,7 @@ Takoyaki::Takoyaki(MainWindow& window,
 
 			cmds.Push<Commands::UseProgram>(mProgram->mProgram);
 			cmds.Push<Commands::Uniform>(mFrameLoc, frame);
-			cmds.Push<Commands::Uniform>(mTimeLoc, mCurrentTime);
+			cmds.Push<Commands::Uniform>(mTimeLoc, demoTime);
 			cmds.Push<Commands::Uniform>(mResolutionLoc, glm::vec2(mRenderTarget->GetSize()));
 			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mCamera.GetPosition());
 			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mCamera.GetTarget());
@@ -155,7 +160,7 @@ void Takoyaki::CreateVertexBuffer() {
 
 void Takoyaki::CreateRenderTarget() {
 	// mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
-	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350, 1000});
+	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350/2, 1000/2});
 }
 
 void Takoyaki::SetupListeners() {

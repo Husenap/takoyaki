@@ -11,6 +11,7 @@ public:
 	void Play(float seconds = 0.f);
 	void Pause();
 	void Seek(float seconds);
+	void SetVolume(float volume);
 
 	bool IsLoaded() const { return mChannel != 0; }
 	bool IsPlaying() const;

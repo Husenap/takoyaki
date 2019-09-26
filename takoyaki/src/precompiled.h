@@ -15,6 +15,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

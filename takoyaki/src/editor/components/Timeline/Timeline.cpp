@@ -23,12 +23,26 @@ void Timeline::Update() {
 			ImGui::SetNextItemWidth(-FLT_EPSILON);
 
 			if (mMusic.IsLoaded()) {
-				if (mMusic.IsPlaying()) {
-					mCurrentTime = mMusic.GetCurrentPosition() / mMusic.GetLengthSeconds();
+				mCurrentTime = mMusic.GetCurrentPosition() / mMusic.GetLengthSeconds();
+
+				const char* playPauseButtonTitle = mMusic.IsPlaying() ? "Pause" : "Play";
+				if (ImGui::Button(playPauseButtonTitle)) {
+					if (mMusic.IsPlaying()) {
+						mMusic.Pause();
+					} else {
+						mMusic.Play();
+					}
 				}
-				if (ImGui::SliderFloat("##apa", &mCurrentTime, 0.0f, 1.0f, "")) {
+
+				ImGui::SetNextItemWidth(-FLT_EPSILON);
+				if (ImGui::SliderFloat("##CurrentTime", &mCurrentTime, 0.0f, 1.0f, "")) {
 					mMusic.Seek(mCurrentTime * mMusic.GetLengthSeconds());
 					mMusic.Pause();
+				}
+
+				static float volume = 100.f;
+				if (ImGui::SliderFloat("Volume", &volume, 0.f, 100.f, "%.0f%%")) {
+					mMusic.SetVolume(volume / 100.f);
 				}
 			}
 		}

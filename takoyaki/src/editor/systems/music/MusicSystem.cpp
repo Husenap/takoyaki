@@ -86,6 +86,10 @@ void MusicSystem::Seek(float seconds) {
 	BASS_ChannelSetPosition(mChannel, bytePos, BASS_POS_BYTE);
 }
 
+void MusicSystem::SetVolume(float volume) {
+	BASS_ChannelSetAttribute(mChannel, BASS_ATTRIB_VOL, std::clamp(volume, 0.f, 1.f));
+}
+
 bool MusicSystem::IsPlaying() const {
 	unsigned long status = BASS_ChannelIsActive(mChannel);
 	return status == BASS_ACTIVE_PLAYING;
