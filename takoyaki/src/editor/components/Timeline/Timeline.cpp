@@ -26,13 +26,10 @@ void Timeline::Update() {
 			mCurrentTime = mMusic.GetCurrentPosition() / mMusic.GetLengthSeconds();
 
 			DrawVolumeControls();
-
 			ImGui::SameLine();
-
-			ImGui::BeginChild("##TimelineContainer", {0.f, 0.f});
 			DrawPlayPauseButton();
+			ImGui::SameLine();
 			DrawScrubber();
-			ImGui::EndChild();
 		}
 	}
 	End();
@@ -40,7 +37,7 @@ void Timeline::Update() {
 
 void Timeline::DrawPlayPauseButton() {
 	const char* playPauseButtonTitle = mMusic.IsPlaying() ? "P\nA\nU\nS\nE" : "P\nL\nA\nY";
-	if (ImGui::Button(playPauseButtonTitle)) {
+	if (ImGui::Button(playPauseButtonTitle, {0.f, ScrubberHeight})) {
 		if (mMusic.IsPlaying()) {
 			mMusic.Pause();
 		} else {
@@ -49,17 +46,14 @@ void Timeline::DrawPlayPauseButton() {
 	}
 }
 
-void Timeline::DrawVolumeControls()
-{
-	ImGui::BeginChild("##VolumeContainer", {25.f, ScrubberHeight});
+void Timeline::DrawVolumeControls() {
 	static float volume = 100.f;
 	if (ImGui::VSliderFloat("##VolumeSlider", {20.f, ScrubberHeight}, &volume, 0.f, 100.f, "")) {
 		mMusic.SetVolume(volume / 100.f);
-}
+	}
 	if (ImGui::IsItemActive() || ImGui::IsItemHovered()) {
 		ImGui::SetTooltip("Volume: %.0f%%", volume);
 	}
-	ImGui::EndChild();
 }
 
 void Timeline::DrawScrubber() {
@@ -75,7 +69,7 @@ void Timeline::DrawScrubber() {
 		mMusic.Pause();
 	}
 	float xPos = widthAvailable * mCurrentTime;
-	drawList.AddLine({p.x + xPos, p.y-1.f}, {p.x + xPos, p.y - 1.f + ScrubberHeight}, 0xee1111ff, 2.0f);
+	drawList.AddLine({p.x + xPos, p.y - 1.f}, {p.x + xPos, p.y - 1.f + ScrubberHeight}, 0xee1111ff, 2.0f);
 }
 
 }  // namespace ty
