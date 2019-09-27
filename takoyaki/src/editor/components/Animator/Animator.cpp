@@ -8,44 +8,45 @@ namespace ty {
 
 const char* AnimatorWindowName = "Animator";
 const float ColumnWidth        = 200.f;
+const int TicksPerBar          = 16;
+const char* TickFormat         = "%02X:%01X";
 
 Animator::Animator(MusicSystem& musicSystem, AnimationSystem& animationSystem, SyncSystem& syncSystem)
     : mMusic(musicSystem)
     , mAnimationSystem(animationSystem)
     , mSyncSystem(syncSystem) {
-	mSyncSystem.SetBars(112);
+	mSyncSystem.SetBars(114);
 	mSyncSystem.SetBPM(129.f);
-	mSyncSystem.SetOffset(6.951f);
+	mSyncSystem.SetOffset(6.951f - mSyncSystem.TickToSecondsWithoutOffset(32));
 }
 
 Animator::~Animator() {}
 
 void Animator::Update() {
-	if (mVisibility) {
-		if (mMusic.IsLoaded()) {
-			mTick = mSyncSystem.SecondsToTick(mMusic.GetCurrentPosition());
-			mTick = std::clamp<int>(mTick, 0, mSyncSystem.NumTicks() - 1);
-		}
-		if (ImGui::Begin(AnimatorWindowName, &mVisibility)) {
-			ImGui::BeginChild("##TimelineColumn",
-			                  {50.f, 0.f},
-			                  false,
-			                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-			DrawTimeline();
-			ImGui::EndChild();
-
-			ImGui::SameLine();
-
-			ImGui::BeginChild("##HorizontalScroller", {0.f, 0.f}, false, ImGuiWindowFlags_NoScrollWithMouse);
-			DrawAnimationTracks();
-			ImGui::EndChild();
-		}
-
-		ImGui::End();
+	if (mMusic.IsLoaded()) {
+		mTick = mSyncSystem.SecondsToTick(mMusic.GetCurrentPosition());
+		mTick = std::clamp<int>(mTick, 0, mSyncSystem.NumTicks() - 1);
 	}
+	if (Begin(AnimatorWindowName)) {
+		ImGui::BeginChild(
+		    "##TimelineColumn", {50.f, 0.f}, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		DrawTimeline();
+		ImGui::EndChild();
+
+		ImGui::SameLine();
+
+		ImGui::BeginChild("##HorizontalScroller", {0.f, 0.f}, false, ImGuiWindowFlags_NoScrollWithMouse);
+		DrawAnimationTracks();
+		ImGui::EndChild();
+	}
+	End();
 }
 
 void Animator::OnInput(const KeyInput& input) {
+	if (!mIsFocused) {
+		return;
+	}
+
 	if (input.action != GLFW_RELEASE) {
 		if (input.mods & GLFW_MOD_CONTROL) {
 			if (input.key == GLFW_KEY_U) {
@@ -101,8 +102,7 @@ void Animator::DrawAnimationTracks() {
 		ImGuiListClipper listClipper;
 		listClipper.Begin(mSyncSystem.NumTicks(), ImGui::GetTextLineHeightWithSpacing());
 		int firstTickIndex = std::min(listClipper.DisplayStart, mTick);
-		int lastTickIndex  = std::max(listClipper.DisplayEnd, mTick+1);
-		if(trackIndex == 0)std::cout << firstTickIndex << "->" << lastTickIndex << std::endl;
+		int lastTickIndex  = std::max(listClipper.DisplayEnd, mTick + 1);
 		for (int currentTick = firstTickIndex; currentTick < lastTickIndex; currentTick++) {
 			ImGui::PushID(currentTick);
 			if (currentTick == mTick) {
@@ -110,10 +110,14 @@ void Animator::DrawAnimationTracks() {
 				ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.420f, 0.311f, 0.156f, 0.4f));
 				ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.561f, 0.416f, 0.209f, 0.670));
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.15f, 0.65f, 1.0f, 1.0f));
+				ImGui::Separator();
+				ImGui::Separator();
 			}
 			track.DrawIndex(currentTick);
 			if (currentTick == mTick) {
 				ImGui::SetScrollHereY();
+				ImGui::Separator();
+				ImGui::Separator();
 				ImGui::PopStyleColor(4);
 			}
 			ImGui::PopID();
@@ -133,14 +137,21 @@ void Animator::DrawTimeline() {
 
 	ImGui::BeginChild(
 	    "##ScrollArea", {0.f, 0.f}, true, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-	for (int i = 0; i < mSyncSystem.NumTicks(); ++i) {
-		if (i == mTick) {
-			ImGui::TextColored(ImVec4(1, 1, 0, 1), "%02X:%02X", i / 16, i % 16);
+	ImGuiListClipper listClipper;
+	listClipper.Begin(mSyncSystem.NumTicks(), ImGui::GetTextLineHeightWithSpacing());
+	int firstTickIndex = std::min(listClipper.DisplayStart, mTick);
+	int lastTickIndex  = std::max(listClipper.DisplayEnd, mTick + 1);
+	for (int currentTick = firstTickIndex; currentTick < lastTickIndex; ++currentTick) {
+		int barTime = currentTick / TicksPerBar;
+		int tickTime = currentTick % TicksPerBar;
+		if (currentTick == mTick) {
+			ImGui::TextColored(ImVec4(1, 1, 0, 1), TickFormat, barTime, tickTime);
 			ImGui::SetScrollHereY();
 		} else {
-			ImGui::Text("%02X:%02X", i / 16, i % 16);
+			ImGui::Text(TickFormat, barTime, tickTime);
 		}
 	}
+	listClipper.End();
 	ImGui::EndChild();
 }
 

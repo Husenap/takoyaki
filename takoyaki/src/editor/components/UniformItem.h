@@ -2,7 +2,7 @@
 
 namespace ty {
 
-enum class UniformType : unsigned char { Float, Vec2, Vec3, Vec4, Color, Mat4 };
+enum class UniformType : unsigned char { Float, Vec2, Vec3, Vec4, Color };
 
 // clang-format off
 struct UniformItemFloat {
@@ -35,22 +35,9 @@ struct UniformItemColor {
 	static constexpr const char* GetShaderType() { return "vec4"; }
 	static constexpr UniformType EnumType = UniformType::Color;
 };
-struct UniformItemMat4 {
-	glm::mat4 value;
-	void Update() {
-		ImGui::BeginGroup();
-		ImGui::DragFloat4("##A", &value[0].x);
-		ImGui::DragFloat4("##B", &value[1].x);
-		ImGui::DragFloat4("##C", &value[2].x);
-		ImGui::DragFloat4("##D", &value[3].x);
-		ImGui::EndGroup();
-	}
-	static constexpr const char* GetShaderType() { return "mat4"; }
-	static constexpr UniformType EnumType = UniformType::Mat4;
-};
 // clang-format on
 
-using UniformItem = std::variant<UniformItemFloat, UniformItemVec2, UniformItemVec3, UniformItemVec4, UniformItemColor, UniformItemMat4>;
+using UniformItem = std::variant<UniformItemFloat, UniformItemVec2, UniformItemVec3, UniformItemVec4, UniformItemColor>;
 
 struct GetUniformType {
 	template <typename T>
@@ -68,8 +55,6 @@ static UniformItem UniformItemFromType(UniformType type) {
 		return UniformItemVec4{};
 	} else if (type == UniformType::Color) {
 		return UniformItemColor{};
-	} else if (type == UniformType::Mat4) {
-		return UniformItemMat4{};
 	}
 	return UniformItemFloat{};
 }

@@ -12,6 +12,12 @@ public:
 
 	void Update();
 
+	void DrawPlayPauseButton();
+
+	void DrawVolumeControls();
+
+	void DrawScrubber();
+
 private:
 	MusicSystem& mMusic;
 

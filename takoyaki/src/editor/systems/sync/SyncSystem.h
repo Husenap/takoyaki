@@ -13,6 +13,7 @@ public:
 
 	int SecondsToTick(float seconds) const;
 	float TickToSeconds(int tick) const;
+	float TickToSecondsWithoutOffset(int tick) const;
 
 	int NumTicks() const { return mNumTicks; }
 

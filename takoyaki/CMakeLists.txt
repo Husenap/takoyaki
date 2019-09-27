@@ -25,6 +25,7 @@ set(editor_files
     "src/editor/Takoyaki.cpp")
 
 set(editor_components_files
+    "src/editor/components/Widget.cpp"
     "src/editor/components/Widget.h"
     "src/editor/components/Animator/Animator.cpp"
     "src/editor/components/Animator/Animator.h"

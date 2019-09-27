@@ -12,7 +12,7 @@ AnimationSystem::AnimationSystem() {
 	mAnimationTracks.push_back(AnimationTrack("Something More Cool", UniformType::Vec3));
 	mAnimationTracks.push_back(AnimationTrack("Something Even Cool", UniformType::Vec4));
 	mAnimationTracks.push_back(AnimationTrack("Something Super Cool", UniformType::Color));
-	mAnimationTracks.push_back(AnimationTrack("Dream big", UniformType::Mat4));
+	mAnimationTracks.push_back(AnimationTrack("Dream big", UniformType::Vec4));
 }
 
 AnimationSystem::~AnimationSystem() {}

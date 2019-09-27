@@ -19,9 +19,7 @@ public:
 	void OpenFile(std::string_view file);
 	void SaveFile(std::string_view file);
 
-	void SetUniformsChangedHandler(UniformsChangedHandler handler) {
-		mUniformsChangedHandler = handler;
-	}
+	void SetUniformsChangedHandler(UniformsChangedHandler handler) { mUniformsChangedHandler = handler; }
 
 	std::string GetUniformDeclarations();
 

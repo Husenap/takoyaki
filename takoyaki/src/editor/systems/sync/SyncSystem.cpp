@@ -29,4 +29,8 @@ float SyncSystem::TickToSeconds(int tick) const {
 	return ((float)tick * mSecondsPerTick) + mOffset;
 }
 
+float SyncSystem::TickToSecondsWithoutOffset(int tick) const {
+	return (float)tick * mSecondsPerTick;
+}
+
 }  // namespace ty
