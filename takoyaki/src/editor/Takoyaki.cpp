@@ -96,8 +96,6 @@ Takoyaki::Takoyaki(MainWindow& window,
 		static int frame = 0;
 		++frame;
 
-		std::cout << mMusic.GetCurrentPosition() << std::endl;
-
 		mWindow.PollEvents();
 		mRenderer.NewFrame();
 

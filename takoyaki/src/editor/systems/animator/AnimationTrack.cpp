@@ -12,7 +12,7 @@ void AnimationTrack::DrawIndex(int index) {
 	auto keyFrame = mKeyFrames.find(index);
 
 	if (keyFrame == mKeyFrames.end()) {
-		ImGui::Text("-- -- --");
+		ImGui::Text("--");
 		return;
 	}
 

@@ -26,8 +26,6 @@ set(editor_files
 
 set(editor_components_files
     "src/editor/components/Widget.h"
-    "src/editor/components/Animator/AnimationTrack.cpp"
-    "src/editor/components/Animator/AnimationTrack.h"
     "src/editor/components/Animator/Animator.cpp"
     "src/editor/components/Animator/Animator.h"
     "src/editor/components/Timeline/Timeline.cpp"
@@ -44,6 +42,12 @@ set(editor_components_files
     "src/editor/components/UniformItem.h")
 
 set(editor_systems_files
+    "src/editor/systems/sync/SyncSystem.h"
+    "src/editor/systems/sync/SyncSystem.cpp"
+    "src/editor/systems/animator/AnimationTrack.h"
+    "src/editor/systems/animator/AnimationTrack.cpp"
+    "src/editor/systems/animator/AnimationSystem.h"
+    "src/editor/systems/animator/AnimationSystem.cpp"
     "src/editor/systems/music/MusicSystem.h"
     "src/editor/systems/music/MusicSystem.cpp")
 
@@ -90,11 +94,6 @@ source_group("src\\util" FILES ${util_files})
 
 
 set_target_properties(${target_name} PROPERTIES FOLDER "takoyaki")
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_HOME_DIRECTORY}/bin )
 set_target_properties(${target_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
 set_target_properties(${target_name} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT ${precompiled_files})
 

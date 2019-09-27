@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../UniformItem.h"
+#include "../../components/UniformItem.h"
 
 namespace ty {
 

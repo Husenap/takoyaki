@@ -1,31 +1,21 @@
 #include "Animator.h"
 
+#include "../../systems/animator/AnimationSystem.h"
 #include "../../systems/music/MusicSystem.h"
+#include "../../systems/sync/SyncSystem.h"
 
 namespace ty {
 
 const char* AnimatorWindowName = "Animator";
 const float ColumnWidth        = 200.f;
 
-Animator::Animator(MusicSystem& musicSystem)
-    : mMusic(musicSystem) {
-	mNumBars        = 112;
-	mNumBeats       = mNumBars * 4;
-	mNumTicks       = mNumBeats * 4;
-	mBPM            = 129.f;
-	mSecondsPerTick = (60.f / (mBPM * 4.f));
-	mOffset         = 6.951f;
-
-	mAnimationTracks.push_back(AnimationTrack("Scene", UniformType::Float));
-	mAnimationTracks.push_back(AnimationTrack("Camera 1", UniformType::Vec3));
-	mAnimationTracks.push_back(AnimationTrack("Camera 2", UniformType::Vec3));
-	mAnimationTracks.push_back(AnimationTrack("Chromatic Aberration", UniformType::Float));
-	mAnimationTracks.push_back(AnimationTrack("Depth of Field", UniformType::Float));
-	mAnimationTracks.push_back(AnimationTrack("Something Cool", UniformType::Vec2));
-	mAnimationTracks.push_back(AnimationTrack("Something More Cool", UniformType::Vec3));
-	mAnimationTracks.push_back(AnimationTrack("Something Even Cool", UniformType::Vec4));
-	mAnimationTracks.push_back(AnimationTrack("Something Super Cool", UniformType::Color));
-	mAnimationTracks.push_back(AnimationTrack("Dream big", UniformType::Mat4));
+Animator::Animator(MusicSystem& musicSystem, AnimationSystem& animationSystem, SyncSystem& syncSystem)
+    : mMusic(musicSystem)
+    , mAnimationSystem(animationSystem)
+    , mSyncSystem(syncSystem) {
+	mSyncSystem.SetBars(112);
+	mSyncSystem.SetBPM(129.f);
+	mSyncSystem.SetOffset(6.951f);
 }
 
 Animator::~Animator() {}
@@ -33,8 +23,8 @@ Animator::~Animator() {}
 void Animator::Update() {
 	if (mVisibility) {
 		if (mMusic.IsLoaded()) {
-			mTick = CalcTickFromSeconds(mMusic.GetCurrentPosition());
-			mTick = std::clamp<int>(mTick, 0, mNumTicks - 1);
+			mTick = mSyncSystem.SecondsToTick(mMusic.GetCurrentPosition());
+			mTick = std::clamp<int>(mTick, 0, mSyncSystem.NumTicks() - 1);
 		}
 		if (ImGui::Begin(AnimatorWindowName, &mVisibility)) {
 			ImGui::BeginChild("##TimelineColumn",
@@ -59,31 +49,27 @@ void Animator::OnInput(const KeyInput& input) {
 	if (input.action != GLFW_RELEASE) {
 		if (input.mods & GLFW_MOD_CONTROL) {
 			if (input.key == GLFW_KEY_U) {
-				mTick = std::clamp<int>(mTick - 16, 0, mNumTicks - 1);
-				SyncMusicToTick();
+				MoveTickIndex(-16);
 			}
 			if (input.key == GLFW_KEY_D) {
-				mTick = std::clamp<int>(mTick + 16, 0, mNumTicks - 1);
-				SyncMusicToTick();
+				MoveTickIndex(16);
 			}
 		} else {
 			if (input.key == GLFW_KEY_H) {
-				mTrackIndex = std::clamp<int>(mTrackIndex - 1, 0, mAnimationTracks.size() - 1);
+				MoveTrackIndex(-1);
 			}
 			if (input.key == GLFW_KEY_L) {
-				mTrackIndex = std::clamp<int>(mTrackIndex + 1, 0, mAnimationTracks.size() - 1);
+				MoveTrackIndex(1);
 			}
 			if (input.key == GLFW_KEY_K) {
-				mTick = std::clamp<int>(mTick - 1, 0, mNumTicks - 1);
-				SyncMusicToTick();
+				MoveTickIndex(-1);
 			}
 			if (input.key == GLFW_KEY_J) {
-				mTick = std::clamp<int>(mTick + 1, 0, mNumTicks - 1);
-				SyncMusicToTick();
+				MoveTickIndex(1);
 			}
 			if (input.key == GLFW_KEY_I) {
 				mMusic.Pause();
-				mAnimationTracks[mTrackIndex].InsertKey(mTick);
+				mAnimationSystem.GetAnimationTracks()[mTrackIndex].InsertKey(mTick);
 			}
 		}
 	}
@@ -92,11 +78,12 @@ void Animator::OnInput(const KeyInput& input) {
 void Animator::DrawAnimationTracks() {
 	static ImVec4 thing;
 
-	for (int trackIndex = 0; trackIndex < mAnimationTracks.size(); trackIndex++) {
+	auto& animationTracks = mAnimationSystem.GetAnimationTracks();
+	for (int trackIndex = 0; trackIndex < animationTracks.size(); trackIndex++) {
 		ImGui::PushID(trackIndex);
 		if (trackIndex > 0) ImGui::SameLine();
 
-		AnimationTrack& track = mAnimationTracks[trackIndex];
+		AnimationTrack& track = animationTracks[trackIndex];
 
 		ImGui::BeginGroup();
 		if (trackIndex == mTrackIndex) {
@@ -111,20 +98,27 @@ void Animator::DrawAnimationTracks() {
 		}
 		ImGuiWindowFlags child_flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
 		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)trackIndex), ImVec2(ColumnWidth, 0.f), true, child_flags);
-		for (int currentTick = 0; currentTick < mNumTicks; currentTick++) {
+		ImGuiListClipper listClipper;
+		listClipper.Begin(mSyncSystem.NumTicks(), ImGui::GetTextLineHeightWithSpacing());
+		int firstTickIndex = std::min(listClipper.DisplayStart, mTick);
+		int lastTickIndex  = std::max(listClipper.DisplayEnd, mTick+1);
+		if(trackIndex == 0)std::cout << firstTickIndex << "->" << lastTickIndex << std::endl;
+		for (int currentTick = firstTickIndex; currentTick < lastTickIndex; currentTick++) {
 			ImGui::PushID(currentTick);
-			if (currentTick == mTick){
+			if (currentTick == mTick) {
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.420f, 0.311f, 0.156f, 0.541f));
 				ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.420f, 0.311f, 0.156f, 0.4f));
 				ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.561f, 0.416f, 0.209f, 0.670));
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.15f, 0.65f, 1.0f, 1.0f));
 			}
 			track.DrawIndex(currentTick);
 			if (currentTick == mTick) {
 				ImGui::SetScrollHereY();
-				ImGui::PopStyleColor(3);
+				ImGui::PopStyleColor(4);
 			}
 			ImGui::PopID();
 		}
+		listClipper.End();
 		if (mTrackIndex == trackIndex) {
 			ImGui::PopStyleColor();
 		}
@@ -139,7 +133,7 @@ void Animator::DrawTimeline() {
 
 	ImGui::BeginChild(
 	    "##ScrollArea", {0.f, 0.f}, true, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-	for (int i = 0; i < mNumTicks; ++i) {
+	for (int i = 0; i < mSyncSystem.NumTicks(); ++i) {
 		if (i == mTick) {
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "%02X:%02X", i / 16, i % 16);
 			ImGui::SetScrollHereY();
@@ -150,17 +144,18 @@ void Animator::DrawTimeline() {
 	ImGui::EndChild();
 }
 
-int Animator::CalcTickFromSeconds(float seconds) {
-	return (int)std::roundf((seconds-mOffset) / mSecondsPerTick);
-}
-
-float Animator::CalcSecondsFromTick(int tick) {
-	return ((float)tick * mSecondsPerTick) + mOffset;
-}
-
 void Animator::SyncMusicToTick() {
 	mMusic.Pause();
-	mMusic.Seek(CalcSecondsFromTick(mTick));
+	mMusic.Seek(mSyncSystem.TickToSeconds(mTick));
+}
+
+void Animator::MoveTrackIndex(int change) {
+	mTrackIndex = std::clamp<int>(mTrackIndex + change, 0, mAnimationSystem.GetTrackCount() - 1);
+}
+
+void Animator::MoveTickIndex(int change) {
+	mTick = std::clamp<int>(mTick + change, 0, mSyncSystem.NumTicks() - 1);
+	SyncMusicToTick();
 }
 
 }  // namespace ty
