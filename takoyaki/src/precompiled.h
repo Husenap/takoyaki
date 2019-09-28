@@ -1,5 +1,8 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -15,6 +18,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

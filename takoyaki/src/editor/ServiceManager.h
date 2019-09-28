@@ -10,6 +10,11 @@ class Camera;
 class UniformsMenu;
 class Preview;
 class DockSpace;
+class Animator;
+class Timeline;
+class MusicSystem;
+class AnimationSystem;
+class SyncSystem;
 }  // namespace ty
 
 namespace ty {
@@ -28,6 +33,12 @@ private:
 	std::unique_ptr<ty::Preview> mPreview;
 	std::unique_ptr<ty::DockSpace> mDockSpace;
 	std::unique_ptr<ty::UniformsMenu> mUniformsMenu;
+	std::unique_ptr<ty::Animator> mAnimator;
+	std::unique_ptr<ty::Timeline> mTimeline;
+
+	std::unique_ptr<ty::SyncSystem> mSyncSystem;
+	std::unique_ptr<ty::MusicSystem> mMusicSystem;
+	std::unique_ptr<ty::AnimationSystem> mAnimationSystem;
 
 	std::unique_ptr<ty::Takoyaki> mTakoyaki;
 };

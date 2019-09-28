@@ -5,17 +5,26 @@ class Camera;
 class Preview;
 class UniformsMenu;
 class DockSpace;
+class Animator;
+class Timeline;
 }  // namespace ty
 
 namespace ty {
 
 class MainEditor {
 public:
-	MainEditor(Camera& camera, Preview& preview, UniformsMenu& uniformsMenu, DockSpace& dockSpace)
+	MainEditor(Camera& camera,
+	           Preview& preview,
+	           UniformsMenu& uniformsMenu,
+	           DockSpace& dockSpace,
+	           Animator& animator,
+	           Timeline& timeline)
 	    : mCamera(camera)
 	    , mPreview(preview)
 	    , mUniformsMenu(uniformsMenu)
-	    , mDockSpace(dockSpace) {}
+	    , mDockSpace(dockSpace)
+	    , mAnimator(animator)
+	    , mTimeline(timeline) {}
 	~MainEditor() = default;
 
 	void LoadProjectFile(const std::string& fileToLoad);
@@ -53,6 +62,8 @@ private:
 	Preview& mPreview;
 	Camera& mCamera;
 	DockSpace& mDockSpace;
+	Animator& mAnimator;
+	Timeline& mTimeline;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;

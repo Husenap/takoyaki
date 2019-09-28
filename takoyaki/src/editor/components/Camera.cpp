@@ -1,19 +1,11 @@
 #include "Camera.h"
 
 namespace ty {
-/*
-    Camera(glm::vec3 position = glm::vec3(0.f, 1.f, -5.f),
-           glm::vec3 up       = glm::vec3(0.f, 1.f, 0.f),
-           float yaw          = 90.f,
-           float pitch        = 0.f)
-        : mPosition(position)
-        , mWorldUp(up)
-        , mYaw(yaw)
-        , mPitch(pitch)
-        , mSpeed(5.0f)
-        , mSensitivity(0.25f)
-        , mZoom(45.f) {
-        */
+
+Camera::Camera() {
+	Reset();
+}
+
 void Camera::Reset() {
 	mIsActive = false;
 	std::fill(mKeys.begin(), mKeys.end(), false);
@@ -32,16 +24,14 @@ void Camera::Update(float deltaTime) {
 		UpdateMovement(deltaTime);
 	}
 
-	if (mVisibility) {
-		if (ImGui::Begin("Camera", &mVisibility)) {
-			ImGui::InputFloat3("position", &mPosition.x, 3, ImGuiInputTextFlags_ReadOnly);
-			ImGui::InputFloat3("target", &mTarget.x, 3, ImGuiInputTextFlags_ReadOnly);
-			ImGui::InputFloat3("forward", &mForward.x, 3, ImGuiInputTextFlags_ReadOnly);
-			ImGui::InputFloat3("right", &mRight.x, 3, ImGuiInputTextFlags_ReadOnly);
-			ImGui::InputFloat3("up", &mUp.x, 3, ImGuiInputTextFlags_ReadOnly);
-		}
-		ImGui::End();
+	if (Begin("Camera")) {
+		ImGui::InputFloat3("position", &mPosition.x, 3, ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("target", &mTarget.x, 3, ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("forward", &mForward.x, 3, ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("right", &mRight.x, 3, ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("up", &mUp.x, 3, ImGuiInputTextFlags_ReadOnly);
 	}
+	End();
 }
 
 void Camera::ProcessKeyInput(const KeyInput& input) {

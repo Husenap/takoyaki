@@ -25,7 +25,12 @@ set(editor_files
     "src/editor/Takoyaki.cpp")
 
 set(editor_components_files
+    "src/editor/components/Widget.cpp"
     "src/editor/components/Widget.h"
+    "src/editor/components/Animator/Animator.cpp"
+    "src/editor/components/Animator/Animator.h"
+    "src/editor/components/Timeline/Timeline.cpp"
+    "src/editor/components/Timeline/Timeline.h"
     "src/editor/components/DockSpace.cpp"
     "src/editor/components/DockSpace.h"
     "src/editor/components/DockSpace.cpp"
@@ -36,6 +41,16 @@ set(editor_components_files
     "src/editor/components/UniformsMenu.h"
     "src/editor/components/UniformsMenu.cpp"
     "src/editor/components/UniformItem.h")
+
+set(editor_systems_files
+    "src/editor/systems/sync/SyncSystem.h"
+    "src/editor/systems/sync/SyncSystem.cpp"
+    "src/editor/systems/animator/AnimationTrack.h"
+    "src/editor/systems/animator/AnimationTrack.cpp"
+    "src/editor/systems/animator/AnimationSystem.h"
+    "src/editor/systems/animator/AnimationSystem.cpp"
+    "src/editor/systems/music/MusicSystem.h"
+    "src/editor/systems/music/MusicSystem.cpp")
 
 set(util_files
     "src/util/FileWatcher.h"
@@ -52,6 +67,7 @@ set(src_files
     ${graphics_files}
     ${editor_files}
     ${editor_components_files}
+    ${editor_systems_files}
     ${util_files}
     ${precompiled_files}
     "src/main.cpp")
@@ -65,24 +81,20 @@ target_link_libraries(${target_name} PUBLIC
     glm_static
     imgui
     tinyfd
-    bass_lib
+    bass
     compiler-warnings)
 
 source_group("src" FILES "src/main.cpp")
 source_group("src\\precompiled" FILES ${precompiled_files})
 source_group("src\\editor" FILES ${editor_files})
 source_group("src\\editor\\components" FILES ${editor_components_files})
+source_group("src\\editor\\systems" FILES ${editor_systems_files})
 source_group("src\\graphics" FILES ${graphics_files})
 source_group("src\\graphics\\gl" FILES ${graphics_gl_files})
 source_group("src\\util" FILES ${util_files})
 
 
 set_target_properties(${target_name} PROPERTIES FOLDER "takoyaki")
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_HOME_DIRECTORY}/bin )
-#set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_HOME_DIRECTORY}/bin )
 set_target_properties(${target_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
 set_target_properties(${target_name} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT ${precompiled_files})
 

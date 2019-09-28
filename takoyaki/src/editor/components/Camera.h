@@ -6,7 +6,7 @@ namespace ty {
 
 class Camera : public Widget {
 public:
-	Camera() { Reset(); }
+	Camera();
 
 	void Reset();
 	void Update(float deltaTime);

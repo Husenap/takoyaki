@@ -1,6 +1,7 @@
 #include "UniformsMenu.h"
 
 namespace {
+
 static int CharacterFilter(ImGuiTextEditCallbackData* data) {
 	ImWchar c    = data->EventChar;
 	int numChars = (*(int*)data->UserData);
@@ -9,6 +10,7 @@ static int CharacterFilter(ImGuiTextEditCallbackData* data) {
 	if (c == '_') return 0;
 	return 1;
 }
+
 }  // namespace
 
 namespace ty {
@@ -69,7 +71,7 @@ void UniformsMenu::DrawUniforms() {
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(UniformDragAndDropName)) {
 				int payload_index = *(const int*)payload->Data;
-				uniformSwap = {payload_index, i};
+				uniformSwap       = {payload_index, i};
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -93,7 +95,8 @@ void UniformsMenu::DrawUniforms() {
 void UniformsMenu::DrawAddUniformPopup() {
 	if (ImGui::BeginPopupModal(AddNewUniformPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
 		ImGui::SetWindowSize({0.f, 0.f});
-		ImGui::Combo("Type", (int*)&mSelectedType, "float\0vec2\0vec3\0vec4\0color\0mat4\0\0");
+		const std::array<const char*, 6> types{"float", "vec2", "vec3", "vec4", "color"};
+		ImGui::Combo("Type", (int*)&mSelectedType, types.data(), types.size());
 
 		int numChars = static_cast<int>(std::string(mNameBuffer.data()).size());
 		ImGui::InputText("Variable Name",

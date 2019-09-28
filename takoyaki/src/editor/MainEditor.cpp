@@ -1,13 +1,15 @@
 #include "MainEditor.h"
 
+#include "components/Animator/Animator.h"
 #include "components/Camera.h"
 #include "components/DockSpace.h"
 #include "components/Preview.h"
+#include "components/Timeline/Timeline.h"
 #include "components/UniformsMenu.h"
 
 namespace ty {
 
-const char* ErrorPopupName      = "Error##Popup";
+const char* ErrorPopupName = "Error##Popup";
 
 void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 	mUniformsMenu.OpenFile(fileToLoad);
@@ -35,6 +37,13 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			}
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Edit")) {
+			if (ImGui::MenuItem("Undo", "Ctrl+Z", nullptr, false)) {
+			}
+			if (ImGui::MenuItem("Redo", "Ctrl+Shift+Z", nullptr, false)) {
+			}
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("View")) {
 			if (ImGui::MenuItem("Uniforms", "F1", nullptr, hasProjectLoaded)) {
 				mUniformsMenu.ToggleVisibility();
@@ -42,7 +51,13 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			if (ImGui::MenuItem("Preview", "F2", nullptr, hasProjectLoaded)) {
 				mPreview.ToggleVisibility();
 			}
-			if (ImGui::MenuItem("Camera", "F3", nullptr, hasProjectLoaded)) {
+			if (ImGui::MenuItem("Animator", "F3", nullptr, hasProjectLoaded)) {
+				mAnimator.ToggleVisibility();
+			}
+			if (ImGui::MenuItem("Timeline", "F4", nullptr, hasProjectLoaded)) {
+				mTimeline.ToggleVisibility();
+			}
+			if (ImGui::MenuItem("Camera", "F5", nullptr, hasProjectLoaded)) {
 				mCamera.ToggleVisibility();
 			}
 			ImGui::EndMenu();
@@ -55,6 +70,8 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 		mPreview.Update(renderTarget);
 		mCamera.Update(deltaTime);
 	}
+	mTimeline.Update();
+	mAnimator.Update();
 
 	if (!mErrors.empty()) {
 		DisplayErrors();
@@ -66,6 +83,7 @@ void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const 
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
+	mAnimator.OnInput(input);
 	mCamera.ProcessKeyInput(input);
 
 	if (mCameraMode) {
@@ -89,9 +107,15 @@ void MainEditor::OnInput(const KeyInput& input) {
 		mPreview.ToggleVisibility();
 	}
 	if (input.key == GLFW_KEY_F3 && input.action == GLFW_PRESS) {
-		mCamera.ToggleVisibility();
+		mAnimator.ToggleVisibility();
 	}
 	if (input.key == GLFW_KEY_F4 && input.action == GLFW_PRESS) {
+		mTimeline.ToggleVisibility();
+	}
+	if (input.key == GLFW_KEY_F5 && input.action == GLFW_PRESS) {
+		mCamera.ToggleVisibility();
+	}
+	if (input.key == GLFW_KEY_F6 && input.action == GLFW_PRESS) {
 		mShowDemoWindow = !mShowDemoWindow;
 	}
 }
@@ -125,7 +149,7 @@ void MainEditor::OnContentScale(const glm::vec2& scale) {
 }
 
 void MainEditor::ReportError(const std::string& message) {
-	//mErrors.emplace_back(message);
+	// mErrors.emplace_back(message);
 	tinyfd_notifyPopup("Error!", message.c_str(), "error");
 }
 

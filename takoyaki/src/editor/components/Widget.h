@@ -1,13 +1,24 @@
 #pragma once
 
-namespace ty{
+namespace ty {
 
-class Widget{
+class Widget {
 public:
-    void ToggleVisibility() { mVisibility = !mVisibility;}
+	Widget();
+	~Widget();
+
+	void ToggleVisibility() { mVisibility = !mVisibility; }
 
 protected:
-    bool mVisibility = true;
+	bool Begin(const char* title, int flags = 0);
+	void End();
+
+	bool mVisibility = true;
+	bool mIsFocused  = false;
+	int mWindowFlags = 0;
+
+private:
+	bool mShouldCallEnd = true;
 };
 
-}
+}  // namespace ty

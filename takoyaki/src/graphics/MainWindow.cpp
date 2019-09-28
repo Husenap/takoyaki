@@ -40,7 +40,7 @@ void MainWindow::SetupImGuiStyle() {
 	for (float f = 1.0f; f <= 3.f; ++f) {
 		FontData data;
 		data.mScale = f;
-		data.mFont  = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f * f);
+		data.mFont  = ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/RobotoMono-Regular.ttf", 16.0f * f);
 		mFonts.emplace_back(data);
 	}
 
@@ -107,8 +107,8 @@ void MainWindow::SetupImGuiStyle() {
 
 	style.ScrollbarSize = 18.f;
 
-	style.WindowBorderSize = 0.f;
-	style.ChildBorderSize  = 0.f;
+	style.WindowBorderSize = 1.f;
+	style.ChildBorderSize  = 1.f;
 	style.PopupBorderSize  = 1.f;
 	style.FrameBorderSize  = 0.f;
 
