@@ -22,7 +22,11 @@ public:
 
 	void InsertKey(int tick, float value = 0.f, Easings::Type easingType = Easings::Type::Zero);
 	void RemoveKey(int tick);
+	void ToggleEasingType(int tick);
 
+	float* GetTickValue(int tick);
+
+	int FindStartTick(int tick) const;
 	const KeyFramePair GetKeyPair(int tick) const;
 	int GetKeyCount() const { return (int)mKeys.size(); }
 

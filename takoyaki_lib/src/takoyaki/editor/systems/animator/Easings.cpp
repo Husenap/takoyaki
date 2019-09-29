@@ -15,6 +15,10 @@ float EaseSmoothstep(float a, float b, float t) {
 	return Lerp(a, b, t * t * (3.f - 2.f * t));
 }
 
+Type NextType(Type type) {
+	return (Type)(((unsigned char)type + 1) % Type::Count);
+}
+
 float Ease(float a, float b, float t, Type type) {
 	t = std::clamp(t, 0.f, 1.f);
 

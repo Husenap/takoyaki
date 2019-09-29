@@ -7,7 +7,7 @@
 namespace ty {
 
 const char* AnimatorWindowName = "Animator";
-const float ColumnWidth        = 200.f;
+const float ColumnWidth        = 100.f;
 const int TicksPerBar          = 16;
 const char* TickFormat         = "%02X:%01X";
 
@@ -72,6 +72,14 @@ void Animator::OnInput(const KeyInput& input) {
 				mMusic.Pause();
 				mAnimationSystem.GetAnimationTracks()[mTrackIndex].InsertKey(mTick);
 			}
+			if (input.key == GLFW_KEY_D) {
+				mMusic.Pause();
+				mAnimationSystem.GetAnimationTracks()[mTrackIndex].RemoveKey(mTick);
+			}
+			if (input.key == GLFW_KEY_E) {
+				mMusic.Pause();
+				mAnimationSystem.GetAnimationTracks()[mTrackIndex].ToggleEasingType(mTick);
+			}
 		}
 	}
 }
@@ -95,7 +103,7 @@ void Animator::DrawAnimationTracks() {
 		}
 
 		if (mTrackIndex == trackIndex) {
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.290f, 0.290f, 0.290f, 1.000f));
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.32f, 0.32f, 0.32f, 1.000f));
 		}
 		ImGuiWindowFlags child_flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
 		ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)trackIndex), ImVec2(ColumnWidth, 0.f), true, child_flags);
@@ -113,7 +121,7 @@ void Animator::DrawAnimationTracks() {
 				ImGui::Separator();
 				ImGui::Separator();
 			}
-			track.DrawIndex(currentTick);
+			track.DrawTick(currentTick);
 			if (currentTick == mTick) {
 				ImGui::SetScrollHereY();
 				ImGui::Separator();

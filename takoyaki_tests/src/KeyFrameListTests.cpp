@@ -123,3 +123,42 @@ TEST(KeyFrameList, SaveToFile) {
 		CheckSimpleData(list);
 	}
 }
+
+TEST(KeyFrameList, ToggleEasingType) {
+	ty::KeyFrameList list;
+	SetSimpleData(list);
+	{
+		const ty::KeyFramePair p = list.GetKeyPair(3);
+		EXPECT_EQ(p.mStart.mTick, 2);
+		EXPECT_EQ(p.mEnd.mTick, 5);
+		EXPECT_EQ(p.mStart.mEasingType, ty::Easings::Type::Linear);
+	}
+	list.ToggleEasingType(3);
+	{
+		const ty::KeyFramePair p = list.GetKeyPair(3);
+		EXPECT_EQ(p.mStart.mTick, 2);
+		EXPECT_EQ(p.mEnd.mTick, 5);
+		EXPECT_EQ(p.mStart.mEasingType, ty::Easings::Type::Exponential);
+	}
+	list.ToggleEasingType(3);
+	{
+		const ty::KeyFramePair p = list.GetKeyPair(3);
+		EXPECT_EQ(p.mStart.mTick, 2);
+		EXPECT_EQ(p.mEnd.mTick, 5);
+		EXPECT_EQ(p.mStart.mEasingType, ty::Easings::Type::Smoothstep);
+	}
+	list.ToggleEasingType(3);
+	{
+		const ty::KeyFramePair p = list.GetKeyPair(3);
+		EXPECT_EQ(p.mStart.mTick, 2);
+		EXPECT_EQ(p.mEnd.mTick, 5);
+		EXPECT_EQ(p.mStart.mEasingType, ty::Easings::Type::Zero);
+	}
+	list.ToggleEasingType(3);
+	{
+		const ty::KeyFramePair p = list.GetKeyPair(3);
+		EXPECT_EQ(p.mStart.mTick, 2);
+		EXPECT_EQ(p.mEnd.mTick, 5);
+		EXPECT_EQ(p.mStart.mEasingType, ty::Easings::Type::Linear);
+	}
+}

@@ -24,23 +24,48 @@ void KeyFrameList::RemoveKey(int tick) {
 	}
 }
 
+void KeyFrameList::ToggleEasingType(int tick) {
+	int startTick = FindStartTick(tick);
+
+	if (startTick == -1) {
+		return;
+	}
+
+	auto& key = mKeys[startTick];
+	key.mEasingType = Easings::NextType(key.mEasingType);
+}
+
+float* KeyFrameList::GetTickValue(int tick) {
+	const auto pred = [tick](const KeyFrame& key) { return tick == key.mTick; };
+	auto it = std::find_if(mKeys.begin(), mKeys.end(), pred);
+	if (it == mKeys.end()) {
+		return nullptr;
+	}
+	return &it->mValue;
+}
+
 const KeyFramePair KeyFrameList::GetKeyPair(int tick) const {
 	if (mKeys.empty()) {
 		return {NullKey, NullKey};
 	}
 
-	int startIndex = -1;
-	for (int i = 0; i < mKeys.size(); ++i) {
-		if (mKeys[i].mTick <= tick) {
-			startIndex = i;
-		} else {
-			break;
-		}
-	}
+	int startIndex = FindStartTick(tick);
 
 	int endIndex = std::min(startIndex + 1, (int)mKeys.size()-1);
 
 	return {(startIndex == -1 ? NullKey : mKeys[startIndex]), (mKeys[endIndex])};
+}
+
+int KeyFrameList::FindStartTick(int tick) const {
+	int startTick = -1;
+	for (int i = 0; i < mKeys.size(); ++i) {
+		if (mKeys[i].mTick <= tick) {
+			startTick = i;
+		} else {
+			break;
+		}
+	}
+	return startTick;
 }
 
 void KeyFrameList::Serialize(dubu::ReadBuffer& buffer) {

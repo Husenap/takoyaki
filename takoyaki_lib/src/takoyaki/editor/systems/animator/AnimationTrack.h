@@ -1,45 +1,24 @@
 #pragma once
 
-#include "../../components/UniformItem.h"
+#include "KeyFrameList.h"
 
 namespace ty {
 
 class AnimationTrack {
-	/*
-	struct KeyFrame {
-		int mTick;
-		UniformItem mData;
-	};
-	*/
 
 public:
-	AnimationTrack(const std::string& name, UniformType uniformType);
+	AnimationTrack(const std::string& name);
 	~AnimationTrack();
 
-	void DrawIndex(int index);
-	void InsertKey(int index);
+	void DrawTick(int tick);
+	void InsertKey(int tick);
+	void RemoveKey(int tick);
+	void ToggleEasingType(int tick);
 
 	const std::string& GetName() const { return mName; }
 
 private:
-	/*
-	std::optional<KeyFrame&> FindKeyFrame(int tick) {
-		const auto it = std::find_if(mVKeyFrames.begin(), mVKeyFrames.end(), [tick](const KeyFrame& keyFrame) {
-			return keyFrame.mTick == tick;
-		});
-
-		if (it == mVKeyFrames.end()) {
-			return std::nullopt;
-		}
-
-		return *it;
-	}
-	*/
-
-	UniformType mUniformType;
 	std::string mName;
-
-	std::map<int, UniformItem> mKeyFrames;
-	//std::vector<KeyFrame> mVKeyFrames;
+	KeyFrameList mKeys;
 };
 }  // namespace ty

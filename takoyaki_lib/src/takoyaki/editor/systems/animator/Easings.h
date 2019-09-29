@@ -2,8 +2,10 @@
 
 namespace ty::Easings {
 
-enum class Type { Zero, Linear, Exponential, Smoothstep };
+enum Type : unsigned char { Zero, Linear, Exponential, Smoothstep, Count };
+
+Type NextType(Type type);
 
 float Ease(float a, float b, float t, Type type);
 
-}  // namespace ty::Easing
+}  // namespace ty::Easings
