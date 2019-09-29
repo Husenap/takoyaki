@@ -27,7 +27,7 @@ public:
 	float* GetTickValue(int tick);
 
 	int FindStartTick(int tick) const;
-	const KeyFramePair GetKeyPair(int tick) const;
+	const KeyFramePair GetKeyPair(int tick);
 	int GetKeyCount() const { return (int)mKeys.size(); }
 
 	void Serialize(dubu::ReadBuffer& buffer);

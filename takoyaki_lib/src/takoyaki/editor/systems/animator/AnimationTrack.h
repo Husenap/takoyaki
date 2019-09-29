@@ -5,7 +5,6 @@
 namespace ty {
 
 class AnimationTrack {
-
 public:
 	AnimationTrack(const std::string& name);
 	~AnimationTrack();
@@ -16,6 +15,7 @@ public:
 	void ToggleEasingType(int tick);
 
 	const std::string& GetName() const { return mName; }
+	const KeyFramePair GetKeyPair(int tick);
 
 private:
 	std::string mName;

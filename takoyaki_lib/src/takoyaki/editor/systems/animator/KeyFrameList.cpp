@@ -44,7 +44,7 @@ float* KeyFrameList::GetTickValue(int tick) {
 	return &it->mValue;
 }
 
-const KeyFramePair KeyFrameList::GetKeyPair(int tick) const {
+const KeyFramePair KeyFrameList::GetKeyPair(int tick) {
 	if (mKeys.empty()) {
 		return {NullKey, NullKey};
 	}

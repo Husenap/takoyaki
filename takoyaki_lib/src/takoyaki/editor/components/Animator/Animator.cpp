@@ -15,8 +15,8 @@ Animator::Animator(MusicSystem& musicSystem, AnimationSystem& animationSystem, S
     : mMusic(musicSystem)
     , mAnimationSystem(animationSystem)
     , mSyncSystem(syncSystem) {
-	mSyncSystem.SetBars(114);
-	mSyncSystem.SetBPM(129.f);
+	mSyncSystem.SetBars(114*2);
+	mSyncSystem.SetBPM(129.f*2.f);
 	mSyncSystem.SetOffset(6.951f - mSyncSystem.TickToSecondsWithoutOffset(32));
 }
 
@@ -117,7 +117,6 @@ void Animator::DrawAnimationTracks() {
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.420f, 0.311f, 0.156f, 0.541f));
 				ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.420f, 0.311f, 0.156f, 0.4f));
 				ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.561f, 0.416f, 0.209f, 0.67f));
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.15f, 0.65f, 1.0f, 1.0f));
 				ImGui::Separator();
 				ImGui::Separator();
 			}
@@ -126,7 +125,7 @@ void Animator::DrawAnimationTracks() {
 				ImGui::SetScrollHereY();
 				ImGui::Separator();
 				ImGui::Separator();
-				ImGui::PopStyleColor(4);
+				ImGui::PopStyleColor(3);
 			}
 			ImGui::PopID();
 		}

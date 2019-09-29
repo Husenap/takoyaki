@@ -12,7 +12,8 @@ public:
 	         MainEditor& editor,
 	         Camera& camera,
 	         UniformsMenu& uniformsMenu,
-	         MusicSystem& musicSystem);
+	         MusicSystem& musicSystem,
+	         AnimationSystem& animationSystem);
 	~Takoyaki();
 
 private:
@@ -58,6 +59,7 @@ private:
 	Camera& mCamera;
 	UniformsMenu& mUniformsMenu;
 	MusicSystem& mMusic;
+	AnimationSystem& mAnimationSystem;
 };
 
 }  // namespace ty

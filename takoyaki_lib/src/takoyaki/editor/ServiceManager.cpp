@@ -19,7 +19,7 @@ namespace ty {
 ServiceManager::ServiceManager() {
 	mSyncSystem      = std::make_unique<ty::SyncSystem>();
 	mMusicSystem     = std::make_unique<ty::MusicSystem>();
-	mAnimationSystem = std::make_unique<ty::AnimationSystem>();
+	mAnimationSystem = std::make_unique<ty::AnimationSystem>(*mSyncSystem);
 
 	mWindow       = std::make_unique<ty::MainWindow>(1600, 900, "Takoyaki");
 	mCamera       = std::make_unique<ty::Camera>();
@@ -34,7 +34,7 @@ ServiceManager::ServiceManager() {
 	mRenderer    = std::make_unique<ty::Renderer>();
 
 	mTakoyaki = std::make_unique<ty::Takoyaki>(
-	    *mWindow, *mRenderer, *mFileWatcher, *mEditor, *mCamera, *mUniformsMenu, *mMusicSystem);
+	    *mWindow, *mRenderer, *mFileWatcher, *mEditor, *mCamera, *mUniformsMenu, *mMusicSystem, *mAnimationSystem);
 }
 ServiceManager::~ServiceManager() {}
 

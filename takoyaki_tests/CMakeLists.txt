@@ -1,6 +1,7 @@
 set(target_name "takoyaki_tests")
 
 set(src_files
+    "src/EasingsTests.cpp"
     "src/KeyFrameListTests.cpp")
 
 add_executable(${target_name} ${src_files})

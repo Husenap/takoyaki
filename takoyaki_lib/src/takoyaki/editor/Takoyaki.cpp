@@ -6,6 +6,7 @@
 #include "MainEditor.h"
 #include "components/Camera.h"
 #include "components/UniformsMenu.h"
+#include "systems/animator/AnimationSystem.h"
 #include "systems/music/MusicSystem.h"
 
 namespace {
@@ -68,14 +69,16 @@ Takoyaki::Takoyaki(MainWindow& window,
                    MainEditor& editor,
                    Camera& camera,
                    UniformsMenu& uniformsMenu,
-                   MusicSystem& musicSystem)
+                   MusicSystem& musicSystem,
+                   AnimationSystem& animationSystem)
     : mWindow(window)
     , mRenderer(renderer)
     , mFileWatcher(fileWatcher)
     , mEditor(editor)
     , mCamera(camera)
     , mUniformsMenu(uniformsMenu)
-    , mMusic(musicSystem) {
+    , mMusic(musicSystem)
+    , mAnimationSystem(animationSystem) {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
@@ -131,6 +134,9 @@ Takoyaki::Takoyaki(MainWindow& window,
 			cmds.Push<Commands::Uniform>(mCameraOriginLoc, mCamera.GetPosition());
 			cmds.Push<Commands::Uniform>(mCameraTargetLoc, mCamera.GetTarget());
 			mEditor.RegisterCommands(cmds, *mProgram);
+			for (const auto& trackValue : mAnimationSystem.Evaluate(demoTime)) {
+				cmds.Push<Commands::Uniform>(mProgram->mProgram, trackValue.mName, trackValue.mValue);
+			}
 
 			cmds.Push<Commands::BindVertexArray>(mVertexArray);
 			cmds.Push<Commands::VertexAttribPointer>(
@@ -158,7 +164,7 @@ void Takoyaki::CreateVertexBuffer() {
 
 void Takoyaki::CreateRenderTarget() {
 	// mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
-	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350/2, 1000/2});
+	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350 / 2, 1000 / 2});
 }
 
 void Takoyaki::SetupListeners() {
