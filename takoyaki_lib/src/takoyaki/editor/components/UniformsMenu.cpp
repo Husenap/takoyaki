@@ -96,7 +96,7 @@ void UniformsMenu::DrawAddUniformPopup() {
 	if (ImGui::BeginPopupModal(AddNewUniformPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
 		ImGui::SetWindowSize({0.f, 0.f});
 		const std::array<const char*, 6> types{"float", "vec2", "vec3", "vec4", "color"};
-		ImGui::Combo("Type", (int*)&mSelectedType, types.data(), types.size());
+		ImGui::Combo("Type", (int*)&mSelectedType, types.data(), (int)types.size());
 
 		int numChars = static_cast<int>(std::string(mNameBuffer.data()).size());
 		ImGui::InputText("Variable Name",

@@ -58,7 +58,7 @@ void MusicSystem::UnloadMusic() {
 	mPeaks.fill(0.f);
 }
 
-void MusicSystem::Play(float seconds) {
+void MusicSystem::Play(float /*seconds*/) {
 	if (!mChannel) return;
 
 	BASS_ChannelPlay(mChannel, FALSE);
@@ -119,8 +119,8 @@ unsigned long MusicSystem::LoadChannelFromFile(const std::string& filepath,
 }
 
 void MusicSystem::LoadSpectrum(unsigned long decoder) {
-	unsigned long bpp = mLengthBytes / NumPeaks;
-	float spp         = BASS_ChannelBytes2Seconds(decoder, bpp);
+	uint64_t bpp = mLengthBytes / NumPeaks;
+	float spp         = (float)BASS_ChannelBytes2Seconds(decoder, bpp);
 
 	float peak = 0.001f;
 

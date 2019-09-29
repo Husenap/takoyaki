@@ -62,7 +62,7 @@ void Timeline::DrawScrubber() {
 	float widthAvailable = ImGui::GetContentRegionAvailWidth();
 	ImGui::SetNextItemWidth(-FLT_EPSILON);
 	ImGui::PlotHistogram(
-	    "##AudioSpectrum", mMusic.GetPeaks().data(), mMusic.GetPeaks().size(), 0, "", 0.f, 1.f, {0.f, ScrubberHeight});
+	    "##AudioSpectrum", mMusic.GetPeaks().data(), (int)mMusic.GetPeaks().size(), 0, "", 0.f, 1.f, {0.f, ScrubberHeight});
 	if (ImGui::IsItemHovered() && ImGui::IsMouseDown(0)) {
 		mCurrentTime = (ImGui::GetIO().MousePos.x - p.x) / widthAvailable;
 		mMusic.Seek(mCurrentTime * mMusic.GetLengthSeconds());

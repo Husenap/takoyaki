@@ -17,4 +17,6 @@ set_property(GLOBAL PROPERTY CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory("serializer_lib")
 add_subdirectory("serializer_tests")
-add_subdirectory("takoyaki")
+add_subdirectory("takoyaki_lib")
+add_subdirectory("takoyaki_tests")
+add_subdirectory("takoyaki_app")
