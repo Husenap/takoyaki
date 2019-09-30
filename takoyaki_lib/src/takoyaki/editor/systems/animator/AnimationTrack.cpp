@@ -19,23 +19,26 @@ ImVec4 EasingToColor(Easings::Type type) {
 }
 }  // namespace
 
-AnimationTrack::AnimationTrack(const std::string& name)
-    : mName(name) {}
+AnimationTrack::AnimationTrack(const std::string& name, bool isUserTrack)
+    : mName(name)
+    , mIsUserTrack(isUserTrack) {}
 
 AnimationTrack::~AnimationTrack() {}
 
 void AnimationTrack::DrawTick(int tick) {
 	const KeyFramePair pair = mKeys.GetKeyPair(tick);
 
+	float* tickValue = nullptr;
 	ImGui::SetNextItemWidth(-FLT_EPSILON);
-	if (pair.mStart.mTick == tick) {
-		float* tickValue = mKeys.GetTickValue(tick);
-		if (tickValue) {
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.f, 0.f));
-			ImGui::DragFloat("", tickValue);
-			ImGui::PopStyleVar();
-		} else {
-			ImGui::TextColored(EasingToColor(pair.mStart.mEasingType), "---");
+	if (pair.mStart.mTick == tick && (tickValue = mKeys.GetTickValue(tick))) {
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.f, 0.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, EasingToColor(pair.mStart.mEasingType));
+		ImGui::DragFloat("", tickValue);
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+		if (mTickToFocus == tick) {
+			ImGui::SetKeyboardFocusHere(-1);
+			mTickToFocus = -1;
 		}
 	} else {
 		ImGui::TextColored(EasingToColor(pair.mStart.mEasingType), "---");
@@ -52,6 +55,10 @@ void AnimationTrack::RemoveKey(int tick) {
 
 void AnimationTrack::ToggleEasingType(int tick) {
 	mKeys.ToggleEasingType(tick);
+}
+
+void AnimationTrack::FocusTick(int tick) {
+	mTickToFocus = tick;
 }
 
 const KeyFramePair AnimationTrack::GetKeyPair(int tick) {

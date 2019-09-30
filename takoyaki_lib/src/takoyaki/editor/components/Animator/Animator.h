@@ -30,6 +30,7 @@ private:
 	MusicSystem& mMusic;
 	AnimationSystem& mAnimationSystem;
 	SyncSystem& mSyncSystem;
+	void DrawAddAnimationTrackWidget();
 };
 
 }  // namespace ty

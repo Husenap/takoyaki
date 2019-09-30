@@ -15,8 +15,8 @@ Animator::Animator(MusicSystem& musicSystem, AnimationSystem& animationSystem, S
     : mMusic(musicSystem)
     , mAnimationSystem(animationSystem)
     , mSyncSystem(syncSystem) {
-	mSyncSystem.SetBars(114*2);
-	mSyncSystem.SetBPM(129.f*2.f);
+	mSyncSystem.SetBars(114 * 2);
+	mSyncSystem.SetBPM(129.f * 2.f);
 	mSyncSystem.SetOffset(6.951f - mSyncSystem.TickToSecondsWithoutOffset(32));
 }
 
@@ -37,6 +37,8 @@ void Animator::Update() {
 
 		ImGui::BeginChild("##HorizontalScroller", {0.f, 0.f}, false, ImGuiWindowFlags_NoScrollWithMouse);
 		DrawAnimationTracks();
+		ImGui::SameLine();
+		DrawAddAnimationTrackWidget();
 		ImGui::EndChild();
 	}
 	End();
@@ -80,12 +82,21 @@ void Animator::OnInput(const KeyInput& input) {
 				mMusic.Pause();
 				mAnimationSystem.GetAnimationTracks()[mTrackIndex].ToggleEasingType(mTick);
 			}
+			if (input.key == GLFW_KEY_O) {
+				if (mMusic.IsPlaying()) {
+					mMusic.Pause();
+				} else {
+					mMusic.Play();
+				}
+			}
 		}
 	}
 }
 
 void Animator::DrawAnimationTracks() {
 	static ImVec4 thing;
+
+	std::pair<int, int> swapData = std::make_pair(-1, -1);
 
 	auto& animationTracks = mAnimationSystem.GetAnimationTracks();
 	for (int trackIndex = 0; trackIndex < animationTracks.size(); trackIndex++) {
@@ -95,11 +106,25 @@ void Animator::DrawAnimationTracks() {
 		AnimationTrack& track = animationTracks[trackIndex];
 
 		ImGui::BeginGroup();
+		if (track.IsUserTrack()) {
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.f, 0.f));
+			if (ImGui::Button("X")) {
+				std::cout << "remove track" << std::endl;
+			}
+			ImGui::PopStyleVar();
+			ImGui::SameLine();
+		}
 		if (trackIndex == mTrackIndex) {
 			ImGui::TextColored(ImVec4(0, 1, 1, 1), track.GetName().c_str());
 			ImGui::SetScrollHereX();
 		} else {
 			ImGui::Text(track.GetName().c_str());
+		}
+		const static int dragDropFlags = ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptBeforeDelivery;
+		if (track.IsUserTrack() && ImGui::BeginDragDropSource(dragDropFlags)) {
+			ImGui::SetDragDropPayload("DND_ANIM", &trackIndex, sizeof(int));
+			ImGui::Text("");
+			ImGui::EndDragDropSource();
 		}
 
 		if (mTrackIndex == trackIndex) {
@@ -135,7 +160,22 @@ void Animator::DrawAnimationTracks() {
 		}
 		ImGui::EndChild();
 		ImGui::EndGroup();
+
+		if (track.IsUserTrack() && ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_ANIM")) {
+				int payload_index = *(const int*)payload->Data;
+				swapData          = {payload_index, trackIndex};
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::PopID();
+	}
+
+	if (swapData.first != -1 && swapData.second != -1) {
+		auto data = animationTracks[swapData.first];
+		animationTracks.erase(animationTracks.begin() + swapData.first);
+		animationTracks.insert(animationTracks.begin() + swapData.second, data);
 	}
 }
 
@@ -149,7 +189,7 @@ void Animator::DrawTimeline() {
 	int firstTickIndex = std::min(listClipper.DisplayStart, mTick);
 	int lastTickIndex  = std::max(listClipper.DisplayEnd, mTick + 1);
 	for (int currentTick = firstTickIndex; currentTick < lastTickIndex; ++currentTick) {
-		int barTime = currentTick / TicksPerBar;
+		int barTime  = currentTick / TicksPerBar;
 		int tickTime = currentTick % TicksPerBar;
 		if (currentTick == mTick) {
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), TickFormat, barTime, tickTime);
@@ -169,11 +209,28 @@ void Animator::SyncMusicToTick() {
 
 void Animator::MoveTrackIndex(int change) {
 	mTrackIndex = std::clamp<int>(mTrackIndex + change, 0, mAnimationSystem.GetTrackCount() - 1);
+	mAnimationSystem.GetAnimationTracks()[mTrackIndex].FocusTick(mTick);
 }
 
 void Animator::MoveTickIndex(int change) {
 	mTick = std::clamp<int>(mTick + change, 0, mSyncSystem.NumTicks() - 1);
 	SyncMusicToTick();
+	mAnimationSystem.GetAnimationTracks()[mTrackIndex].FocusTick(mTick);
+}
+
+void Animator::DrawAddAnimationTrackWidget() {
+	ImGui::BeginGroup();
+	ImGui::Text("New Track");
+
+	ImGuiWindowFlags child_flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
+	ImGui::BeginChild("##AddNewTrackWidget", ImVec2(ColumnWidth, 0.f), true, child_flags);
+	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts.back());
+	if (ImGui::Button("+##AddNewTrackButton", ImGui::GetContentRegionAvail())) {
+		std::cout << "add new track!" << std::endl;
+	}
+	ImGui::PopFont();
+	ImGui::EndChild();
+	ImGui::EndGroup();
 }
 
 }  // namespace ty
