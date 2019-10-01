@@ -14,4 +14,4 @@ target_include_directories(${target_name} INTERFACE "src")
 
 source_group("src\\serializer" FILES ${src_serializer})
 
-set_target_properties(${target_name} PROPERTIES FOLDER "takoyaki")
+set_target_properties(${target_name} PROPERTIES FOLDER "serializer")

@@ -7,6 +7,9 @@
 //* uniform vec3 iCameraTarget; *
 //#=============================#
 
+uniform float Camera1;
+uniform float Camera2;
+
 #define ZERO (min(0, iFrame%4))
 const float FOV = 0.4;
 const float MAX_STEPS = 256;
@@ -159,7 +162,7 @@ SceneResult Scene(in vec3 p){
     
     Material material = MixMaterials(smoothMaterial, fuzzyMaterial, materialMix);
 
-    float d = length(p-vec3(sin(iTime), 0.0, 0.0)) - 1.0;
+    float d = length(p-vec3(sin(iTime), 0.0, 0.0)) - Camera1;
     //d = min(d, p.y+1.0);
 
     d += - (fbm3(p * 12.0 + iTime * .4) - .1) * materialMix * .01;
@@ -273,6 +276,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     col *= 0.4+0.6*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.1);
 
     col += pow(max(col - .2, 0.0), vec3(1.4)) * 0.4;
+
+    col *= Camera2;
 
     fragColor = vec4(col, 1.0);
 }
