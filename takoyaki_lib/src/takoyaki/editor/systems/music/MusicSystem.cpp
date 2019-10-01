@@ -33,7 +33,7 @@ MusicSystem::~MusicSystem() {
 bool MusicSystem::LoadMusic(const std::string& filepath) {
 	UnloadMusic();
 
-	mChannel = LoadChannelFromFile(filepath, 0, BASS_MUSIC_RAMP);
+	mChannel = LoadChannelFromFile(filepath, BASS_STREAM_DECODE, BASS_MUSIC_RAMP | BASS_MUSIC_DECODE);
 
 	if (!mChannel) {
 		return false;
@@ -58,7 +58,7 @@ void MusicSystem::UnloadMusic() {
 	mPeaks.fill(0.f);
 }
 
-void MusicSystem::Play(float /*seconds*/) {
+void MusicSystem::Play(float seconds) {
 	if (!mChannel) return;
 
 	BASS_ChannelPlay(mChannel, FALSE);
