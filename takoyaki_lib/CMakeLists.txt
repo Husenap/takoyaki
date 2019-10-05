@@ -42,6 +42,12 @@ set(editor_components_files
     "src/takoyaki/editor/components/UniformItem.h")
 
 set(editor_systems_files
+    "src/takoyaki/editor/systems/project/FileLocator.h"
+    "src/takoyaki/editor/systems/project/FileLocator.cpp"
+    "src/takoyaki/editor/systems/project/ProjectSystem.h"
+    "src/takoyaki/editor/systems/project/ProjectSystem.cpp"
+    "src/takoyaki/editor/systems/scene/SceneSystem.h"
+    "src/takoyaki/editor/systems/scene/SceneSystem.cpp"
     "src/takoyaki/editor/systems/sync/SyncSystem.h"
     "src/takoyaki/editor/systems/sync/SyncSystem.cpp"
     "src/takoyaki/editor/systems/animator/Easings.h"

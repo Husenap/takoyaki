@@ -11,7 +11,6 @@ public:
 	         FileWatcher& fileWatcher,
 	         MainEditor& editor,
 	         Camera& camera,
-	         UniformsMenu& uniformsMenu,
 	         MusicSystem& musicSystem,
 	         AnimationSystem& animationSystem);
 	~Takoyaki();
@@ -35,21 +34,13 @@ private:
 
 	void OnCameraCaptureInput();
 	void OnCameraReleaseInput();
-	void OnUniformsChanged();
 
 	void LoadProjectFile(const char* fileToLoad);
 
-	std::string mCurrentProject;
 	float mCurrentTime;
 
 	GLuint mVertexArray;
 	std::unique_ptr<ShaderProgram> mProgram;
-	GLint mPosLoc;
-	GLint mFrameLoc;
-	GLint mTimeLoc;
-	GLint mResolutionLoc;
-	GLint mCameraOriginLoc;
-	GLint mCameraTargetLoc;
 	std::unique_ptr<RenderTarget> mRenderTarget;
 
 	MainWindow& mWindow;
@@ -57,7 +48,6 @@ private:
 	FileWatcher& mFileWatcher;
 	MainEditor& mEditor;
 	Camera& mCamera;
-	UniformsMenu& mUniformsMenu;
 	MusicSystem& mMusic;
 	AnimationSystem& mAnimationSystem;
 };

@@ -6,18 +6,15 @@
 #include "components/Preview.h"
 #include "components/Timeline/Timeline.h"
 #include "components/UniformsMenu.h"
+#include "systems/project/ProjectSystem.h"
+#include "systems/scene/SceneSystem.h"
 
 namespace ty {
 
-const char* ErrorPopupName = "Error##Popup";
-
-void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
-	mUniformsMenu.OpenFile(fileToLoad);
-	mCamera.Reset();
-}
-
-void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget) {
+void MainEditor::Update(float deltaTime, const RenderTarget& renderTarget) {
 	mDockSpace.Update();
+
+	bool hasProjectLoaded = mProjectSystem.IsProjectLoaded();
 
 	if (mShowDemoWindow) {
 		ImGui::ShowDemoWindow(&mShowDemoWindow);
@@ -27,13 +24,19 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 		mMenuBarSize = ImGui::GetWindowSize();
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("New", "Ctrl + N")) {
-				mNewFileHandler();
+				mProjectSystem.NewProject();
 			}
 			if (ImGui::MenuItem("Open", "Ctrl + O")) {
-				mOpenFileHandler();
+				mProjectSystem.OpenProject();
 			}
 			if (ImGui::MenuItem("Save", "Ctrl + S", nullptr, hasProjectLoaded)) {
-				mSaveFileHandler();
+				mProjectSystem.SaveProject();
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Project")) {
+			if (ImGui::MenuItem("New Scene")) {
+				mSceneSystem.NewScene();
 			}
 			ImGui::EndMenu();
 		}
@@ -45,9 +48,6 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("View")) {
-			if (ImGui::MenuItem("Uniforms", "F1", nullptr, hasProjectLoaded)) {
-				mUniformsMenu.ToggleVisibility();
-			}
 			if (ImGui::MenuItem("Preview", "F2", nullptr, hasProjectLoaded)) {
 				mPreview.ToggleVisibility();
 			}
@@ -66,20 +66,11 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 	}
 
 	if (hasProjectLoaded) {
-		mUniformsMenu.Update();
 		mPreview.Update(renderTarget);
 		mCamera.Update(deltaTime);
 	}
 	mTimeline.Update();
 	mAnimator.Update();
-
-	if (!mErrors.empty()) {
-		DisplayErrors();
-	}
-}
-
-void MainEditor::RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program) {
-	mUniformsMenu.RegisterCommands(cmds, program);
 }
 
 void MainEditor::OnInput(const KeyInput& input) {
@@ -91,18 +82,15 @@ void MainEditor::OnInput(const KeyInput& input) {
 	}
 
 	if (input.key == GLFW_KEY_N && input.mods == GLFW_MOD_CONTROL) {
-		if (mNewFileHandler) mNewFileHandler();
+		mProjectSystem.NewProject();
 	}
 	if (input.key == GLFW_KEY_O && input.mods == GLFW_MOD_CONTROL) {
-		if (mOpenFileHandler) mOpenFileHandler();
+		mProjectSystem.OpenProject();
 	}
 	if (input.key == GLFW_KEY_S && (input.mods == GLFW_MOD_CONTROL)) {
-		if (mSaveFileHandler) mSaveFileHandler();
+		mProjectSystem.SaveProject();
 	}
 
-	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {
-		mUniformsMenu.ToggleVisibility();
-	}
 	if (input.key == GLFW_KEY_F2 && input.action == GLFW_PRESS) {
 		mPreview.ToggleVisibility();
 	}
@@ -146,27 +134,6 @@ void MainEditor::OnFramebufferSize(const glm::ivec2& size) {
 
 void MainEditor::OnContentScale(const glm::vec2& scale) {
 	mContentScale = scale;
-}
-
-void MainEditor::ReportError(const std::string& message) {
-	// mErrors.emplace_back(message);
-	tinyfd_notifyPopup("Error!", message.c_str(), "error");
-}
-
-void MainEditor::DisplayErrors() {
-	if (!ImGui::IsPopupOpen(ErrorPopupName)) {
-		ImGui::OpenPopup(ErrorPopupName);
-	}
-	if (ImGui::BeginPopupModal(ErrorPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
-		ImGui::SetWindowSize({300.f * mContentScale.x, 0.f});
-		ImGui::TextWrapped(mErrors.front().c_str());
-		if (ImGui::Button("Ok", {-FLT_EPSILON, 0.0})) {
-			mErrors.erase(mErrors.begin());
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::EndPopup();
-	}
 }
 
 }  // namespace ty

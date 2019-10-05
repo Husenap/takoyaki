@@ -30,7 +30,7 @@ void AnimationTrack::DrawTick(int tick) {
 
 	float* tickValue = nullptr;
 	ImGui::SetNextItemWidth(-FLT_EPSILON);
-	if (pair.mStart.mTick == tick && (tickValue = mKeys.GetTickValue(tick))) {
+	if (pair.mStart.mTick == tick && (tickValue = mKeys.GetTickValue(tick)) != nullptr) {
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.f, 0.f));
 		ImGui::PushStyleColor(ImGuiCol_Text, EasingToColor(pair.mStart.mEasingType));
 		ImGui::DragFloat("", tickValue);
