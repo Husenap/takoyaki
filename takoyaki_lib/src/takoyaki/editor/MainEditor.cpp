@@ -150,7 +150,8 @@ void MainEditor::OnContentScale(const glm::vec2& scale) {
 
 void MainEditor::ReportError(const std::string& message) {
 	// mErrors.emplace_back(message);
-	tinyfd_notifyPopup("Error!", message.c_str(), "error");
+	//tinyfd_notifyPopup("Error!", message.c_str(), "error");
+	std::cout << message << std::endl;
 }
 
 void MainEditor::DisplayErrors() {

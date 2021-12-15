@@ -26,6 +26,7 @@ void main(){
 
 static const char* fragmentShaderCodeBegin = R"(
 #version 450
+#define TAKOYAKI
 out vec4 frag_color;
 uniform float iTime;
 uniform vec2 iResolution;
@@ -163,8 +164,7 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	// mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
-	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350 / 2, 1000 / 2});
+	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
 }
 
 void Takoyaki::SetupListeners() {
@@ -224,6 +224,8 @@ void Takoyaki::LoadShader() {
 	auto error = mProgram->GetError();
 	if (error.has_value()) {
 		mEditor.ReportError(error.value());
+	} else {
+		mEditor.ReportError("Successfully Compiled Shader! :D");
 	}
 
 	mPosLoc          = mProgram->GetAttributeLocation("vPos");
