@@ -1,0 +1,1 @@
+cmake --open .build/

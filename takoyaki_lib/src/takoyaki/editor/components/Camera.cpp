@@ -25,11 +25,11 @@ void Camera::Update(float deltaTime) {
 	}
 
 	if (Begin("Camera")) {
-		ImGui::InputFloat3("position", &mPosition.x, 3, ImGuiInputTextFlags_ReadOnly);
-		ImGui::InputFloat3("target", &mTarget.x, 3, ImGuiInputTextFlags_ReadOnly);
-		ImGui::InputFloat3("forward", &mForward.x, 3, ImGuiInputTextFlags_ReadOnly);
-		ImGui::InputFloat3("right", &mRight.x, 3, ImGuiInputTextFlags_ReadOnly);
-		ImGui::InputFloat3("up", &mUp.x, 3, ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("position", &mPosition.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("target", &mTarget.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("forward", &mForward.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("right", &mRight.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputFloat3("up", &mUp.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
 	}
 	End();
 }

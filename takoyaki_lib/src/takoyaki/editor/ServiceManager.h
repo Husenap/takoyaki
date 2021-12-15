@@ -15,6 +15,7 @@ class Timeline;
 class MusicSystem;
 class AnimationSystem;
 class SyncSystem;
+class Exporter;
 }  // namespace ty
 
 namespace ty {
@@ -35,6 +36,7 @@ private:
 	std::unique_ptr<ty::UniformsMenu> mUniformsMenu;
 	std::unique_ptr<ty::Animator> mAnimator;
 	std::unique_ptr<ty::Timeline> mTimeline;
+	std::unique_ptr<ty::Exporter> mExporter;
 
 	std::unique_ptr<ty::SyncSystem> mSyncSystem;
 	std::unique_ptr<ty::MusicSystem> mMusicSystem;

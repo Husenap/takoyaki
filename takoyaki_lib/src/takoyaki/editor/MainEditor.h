@@ -1,13 +1,6 @@
 #pragma once
 
-namespace ty {
-class Camera;
-class Preview;
-class UniformsMenu;
-class DockSpace;
-class Animator;
-class Timeline;
-}  // namespace ty
+#include "ServiceManager.h"
 
 namespace ty {
 
@@ -18,18 +11,20 @@ public:
 	           UniformsMenu& uniformsMenu,
 	           DockSpace& dockSpace,
 	           Animator& animator,
-	           Timeline& timeline)
+	           Timeline& timeline,
+	           Exporter& exporter)
 	    : mCamera(camera)
 	    , mPreview(preview)
 	    , mUniformsMenu(uniformsMenu)
 	    , mDockSpace(dockSpace)
 	    , mAnimator(animator)
-	    , mTimeline(timeline) {}
+	    , mTimeline(timeline)
+	    , mExporter(exporter) {}
 	~MainEditor() = default;
 
 	void LoadProjectFile(const std::string& fileToLoad);
 
-	void Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget);
+	void Update(float deltaTime, bool hasProjectLoaded, RenderTarget& renderTarget);
 	void RegisterCommands(RenderCommandList<RenderCommand>& cmds, const ShaderProgram& program);
 
 	void OnInput(const KeyInput& input);
@@ -44,6 +39,7 @@ public:
 	void SetNewFileHandler(NewFileHandler handler) { mNewFileHandler = handler; }
 	void SetOpenFileHandler(OpenFileHandler handler) { mOpenFileHandler = handler; }
 	void SetSaveFileHandler(SaveFileHandler handler) { mSaveFileHandler = handler; }
+	void SetExportHandler(SaveFileHandler handler) { mExportHandler = handler; }
 	void SetCameraCaptureInputHandler(CameraCaptureInputHandler handler) { mCameraCaptureHandler = handler; }
 	void SetCameraReleaseInputHandler(CameraReleaseInputHandler handler) { mCameraReleaseHandler = handler; }
 
@@ -64,10 +60,12 @@ private:
 	DockSpace& mDockSpace;
 	Animator& mAnimator;
 	Timeline& mTimeline;
+	Exporter& mExporter;
 
 	OpenFileHandler mNewFileHandler;
 	OpenFileHandler mOpenFileHandler;
 	SaveFileHandler mSaveFileHandler;
+	SaveFileHandler mExportHandler;
 
 	CameraCaptureInputHandler mCameraCaptureHandler;
 	CameraReleaseInputHandler mCameraReleaseHandler;

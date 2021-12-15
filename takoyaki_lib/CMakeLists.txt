@@ -33,6 +33,8 @@ set(editor_components_files
     "src/takoyaki/editor/components/Timeline/Timeline.h"
     "src/takoyaki/editor/components/DockSpace.cpp"
     "src/takoyaki/editor/components/DockSpace.h"
+    "src/takoyaki/editor/components/Exporter.cpp"
+    "src/takoyaki/editor/components/Exporter.h"
     "src/takoyaki/editor/components/Preview.h"
     "src/takoyaki/editor/components/Preview.cpp"
     "src/takoyaki/editor/components/Camera.h"
@@ -63,6 +65,7 @@ set(util_files
     "src/takoyaki/util/VariantPolyfill.h")
 
 set(precompiled_files
+    "src/takoyaki/precompiled.cpp"
     "src/takoyaki/precompiled.h")
 
 set(app_files
@@ -89,21 +92,13 @@ target_link_libraries(${target_name} PUBLIC
     imgui
     tinyfd
     bass
+    stb
     compiler-warnings)
 
-target_include_directories(${target_name} INTERFACE "src")
+    target_precompile_headers(${target_name} PUBLIC "src/takoyaki/precompiled.h")
+target_include_directories(${target_name} PUBLIC "src")
 
-source_group("src\\app" FILES ${app_files})
-source_group("src\\precompiled" FILES ${precompiled_files})
-source_group("src\\editor" FILES ${editor_files})
-source_group("src\\editor\\components" FILES ${editor_components_files})
-source_group("src\\editor\\systems" FILES ${editor_systems_files})
-source_group("src\\graphics" FILES ${graphics_files})
-source_group("src\\graphics\\gl" FILES ${graphics_gl_files})
-source_group("src\\util" FILES ${util_files})
-
+auto_group_sources(src_files ${CMAKE_CURRENT_SOURCE_DIR})
+source_group("src/precompiled" FILES ${precompiled_files})
 
 set_target_properties(${target_name} PROPERTIES FOLDER "takoyaki")
-set_target_properties(${target_name} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT ${precompiled_files})
-
-cotire(${target_name})

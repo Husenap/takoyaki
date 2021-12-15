@@ -6,6 +6,7 @@
 #include "MainEditor.h"
 #include "components/Camera.h"
 #include "components/UniformsMenu.h"
+#include "components/Exporter.h"
 #include "systems/animator/AnimationSystem.h"
 #include "systems/music/MusicSystem.h"
 
@@ -26,6 +27,7 @@ void main(){
 
 static const char* fragmentShaderCodeBegin = R"(
 #version 450
+#define TAKOYAKI
 out vec4 frag_color;
 uniform float iTime;
 uniform vec2 iResolution;
@@ -70,7 +72,8 @@ Takoyaki::Takoyaki(MainWindow& window,
                    Camera& camera,
                    UniformsMenu& uniformsMenu,
                    MusicSystem& musicSystem,
-                   AnimationSystem& animationSystem)
+                   AnimationSystem& animationSystem,
+                   Exporter& exporter)
     : mWindow(window)
     , mRenderer(renderer)
     , mFileWatcher(fileWatcher)
@@ -78,7 +81,8 @@ Takoyaki::Takoyaki(MainWindow& window,
     , mCamera(camera)
     , mUniformsMenu(uniformsMenu)
     , mMusic(musicSystem)
-    , mAnimationSystem(animationSystem) {
+    , mAnimationSystem(animationSystem)
+    , mExporter(exporter) {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
@@ -87,11 +91,11 @@ Takoyaki::Takoyaki(MainWindow& window,
 	float deltaTime = 0.0f;
 	float demoTime  = 0.0f;
 
-	const char* filter     = "*.*";
+	const char* filter     = "*.mp3";
 	const char* fileToLoad = tinyfd_openFileDialog("Choose a soundtrack", "", 1, &filter, nullptr, 0);
 	if (fileToLoad) {
 		if (mMusic.LoadMusic(fileToLoad)) {
-			mMusic.Play();
+			//mMusic.Play();
 		}
 	}
 
@@ -163,8 +167,7 @@ void Takoyaki::CreateVertexBuffer() {
 }
 
 void Takoyaki::CreateRenderTarget() {
-	// mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
-	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{2350 / 2, 1000 / 2});
+	mRenderTarget = std::make_unique<RenderTarget>(glm::ivec2{1280, 720});
 }
 
 void Takoyaki::SetupListeners() {
@@ -177,6 +180,7 @@ void Takoyaki::SetupListeners() {
 	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
 	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
+	mEditor.SetExportHandler([this]() { OnExportFile(); });
 	mEditor.SetCameraCaptureInputHandler([this]() { OnCameraCaptureInput(); });
 	mEditor.SetCameraReleaseInputHandler([this]() { OnCameraReleaseInput(); });
 
@@ -224,6 +228,8 @@ void Takoyaki::LoadShader() {
 	auto error = mProgram->GetError();
 	if (error.has_value()) {
 		mEditor.ReportError(error.value());
+	} else {
+		mEditor.ReportError("Successfully Compiled Shader! :D");
 	}
 
 	mPosLoc          = mProgram->GetAttributeLocation("vPos");
@@ -259,6 +265,12 @@ void Takoyaki::OnOpenFile() {
 void Takoyaki::OnSaveFile() {
 	if (!mCurrentProject.empty()) {
 		mUniformsMenu.SaveFile(mCurrentProject);
+	}
+}
+
+void Takoyaki::OnExportFile() {
+	if (!mCurrentProject.empty()) {
+		mExporter.Export();
 	}
 }
 

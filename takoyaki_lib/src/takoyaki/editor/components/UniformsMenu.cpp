@@ -1,8 +1,6 @@
 #include "UniformsMenu.h"
 
-namespace {
-
-static int CharacterFilter(ImGuiTextEditCallbackData* data) {
+static int CharacterFilter(ImGuiInputTextCallbackData* data) {
 	ImWchar c    = data->EventChar;
 	int numChars = (*(int*)data->UserData);
 	if (std::isalpha(c)) return 0;
@@ -10,8 +8,6 @@ static int CharacterFilter(ImGuiTextEditCallbackData* data) {
 	if (c == '_') return 0;
 	return 1;
 }
-
-}  // namespace
 
 namespace ty {
 
@@ -95,7 +91,7 @@ void UniformsMenu::DrawUniforms() {
 void UniformsMenu::DrawAddUniformPopup() {
 	if (ImGui::BeginPopupModal(AddNewUniformPopupName, nullptr, ImGuiWindowFlags_NoResize)) {
 		ImGui::SetWindowSize({0.f, 0.f});
-		const std::array<const char*, 6> types{"float", "vec2", "vec3", "vec4", "color"};
+		const std::array<const char*, 5> types{"float", "vec2", "vec3", "vec4", "color"};
 		ImGui::Combo("Type", (int*)&mSelectedType, types.data(), (int)types.size());
 
 		int numChars = static_cast<int>(std::string(mNameBuffer.data()).size());
