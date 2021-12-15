@@ -14,7 +14,12 @@ public:
 	GLuint GetFramebuffer() const { return mFramebuffer; }
 	GLuint GetRenderTexture() const { return mRenderTexture; }
 
+	std::vector<std::uint8_t> GetPixels(); 
+
 private:
+	void Init();
+	void Destroy();
+
 	GLuint mFramebuffer;
 	GLuint mRenderTexture;
 	glm::ivec2 mSize;

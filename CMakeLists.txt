@@ -1,19 +1,15 @@
-cmake_minimum_required(VERSION 3.12.4)
-project("takoyaki" C CXX)
+cmake_minimum_required(VERSION 3.21)
 
-message("-- CONFIGURATION TYPES: ${CMAKE_CONFIGURATION_TYPES}")
+project("takoyaki" VERSION "0.1.0" LANGUAGES CXX)
 
 include("cmake/compiler_features.cmake")
 include("cmake/compiler_warnings.cmake")
-include("cmake/cotire.cmake")
-include("cmake/googletest.cmake")
-include("cmake/glfw.cmake")
-include("cmake/glm.cmake")
-include("cmake/thirdparty.cmake")
+include("cmake/auto_group_sources.cmake")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "predefined")
-set_property(GLOBAL PROPERTY CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_subdirectory("thirdparty")
 
 add_subdirectory("serializer_lib")
 add_subdirectory("serializer_tests")

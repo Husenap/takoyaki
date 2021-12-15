@@ -1,5 +1,4 @@
 message("-- External Project: glm")
-include(FetchContent)
 
 FetchContent_Declare(
 	glm

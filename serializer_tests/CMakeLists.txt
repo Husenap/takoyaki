@@ -9,7 +9,7 @@ source_group("src" FILES ${src_files})
 
 target_link_libraries(${target_name}
     "serializer_lib"
-    "gtest_main")
+    "gmock_main")
 
 set_target_properties(${target_name} PROPERTIES FOLDER "serializer")
 

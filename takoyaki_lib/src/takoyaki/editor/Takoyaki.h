@@ -13,7 +13,8 @@ public:
 	         Camera& camera,
 	         UniformsMenu& uniformsMenu,
 	         MusicSystem& musicSystem,
-	         AnimationSystem& animationSystem);
+	         AnimationSystem& animationSystem,
+	         Exporter& exporter);
 	~Takoyaki();
 
 private:
@@ -32,6 +33,7 @@ private:
 	void OnNewFile();
 	void OnOpenFile();
 	void OnSaveFile();
+	void OnExportFile();
 
 	void OnCameraCaptureInput();
 	void OnCameraReleaseInput();
@@ -60,6 +62,7 @@ private:
 	UniformsMenu& mUniformsMenu;
 	MusicSystem& mMusic;
 	AnimationSystem& mAnimationSystem;
+	Exporter& mExporter;
 };
 
 }  // namespace ty

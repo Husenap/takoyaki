@@ -6,6 +6,7 @@
 #include "components/Preview.h"
 #include "components/Timeline/Timeline.h"
 #include "components/UniformsMenu.h"
+#include "components/Exporter.h"
 
 namespace ty {
 
@@ -16,7 +17,7 @@ void MainEditor::LoadProjectFile(const std::string& fileToLoad) {
 	mCamera.Reset();
 }
 
-void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarget& renderTarget) {
+void MainEditor::Update(float deltaTime, bool hasProjectLoaded, RenderTarget& renderTarget) {
 	mDockSpace.Update();
 
 	if (mShowDemoWindow) {
@@ -34,6 +35,9 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 			}
 			if (ImGui::MenuItem("Save", "Ctrl + S", nullptr, hasProjectLoaded)) {
 				mSaveFileHandler();
+			}
+			if (ImGui::MenuItem("Export", "Ctrl + E", nullptr, hasProjectLoaded)) {
+				mExportHandler();
 			}
 			ImGui::EndMenu();
 		}
@@ -69,6 +73,7 @@ void MainEditor::Update(float deltaTime, bool hasProjectLoaded, const RenderTarg
 		mUniformsMenu.Update();
 		mPreview.Update(renderTarget);
 		mCamera.Update(deltaTime);
+		mExporter.Update(renderTarget);
 	}
 	mTimeline.Update();
 	mAnimator.Update();
@@ -98,6 +103,9 @@ void MainEditor::OnInput(const KeyInput& input) {
 	}
 	if (input.key == GLFW_KEY_S && (input.mods == GLFW_MOD_CONTROL)) {
 		if (mSaveFileHandler) mSaveFileHandler();
+	}
+	if (input.key == GLFW_KEY_E && (input.mods == GLFW_MOD_CONTROL)) {
+		if (mExportHandler) mExportHandler();
 	}
 
 	if (input.key == GLFW_KEY_F1 && input.action == GLFW_PRESS) {
@@ -150,7 +158,7 @@ void MainEditor::OnContentScale(const glm::vec2& scale) {
 
 void MainEditor::ReportError(const std::string& message) {
 	// mErrors.emplace_back(message);
-	//tinyfd_notifyPopup("Error!", message.c_str(), "error");
+	// tinyfd_notifyPopup("Error!", message.c_str(), "error");
 	std::cout << message << std::endl;
 }
 

@@ -7,6 +7,7 @@
 #include "components/Animator/Animator.h"
 #include "components/Camera.h"
 #include "components/DockSpace.h"
+#include "components/Exporter.h"
 #include "components/Preview.h"
 #include "components/Timeline/Timeline.h"
 #include "components/UniformsMenu.h"
@@ -28,13 +29,21 @@ ServiceManager::ServiceManager() {
 	mDockSpace    = std::make_unique<ty::DockSpace>();
 	mAnimator     = std::make_unique<ty::Animator>(*mMusicSystem, *mAnimationSystem, *mSyncSystem);
 	mTimeline     = std::make_unique<ty::Timeline>(*mMusicSystem);
-	mEditor =
-	    std::make_unique<ty::MainEditor>(*mCamera, *mPreview, *mUniformsMenu, *mDockSpace, *mAnimator, *mTimeline);
+	mExporter     = std::make_unique<ty::Exporter>();
+	mEditor       = std::make_unique<ty::MainEditor>(
+        *mCamera, *mPreview, *mUniformsMenu, *mDockSpace, *mAnimator, *mTimeline, *mExporter);
 	mFileWatcher = std::make_unique<ty::FileWatcher>();
 	mRenderer    = std::make_unique<ty::Renderer>();
 
-	mTakoyaki = std::make_unique<ty::Takoyaki>(
-	    *mWindow, *mRenderer, *mFileWatcher, *mEditor, *mCamera, *mUniformsMenu, *mMusicSystem, *mAnimationSystem);
+	mTakoyaki = std::make_unique<ty::Takoyaki>(*mWindow,
+	                                           *mRenderer,
+	                                           *mFileWatcher,
+	                                           *mEditor,
+	                                           *mCamera,
+	                                           *mUniformsMenu,
+	                                           *mMusicSystem,
+	                                           *mAnimationSystem,
+	                                           *mExporter);
 }
 ServiceManager::~ServiceManager() {}
 

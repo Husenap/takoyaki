@@ -4,7 +4,7 @@ namespace ty {
 
 void Preview::Update(const RenderTarget& renderTarget) {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.f, 0.f, 0.f, 1.0f});
-	ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, {0.f, 0.f, 0.f, 1.0f});
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, {0.f, 0.f, 0.f, 1.0f});
 	if (Begin("Preview")) {
 		mIsHovered = ImGui::IsWindowHovered();
 

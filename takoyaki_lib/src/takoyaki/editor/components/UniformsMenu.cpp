@@ -1,8 +1,6 @@
 #include "UniformsMenu.h"
 
-namespace {
-
-static int CharacterFilter(ImGuiTextEditCallbackData* data) {
+static int CharacterFilter(ImGuiInputTextCallbackData* data) {
 	ImWchar c    = data->EventChar;
 	int numChars = (*(int*)data->UserData);
 	if (std::isalpha(c)) return 0;
@@ -10,8 +8,6 @@ static int CharacterFilter(ImGuiTextEditCallbackData* data) {
 	if (c == '_') return 0;
 	return 1;
 }
-
-}  // namespace
 
 namespace ty {
 

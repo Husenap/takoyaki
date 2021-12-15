@@ -21,7 +21,7 @@ MainWindow::~MainWindow() {
 
 void MainWindow::InitGL() {
 	glfwMakeContextCurrent(mWindow);
-	gladLoadGL();
+	gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress));
 	glfwSwapInterval(1);
 }
 

@@ -6,6 +6,7 @@
 #include "MainEditor.h"
 #include "components/Camera.h"
 #include "components/UniformsMenu.h"
+#include "components/Exporter.h"
 #include "systems/animator/AnimationSystem.h"
 #include "systems/music/MusicSystem.h"
 
@@ -71,7 +72,8 @@ Takoyaki::Takoyaki(MainWindow& window,
                    Camera& camera,
                    UniformsMenu& uniformsMenu,
                    MusicSystem& musicSystem,
-                   AnimationSystem& animationSystem)
+                   AnimationSystem& animationSystem,
+                   Exporter& exporter)
     : mWindow(window)
     , mRenderer(renderer)
     , mFileWatcher(fileWatcher)
@@ -79,7 +81,8 @@ Takoyaki::Takoyaki(MainWindow& window,
     , mCamera(camera)
     , mUniformsMenu(uniformsMenu)
     , mMusic(musicSystem)
-    , mAnimationSystem(animationSystem) {
+    , mAnimationSystem(animationSystem)
+    , mExporter(exporter) {
 	SetupListeners();
 	CreateVertexBuffer();
 	CreateRenderTarget();
@@ -88,11 +91,11 @@ Takoyaki::Takoyaki(MainWindow& window,
 	float deltaTime = 0.0f;
 	float demoTime  = 0.0f;
 
-	const char* filter     = "*.*";
+	const char* filter     = "*.mp3";
 	const char* fileToLoad = tinyfd_openFileDialog("Choose a soundtrack", "", 1, &filter, nullptr, 0);
 	if (fileToLoad) {
 		if (mMusic.LoadMusic(fileToLoad)) {
-			mMusic.Play();
+			//mMusic.Play();
 		}
 	}
 
@@ -177,6 +180,7 @@ void Takoyaki::SetupListeners() {
 	mEditor.SetNewFileHandler([this]() { OnNewFile(); });
 	mEditor.SetOpenFileHandler([this]() { OnOpenFile(); });
 	mEditor.SetSaveFileHandler([this]() { OnSaveFile(); });
+	mEditor.SetExportHandler([this]() { OnExportFile(); });
 	mEditor.SetCameraCaptureInputHandler([this]() { OnCameraCaptureInput(); });
 	mEditor.SetCameraReleaseInputHandler([this]() { OnCameraReleaseInput(); });
 
@@ -261,6 +265,12 @@ void Takoyaki::OnOpenFile() {
 void Takoyaki::OnSaveFile() {
 	if (!mCurrentProject.empty()) {
 		mUniformsMenu.SaveFile(mCurrentProject);
+	}
+}
+
+void Takoyaki::OnExportFile() {
+	if (!mCurrentProject.empty()) {
+		mExporter.Export();
 	}
 }
 
