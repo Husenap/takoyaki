@@ -7,6 +7,7 @@ class Shader {
 public:
 	Shader(const char* shaderCode) {
 		mShader = glCreateShader(SHADER_TYPE);
+
 		glShaderSource(mShader, 1, &shaderCode, NULL);
 		glCompileShader(mShader);
 	}
@@ -16,8 +17,8 @@ public:
 		int success(-1);
 		glGetShaderiv(mShader, GL_COMPILE_STATUS, &success);
 		if (!success) {
-			char buffer[512];
-			glGetShaderInfoLog(mShader, GL_COMPILE_STATUS, nullptr, buffer);
+			char buffer[4096];
+			glGetShaderInfoLog(mShader, 4096, nullptr, buffer);
 			return std::string(buffer);
 		}
 		return std::nullopt;

@@ -16,8 +16,8 @@ public:
 		int success(-1);
 		glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
 		if (!success) {
-			char buffer[512];
-			glGetProgramInfoLog(mProgram, 512, NULL, buffer);
+			char buffer[4096];
+			glGetProgramInfoLog(mProgram, 4096, NULL, buffer);
 			return std::string(buffer);
 		}
 		return std::nullopt;
